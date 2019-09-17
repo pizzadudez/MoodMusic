@@ -2,7 +2,7 @@ const express = require('express');
 const router = express.Router();
 require('dotenv').config({path: __dirname + '/../.env'});
 const request = require('request');
-const AuthModel = require('../models/Auth');
+const Auth = require('../models/Auth');
 
 // Redirects to spotify's auth URI
 router.get('/', (req, res, next) => {
@@ -48,11 +48,14 @@ router.get('/callback', (req, res, next) => {
     }
     request.get(options, (err, res, body) => {
       const user_id = body.id;
-      AuthModel.get((err, data) => {
-        console.log(data);
-        console.log('after');
-      })
-      
+      // Update or Init auth data
+      Auth.get().then((data) => {
+        if (!data || data.user_id !== user_id) {
+          Auth.set(user_id, access_token, refresh_token);
+        } else {
+          Auth.update(access_token, refresh_token);
+        }
+      });      
     });
   });
 
