@@ -46,7 +46,6 @@ exports.getUserData = () => {
         console.log('get error');
         reject(err);
       } else {
-        console.log(rows[0]);
         resolve(rows[0]);
       }
     });
