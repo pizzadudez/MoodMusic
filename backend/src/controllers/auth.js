@@ -1,11 +1,9 @@
-const express = require('express');
-const router = express.Router();
-require('dotenv').config({path: __dirname + '/../.env'});
 const request = require('request');
+require('dotenv').config({path: __dirname + '/../.env'});
 const Auth = require('../models/Auth');
 
-// Redirects to spotify's auth URI
-router.get('/', (req, res, next) => {
+// Log into Spotify to authorize
+exports.authorize = (req, res, next) => {
   const scope = 'user-read-private user-read-email';
   res.redirect('https://accounts.spotify.com/authorize?' +
     'client_id=' + process.env.CLIENT_ID +
@@ -13,10 +11,9 @@ router.get('/', (req, res, next) => {
     (scope ? '&scope=' + encodeURIComponent(scope) : '') +
     '&redirect_uri=' + encodeURIComponent(process.env.REDIRECT_URI)
   );
-});
-
-// Callback from auth
-router.get('/callback', (req, res, next) => {
+};
+// Oauth2 callback 
+exports.authorizeCallback = (req, res, next) => {
   const code = req.query.code || null;
 
   const authOptions = {
@@ -45,21 +42,49 @@ router.get('/callback', (req, res, next) => {
       url: 'https://api.spotify.com/v1/me',
       headers: { 'Authorization': 'Bearer ' + body.access_token },
       json: true,
-    }
+    };
     request.get(options, (err, res, body) => {
       const user_id = body.id;
       // Update or Init auth data
-      Auth.get().then((data) => {
+      Auth.getUserData().then((data) => {
         if (!data || data.user_id !== user_id) {
-          Auth.set(user_id, access_token, refresh_token);
+          console.log('Added user credentials.')
         } else {
-          Auth.update(access_token, refresh_token);
+          console.log('User has already authorized the app.')
         }
+        Auth.initUser(user_id, access_token, refresh_token);
       });      
     });
   });
 
   res.redirect('/');
-});
+};
+// Request a new tokens using the refresh token
+exports.refreshToken = (req, response, next) => {
+  Auth.getUserData().then((authData) => {
+    const refresh_token = authData.refresh_token;
 
-module.exports = router;
+    const authOptions = {
+      url: 'https://accounts.spotify.com/api/token',
+      form: {
+        grant_type: 'refresh_token',
+        refresh_token: refresh_token
+      },
+      headers: { 
+        'Authorization': 'Basic ' + 
+        (new Buffer(process.env.CLIENT_ID + ':' + process.env.CLIENT_SECRET).toString('base64')) 
+      },
+      json: true
+    };
+
+    request.post(authOptions, (err, res, body) => {
+      if (err || res.statusCode !== 200) {
+        console.log('Error requesting token refresh');
+        return;
+      } else {
+        Auth.updateToken(body.access_token);
+        response.redirect('/');
+      }
+    });
+  });
+};
