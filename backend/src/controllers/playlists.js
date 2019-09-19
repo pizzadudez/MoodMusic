@@ -12,7 +12,7 @@ exports.playlists = (req, response, next) => {
     };
     request.get(options, (err, res, body) => {
       body.items.forEach((pl, idx) => {
-        Playlist.insert(pl.id, pl.name, pl.snapshot_id);
+        Playlist.insertOrUpdate(pl.id, pl.name, pl.snapshot_id);
       });
       const info = body.items.map(pl => ({ 
         'name': pl.name,

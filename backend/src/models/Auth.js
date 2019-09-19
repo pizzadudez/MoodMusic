@@ -20,10 +20,10 @@ exports.initUser = (userId, accessToken, refreshToken) => {
   const sql = `INSERT INTO auth 
                (user_id, access_token, refresh_token, expires)
                VALUES(?, ?, ?, ?)`;
-  const params = [userId, accessToken, refreshToken, 1]
+  const values = [userId, accessToken, refreshToken, 1];
   db.serialize(() => {
     db.run("DELETE FROM auth", err => err ? console.log(err) : {});
-    db.run(sql, params, err => {
+    db.run(sql, values, err => {
       if (err) { console.log(err); }
     });
   })
