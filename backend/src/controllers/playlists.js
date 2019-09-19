@@ -1,6 +1,7 @@
 const request = require('request');
 require('dotenv').config({path: __dirname + '/../.env'});
 const Auth = require('../models/Auth');
+const Playlist = require('../models/Playlist');
 
 exports.playlists = (req, response, next) => {
   Auth.getUserData().then((authData) => {
@@ -10,8 +11,14 @@ exports.playlists = (req, response, next) => {
       json: true,
     };
     request.get(options, (err, res, body) => {
-      const playlists = body.items.map(playlist => playlist.id);
-      response.send(playlists);
+      body.items.forEach((pl, idx) => {
+        Playlist.insert(pl.id, pl.name, pl.snapshot_id);
+      });
+      const info = body.items.map(pl => ({ 
+        'name': pl.name,
+        'snapshot_id': pl.snapshot_id,
+      }));
+      response.send(info);
     });
   });
 };
