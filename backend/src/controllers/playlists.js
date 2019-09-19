@@ -18,15 +18,15 @@ exports.playlists = (req, response, next) => {
 
 exports.tracks = (req, response, next) => {
   Auth.getUserData().then((authData) => {
+    const filters = '?fields=items(track(name,artists(name)))';
     const options = {
-      url: 'https://api.spotify.com/v1/playlists/' + req.params.playlist_id + '/tracks',
+      url: 'https://api.spotify.com/v1/playlists/' + req.params.playlist_id + '/tracks' + filters,
       headers: { 'Authorization': 'Bearer ' + authData.access_token },
       json: true,
     };
-    console.log(options.url);
     request.get(options, (err, res, body) => {
-      const tracks = body.items.map(track => track.track.name);
-      response.send(tracks);
+      //const tracks = body.items.map(track => track.track.name);
+      response.send(body);
     })
   });
 };

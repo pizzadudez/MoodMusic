@@ -3,14 +3,15 @@ const app = express();
 const path = require('path');
 require('dotenv').config({path: __dirname + '/../.env'});
 
-app.use(express.static(path.join(__dirname, '../public')));
-
-// Routers
 const AuthRouter = require('./routes/auth');
 const PlaylistsRouter = require('./routes/playlists');
 
+// Routers
 app.use('/auth', AuthRouter);
 app.use('/playlists', PlaylistsRouter);
+// Misc
+app.use(express.static(path.join(__dirname, '../public')));
+app.set('json spaces', 2); 
 
 // Port listening
 const PORT = process.env.PORT || 8888;
