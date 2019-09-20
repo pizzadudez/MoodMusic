@@ -2,9 +2,10 @@
 
 - Buffer() deprecation warning 
 
-## Ideas:
+## Ideas / Questions:
 
 - What determines if a song is new and requires attention?
+- How do I handle songs with multiple artists?
 
 ## Steps:
 

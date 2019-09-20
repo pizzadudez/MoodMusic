@@ -39,8 +39,24 @@ exports.insertOrUpdate = (id, name, snapshot_id) => {
 
 exports.get = (id) => {
   return new Promise((res, rej) => {
-    db.all("SELECT * FROM playlists WHERE id=?", [id], (err, rows) => 
-      err ? rej(err) : res(rows[0])
-    );
+    const sql = "SELECT * FROM playlists WHERE id=?";
+    db.all(sql, [id], (err, rows) => err ? rej(err) : res(rows[0]));
   });
+};
+
+// List of playlist_ids with changes and tracked
+exports.updates = () => {
+  return new Promise((res, rej) => {
+    const sql = "SELECT id FROM playlists";
+    db.all(sql, (err, rows) => err ? rej(err) : res(rows.map(row => row.id)));
+  });
+};
+
+// Set changes to 0/1
+exports.setChanges = (id, bool) => {
+  const sql = "UPDATE playlists SET changes=? WHERE id=?";
+  db.run(sql, [bool, id], err => err
+    ? console.log(err)
+    : console.log(`Playlist ${id} checked`)
+  );
 };
