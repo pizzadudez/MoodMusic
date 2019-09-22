@@ -1,6 +1,7 @@
 ## Fix Later:
 
 - Buffer() deprecation warning 
+- Eliminate useless track inserts (use hash maps to see what to not insert)
 
 ## Ideas / Questions:
 
