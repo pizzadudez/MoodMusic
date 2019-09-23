@@ -7,6 +7,7 @@
 
 - What determines if a song is new and requires attention?
 - How do I handle songs with multiple artists?
+- add using the same post request (make sure to specify what type of label it is)
 
 ## Steps:
 
