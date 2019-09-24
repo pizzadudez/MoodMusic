@@ -14,7 +14,7 @@ exports.conn = () => {
 // Init database on server start
 exports.init = () => {
   db.serialize(() => {
-    db.run(`CREATE TABLE IF NOT EXISTS auth (
+    db.run(`CREATE TABLE IF NOT EXISTS users (
             user_id TEXT UNIQUE,
             access_token TEXT,
             refresh_token TEXT,

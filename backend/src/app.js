@@ -1,24 +1,23 @@
 const express = require('express');
-const app = express();
 const path = require('path');
-require('dotenv').config({path: __dirname + '/../.env'});
-const db = require('./db');
+const db = require('./models/db');
+const config = require('./config');
 
-const AuthRouter = require('./routes/auth');
-const PlaylistsRouter = require('./routes/playlists');
+const AuthRouter = require('./auth');
+// const ApiRouter = require();
 
+const app = express();
 // Routers
 app.use('/auth', AuthRouter);
-app.use('/playlists', PlaylistsRouter);
+// app.use('/api', ApiRouter);
 // Misc
 app.use(express.static(path.join(__dirname, '../public')));
-app.set('json spaces', 2); 
+app.set('json spaces', 2);
 
-// Init db
+// Init database
 db.init();
 
-// Port listening
-const PORT = process.env.PORT || 8888;
-app.listen(PORT, () => {
-  console.log(`Server running on port: ${PORT}`);
+const port = config.port || 1000;
+app.listen(port, () => {
+  console.log(`Server running on port: ${port}`);
 });

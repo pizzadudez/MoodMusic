@@ -7,7 +7,10 @@
 
 - What determines if a song is new and requires attention?
 - How do I handle songs with multiple artists?
-- add using the same post request (make sure to specify what type of label it is)
+- add all labels using the same post request (make sure to specify what type of label it is)
+- Give playlists a genre id: this way we automatically set the genre for a song
+- Store album images along side an Album table (will be useful for mp3 tagging too)
+- Store last playlist check somewhere
 
 ## Steps:
 
@@ -49,4 +52,26 @@
 - Reorder tracks in playlist
 - Change playlist name
 - Spotify song analysis (lots of interesting parameters)
+
+## Frontend Requirements (API endpoints):
+
+- get list of track objects with all info (playlist, gen, sgen, mood)
+
+- get list of playlist objects
+
+- get list of label objects (sepparate for each type)
+
+  
+
+- create local MoodPlaylist (with optional list of tracks)
+
+- post track/s to MoodPlaylist
+
+- delete track/s from MoodPlaylist
+
+- Publish / Update spotify MoodPlaylist
+
+- Create label
+- Delete label (and track relations with label)
+- Add / Remove label from track/s
 
