@@ -1,5 +1,4 @@
 const request = require('request');
-const config = require('../config');
 const UserModel = require('../models/User');
 const PlaylistModel = require('../models/Playlist');
 const TrackModel = require('../models/Track');
@@ -41,7 +40,7 @@ exports.refreshTracks = async () => {
     const playlists = allPlaylists.filter(pl => pl.changes === 1 && pl.tracking === 1);
     
     if (!playlists.length) {
-      return 'No tracked playlist has changes.';
+      return 'No tracked playlists have changes.';
     }
 
     const promises = playlists.map(playlist => new Promise((resolve, reject) => {

@@ -20,7 +20,7 @@ exports.init = () => {
             refresh_token TEXT,
             expires INTEGER)`);
     db.run(`CREATE TABLE IF NOT EXISTS playlists (
-            id TEXT UNIQUE,
+            id TEXT,
             name TEXT,
             snapshot_id TEXT,
             changes INTEGER,
@@ -32,44 +32,26 @@ exports.init = () => {
             artist TEXT,
             album TEXT,
             PRIMARY KEY (id))`);
+    db.run(`CREATE TABLE IF NOT EXISTS labels (
+            id INTEGER NOT NULL,
+            type TEXT NOT NULL,
+            name TEXT NOT NULL UNIQUE,
+            color TEXT,
+            parent_id INTEGER,
+            PRIMARY KEY (id))`);
     db.run(`CREATE TABLE IF NOT EXISTS tracks_playlists (
-            track_id TEXT,
-            playlist_id TEXT,
+            track_id TEXT NOT NULL,
+            playlist_id TEXT NOT NULL,
             added_at TEXT,
             PRIMARY KEY (track_id, playlist_id),
             FOREIGN KEY (track_id) REFERENCES tracks (id),
             FOREIGN KEY (playlist_id) REFERENCES playlists (id))`);
-    db.run(`CREATE TABLE IF NOT EXISTS genres (
-            id TEXT,
-            name TEXT,
-            PRIMARY KEY (id))`);
-    db.run(`CREATE TABLE IF NOT EXISTS subgenres (
-            id TEXT,
-            name TEXT,
-            genre_id TEXT,
-            PRIMARY KEY (id),
-            FOREIGN KEY (genre_id) REFERENCES genres (id))`);
-    db.run(`CREATE TABLE IF NOT EXISTS moods (
-            id TEXT,
-            name TEXT,
-            PRIMARY KEY (id))`);
-    db.run(`CREATE TABLE IF NOT EXISTS tracks_genres (
-            track_id TEXT,
-            genre_id TEXT,
-            PRIMARY KEY (track_id, genre_id),
+    db.run(`CREATE TABLE IF NOT EXISTS tracks_labels (
+            track_id TEXT NOT NULL,
+            label_id INTEGER NOT NULL,
+            added_at TEXT,
+            PRIMARY KEY (track_id, label_id),
             FOREIGN KEY (track_id) REFERENCES tracks (id),
-            FOREIGN KEY (genre_id) REFERENCES genres (id))`);
-    db.run(`CREATE TABLE IF NOT EXISTS tracks_subgenres (
-            track_id TEXT,
-            subgenre_id TEXT,
-            PRIMARY KEY (track_id, subgenre_id),
-            FOREIGN KEY (track_id) REFERENCES tracks (id),
-            FOREIGN KEY (subgenre_id) REFERENCES subgenres (id))`);               
-    db.run(`CREATE TABLE IF NOT EXISTS tracks_moods (
-            track_id TEXT,
-            mood_id TEXT,
-            PRIMARY KEY (track_id, mood_id),
-            FOREIGN KEY (track_id) REFERENCES tracks (id),
-            FOREIGN KEY (mood_id) REFERENCES moods (id))`);
+            FOREIGN KEY (label_id) REFERENCES labels (id))`);
   });
 };
