@@ -22,7 +22,8 @@ exports.requestTokens = code => {
     },
     headers: { 
       'Authorization': 'Basic ' + 
-      (new Buffer(config.clientId + ':' + config.clientSecret).toString('base64')) 
+      new Buffer.from(config.clientId + ':' + config.clientSecret)
+        .toString('base64')
     },
     json: true,
   };
@@ -52,11 +53,11 @@ exports.refreshToken = async () => {
       },
       headers: { 
         'Authorization': 'Basic ' + 
-        (new Buffer(config.clientId + ':' + config.clientSecret).toString('base64')) 
+        new Buffer.from(config.clientId + ':' + config.clientSecret)
+          .toString('base64') 
       },
       json: true,
     };
-  
     const res = await new Promise((resolve, reject) => {
       request.post(authOptions, (err, res, body) => {
         if (err) {

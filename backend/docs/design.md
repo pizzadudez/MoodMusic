@@ -1,7 +1,11 @@
 ## Fix Later:
 
-- Buffer() deprecation warning 
-- Eliminate useless track inserts (use hash maps to see what to not insert)
+- [x] Buffer() deprecation warning 
+- [ ] Eliminate useless track inserts (use hash maps to see what to not insert)
+- [ ] Handle playlists/tracks with over 100 songs (and playlists when over 20)
+- [ ] Handle songs removed from playlists
+  - [ ] Solution: delete all tracks_playlists relations if tracks no longer in playlist
+  - [ ] Keep songs without playlsits (they will have their own 'pseudo playlist')
 
 ## Ideas / Questions:
 

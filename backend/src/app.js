@@ -4,12 +4,12 @@ const db = require('./models/db');
 const config = require('./config');
 
 const AuthRouter = require('./auth');
-// const ApiRouter = require();
+const ApiRouter = require('./api');
 
 const app = express();
 // Routers
 app.use('/auth', AuthRouter);
-// app.use('/api', ApiRouter);
+app.use('/api', ApiRouter);
 // Misc
 app.use(express.static(path.join(__dirname, '../public')));
 app.set('json spaces', 2);

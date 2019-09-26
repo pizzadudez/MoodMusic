@@ -35,6 +35,7 @@ exports.init = () => {
     db.run(`CREATE TABLE IF NOT EXISTS tracks_playlists (
             track_id TEXT,
             playlist_id TEXT,
+            added_at TEXT,
             PRIMARY KEY (track_id, playlist_id),
             FOREIGN KEY (track_id) REFERENCES tracks (id),
             FOREIGN KEY (playlist_id) REFERENCES playlists (id))`);
