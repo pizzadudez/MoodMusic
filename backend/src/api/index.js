@@ -5,6 +5,6 @@ const LabelsRouter = require('./routes/labels');
 
 router.use('/playlists', PlaylistsRouter);
 router.use('/tracks', TracksRouter);
-router.use('/labels', LabelsRouter);
+router.use('/', LabelsRouter);
 
 module.exports = router;

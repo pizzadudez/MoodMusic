@@ -76,6 +76,14 @@
 - Publish / Update spotify MoodPlaylist
 
 - Create label
+
 - Delete label (and track relations with label)
+
 - Add / Remove label from track/s
+
+## Labels Crud:
+
+- crud only 1 label at a time
+- create, update, delete;   read
+- 
 

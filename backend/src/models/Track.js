@@ -1,5 +1,6 @@
 const db = require('./db').conn();
 
+// Add tracks from spotify playlists
 exports.insertTracks = (tracks, playlistId) => {
   if (!tracks) return;
   const sqlTracks = `INSERT INTO tracks (

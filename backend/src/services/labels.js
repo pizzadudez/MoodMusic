@@ -1,9 +1,10 @@
 const LabelModel = require('../models/Label');
 
-exports.createLabel = async label => {
-  return await LabelModel.create(label);
-};
-
-exports.deleteLabel = async id => {
-  return await LabelModel.delete(id);
+exports.getAll = async () => {
+  const labels = await LabelModel.getAll();
+  return labels.reduce((obj, label) => {
+    obj[label.type] = obj[label.type] || [];
+    obj[label.type].push(label);
+    return obj
+  }, {});
 };

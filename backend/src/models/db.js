@@ -8,12 +8,13 @@ const db = new sqlite3.Database('./db.sqlite3', err => {
   }
 });
 // Import this into models
-exports.conn = () => { 
+exports.conn = () => {
   return db; 
 };
 // Init database on server start
 exports.init = () => {
   db.serialize(() => {
+    db.get('PRAGMA foreign_keys = ON');
     db.run(`CREATE TABLE IF NOT EXISTS users (
             user_id TEXT UNIQUE,
             access_token TEXT,

@@ -4,11 +4,40 @@ const validate = method => {
   switch (method) {
     case 'createLabel': {
       return [
-        body('type', 'Types: genre/subgenre/mood.').isIn(['genre', 'subgenre', 'mood']),
-        body('name', 'No name provided.').exists(),
+        body('type', 'Types: genre|subgenre|mood.')
+          .isIn(['genre', 'subgenre', 'mood']),
+        body('name', '<name> must only contain letters and is mandatory')
+          .exists(),
         body('parent_id', 'Value must be a label id.')
           .if(body('type').equals('subgenre')).exists().isInt(),
+        body('color', 'Must be hex color code')
+          .optional().isHexColor()
+      ];
+    }
+    case 'updateLabel': {
+      return [
+        body('name', '<name> must only contain letters').optional(),
+        body('parent_id', 'Value must be a label id.').optional().isInt(),
         body('color', 'Must be hex color code').optional().isHexColor()
+      ];
+    }
+    case 'addLabels': {
+      return [
+        body('*.track_id').exists(),
+        body('*.label_ids').custom(list => {
+          if (!Array.isArray(list)) {
+            throw new Error('label_ids must be of type Array of Numbers');
+          } else {
+            return true;
+          }
+        }),
+        body('*.label_ids.*').custom(id => {
+          if (typeof(id) !== 'number') {
+            throw new Error('label_ids elements must be of type Number');
+          } else {
+            return true;
+          }
+        })
       ];
     }
   } 
