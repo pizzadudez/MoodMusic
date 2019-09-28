@@ -2,6 +2,7 @@ const request = require('request');
 const UserModel = require('../models/User');
 const PlaylistModel = require('../models/Playlist');
 const TrackModel = require('../models/Track');
+const LabelModel = require('../models/Label');
 
 // Request up to date playlist data from Spotify
 exports.refreshPlaylists = async () => {
@@ -31,16 +32,16 @@ exports.refreshPlaylists = async () => {
     console.log(err);
   }
 };
-// TODO finish
-// Update tracks from tracked playlists with changes
+// Get new Tracks from tracked playlists with changes
 exports.refreshTracks = async () => {
   try {
-    const playlistsIds = await PlaylistModel.trackedWithChanges();
-    if (!playlists.length) { return 'No tracked playlists have changes.'; }
+    const playlistIds = await PlaylistModel.trackedWithChanges();
+    if (!playlistIds.length) { return 'No tracked playlists have changes.'; }
     const userData = await UserModel.getUser();
     const filters = '?fields=items(track(id,name,artists,album),added_at)';
     
-    const promises = playlistsIds.map(id => {
+    // Promises to generate 'playlist-tracks' relation objects
+    const promises = playlistIds.map(id => {
       return new Promise(async (resolve, reject) => {
         const hashMap = await PlaylistModel.tracksHashMap(id);
         const options = {
@@ -71,32 +72,45 @@ exports.refreshTracks = async () => {
         });
       });
     });
+    // list of {playlist_id: id, tracks: [trackObj]}
     const playlistsTracks = await Promise.all(promises);
 
+    // new tracks
     const trackHashMap = await TrackModel.hashMap();
-    const preparedTracks = playlistsTracks.reduce((arr, pl) => {
-      const tracks = pl.tracks.reduce((arr, track) => {
-        if (trackHashMap[track.id]) {
-          return arr;
-        } else {
-          return [...arr, track];
-        }
-      }, []);
+    const newTracks = playlistsTracks.reduce((arr, pl) => {
+      const tracks = pl.tracks.filter(track => !trackHashMap[track.id]);
       return [...arr, ...tracks];
     }, []);
-    console.log(preparedTracks);
-
-    const rel = playlistsTracks.map(playlist => ({
-      playlist_id: playlist.playlist_id,
-      track_ids: playlist.tracks.map(track => track.id)
+    await TrackModel.newTracks(newTracks);
+    
+    // tracks-playlists relationships
+    const relPlaylists = playlistsTracks.map(pl => ({
+      playlist_id: pl.playlist_id,
+      track_ids: pl.tracks.map(track => track.id)
     }));
-    console.log(rel)
+    await TrackModel.addTracks(relPlaylists);
+
+    // tracks-labels relationships
+    const promiseList = playlistsTracks.map(async pl => {
+      const genreId = (await PlaylistModel.get(pl.playlist_id)).genre_id;
+      const list = pl.tracks.map(track => ({
+        track_id: track.id,
+        label_ids: [genreId]
+      }));
+      return list;
+    });
+    const relLabels = (await Promise.all(promiseList)).flat(Infinity);
+    await LabelModel.addLabels(relLabels);
+
+    // Set the changes field to false on checked playlists
+    playlistIds.forEach(id => PlaylistModel.setChanges(id, 0));
+    console.log('New Tracks Added!');
 
   } catch (err) {
     console.log(err);
   }
 };
-// README
+// Create Playlist
 exports.createPlaylist = async name => {
   try {
     const userData = await UserModel.getUser();

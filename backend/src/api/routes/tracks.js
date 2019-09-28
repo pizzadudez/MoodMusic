@@ -5,7 +5,12 @@ const SpotifyService = require('../../services/spotify');
 const TrackModel = require('../../models/Track');
 const TracksService = require('../../services/tracks');
 
-router.get('/', async (req, res, next) => {
+//
+router.get('/', (req, res, next) => {
+  res.send('GET ALL TRACKS HERE');
+});
+//
+router.get('/check', async (req, res, next) => {
   try {
     await SpotifyService.refreshPlaylists();
     const message = await SpotifyService.refreshTracks();
@@ -13,15 +18,6 @@ router.get('/', async (req, res, next) => {
   } catch (err) {
     res.send(err);
   }
-});
-//
-router.get('/test', async (req, res, next) => {
-  const message = await TracksService.addNewTracks()
-    .catch(err => {
-      console.log(err);
-      res.send(err);
-    });
-  res.send(message);
 });
 //
 router.post('/add', validator('addTracks'), async (req, res, next) => {

@@ -108,6 +108,10 @@ exports.all = () => {
     db.all(sql, (err, rows) => err ? reject(err) : resolve(rows));
   });
 };
+// Get playlist by id
+exports.get = id => {
+  return getRow(id);
+}
 // Get list of tracked playlist ids with changes
 exports.trackedWithChanges = () => {
   return new Promise((resolve, reject) => {
