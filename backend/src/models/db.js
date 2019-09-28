@@ -21,12 +21,15 @@ exports.init = () => {
             refresh_token TEXT,
             expires INTEGER)`);
     db.run(`CREATE TABLE IF NOT EXISTS playlists (
-            id TEXT,
+            id TEXT UNIQUE,
             name TEXT,
             snapshot_id TEXT,
-            changes INTEGER,
-            tracking INTEGER,
-            PRIMARY KEY (id))`);
+            genre_id INTEGER DEFAULT NULL,
+            mood_playlist INTEGER DEFAULT 0,
+            changes INTEGER DEFAULT 1,
+            tracking INTEGER DEFAULT 0,
+            PRIMARY KEY (id),
+            FOREIGN KEY (genre_id) REFERENCES labels (id) ON DELETE SET NULL)`);
     db.run(`CREATE TABLE IF NOT EXISTS tracks (
             id TEXT UNIQUE,
             name TEXT,
@@ -45,14 +48,14 @@ exports.init = () => {
             playlist_id TEXT NOT NULL,
             added_at TEXT,
             PRIMARY KEY (track_id, playlist_id),
-            FOREIGN KEY (track_id) REFERENCES tracks (id),
-            FOREIGN KEY (playlist_id) REFERENCES playlists (id))`);
+            FOREIGN KEY (track_id) REFERENCES tracks (id) ON DELETE CASCADE,
+            FOREIGN KEY (playlist_id) REFERENCES playlists (id) ON DELETE CASCADE)`);
     db.run(`CREATE TABLE IF NOT EXISTS tracks_labels (
             track_id TEXT NOT NULL,
             label_id INTEGER NOT NULL,
             added_at TEXT,
             PRIMARY KEY (track_id, label_id),
-            FOREIGN KEY (track_id) REFERENCES tracks (id),
-            FOREIGN KEY (label_id) REFERENCES labels (id))`);
+            FOREIGN KEY (track_id) REFERENCES tracks (id) ON DELETE CASCADE,
+            FOREIGN KEY (label_id) REFERENCES labels (id) ON DELETE CASCADE)`);
   });
 };

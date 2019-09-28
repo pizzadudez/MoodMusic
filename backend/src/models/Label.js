@@ -1,79 +1,105 @@
 const db = require('./db').conn();
 
 // Create new label with validation
-exports.create = label => {
-  const sql = `INSERT INTO labels (
-               type, name, color, parent_id)
-               VALUES(?, ?, ?, ?)`;
-  let values = [
-    label.type, 
-    label.name, 
-    label.color || null, 
-    label.type === 'subgenre' ? label.parent_id : null
-  ];
-  return new Promise((resolve, reject) => {
-    db.serialize(() => {
-      const sqlSelect = "SELECT type, color FROM labels WHERE id=? AND type='genre'";
-      db.get(sqlSelect, [label.parent_id], (err, rows) => {
+exports.create = async label => {
+  try {
+    let values = [
+      label.type, 
+      label.name, 
+      label.color || null, 
+      label.type === 'subgenre' ? label.parent_id : null
+    ];
+    // check if parent_id is valid and inherit color if null
+    await new Promise((resolve, reject) => {
+      if (label.type !== 'subgenre') { resolve(); }
+      const sql = "SELECT color FROM labels WHERE id=? AND type='genre'";
+      db.get(sql, [label.parent_id], (err, row) => {
         if (err) {
           reject(err);
-        } else if (label.type === 'subgenre' && !rows) {
-          reject('Invalid parent_id. Must be the id of a <genre> label.');
-        } else if (label.type === 'subgenre' && rows && rows.type === 'genre') {
-          // if no color inherit genre's color
-          values[2] = values[2] === null ? rows.color : values[2];
-        } 
-        db.run(sql, values, err => err 
-          ? reject(err)
-          : resolve(`Created <${label.type}> label: '${label.name}'`));
+        } else if (row) {
+          values[2] = values[2] === null ? row.color : values[2];
+          resolve();
+        } else {
+          reject('Invalid parent_id');
+        }
       });
     });
-  });
+    // Insert Label
+    const message = await new Promise((resolve, reject) => {
+      const sql = `INSERT INTO labels (type, name, color, parent_id)
+                   VALUES(?, ?, ?, ?)`;
+      db.run(sql, values, err => err 
+        ? reject(err)
+        : resolve(`Created <${label.type}> label: '${label.name}'`));
+    });
+    console.log(message);
+    return message;
+  } catch (err) {
+    console.log(err)
+    return err;
+  }
 };
 // Update existing label
-exports.update = (id, update) => {
-  return new Promise((resolve, reject) => {
-    db.get("SELECT * FROM labels WHERE id=?", [id], (err, rows) => {
-      if (err) {
-        reject(err);
-      } else if (!rows) {
-        reject(`There is no label with id: ${id}`);
-      } else {
-        // Format Update sql and values
-        const label = {
-          name: update.name || null,
-          color: update.color || null,
-          parent_id: rows.type === "subgenre" ? (update.parent_id || null) : null,
-        };
-        const fields = Object.keys(label).filter(key => label[key] !== null);
-        if (fields.length === 0) {
-          reject('No valid fields to update...');
+exports.update = async (id, update) => {
+  try {
+    const row = await new Promise((resolve, reject) => {
+      db.get("SELECT * FROM labels WHERE id=?", [id], (err, row) => {
+        if (err) {
+          reject(err);
+        } else if (!row) {
+          reject(`There is no label with id: ${id}`);
+        } else {
+          resolve(row);
         }
-        const fieldsSQL = fields.map(field => field + '=?');
-        const sql = "UPDATE labels SET " + fieldsSQL.join(', ') + " WHERE id=?";
-        const values = Object.values(label).filter(val => val !== null);
-        // Check subgenre parent_id constraints
-        const selectParent = "SELECT type FROM labels WHERE id=? AND type='genre'";
-        db.get(selectParent, [label.parent_id], (err, parentRow) => {
-          if (err) {
-            reject(err);
-          } else if (parentRow && rows.type === 'subgenre' && parentRow.type !== 'genre') {
-            reject('Invalid parent_id. Must be the id of a <genre> label.');
-          } else {
-            // Finally Update
-            db.run(sql, [...values, id], err => err 
-              ? reject(err)
-              : resolve(`Updated label id: ${id}`));
-          }   
-        });
-      }
+      });
     });
-  });
+    const label = {
+      name: update.name,
+      color: update.color,
+      parent_id: row.type === 'subgenre' ? (update.parent_id) : null,
+    };
+    const labelValues = Object.values(label)
+      .filter(val => val != null);
+    if (!labelValues.length) { return 'No valid fields to modify'; }
+    const labelSQL = Object.keys(label)
+      .filter(key => label[key] != null)
+      .map(key=> key + '=?')
+      .join(', ');
+    console.log(labelValues);
+    console.log(labelSQL);
+    // Check if parent_id is valid
+    await new Promise((resolve, reject) => {
+      if (row.type !== 'subgenre') { resolve(); }
+      const sql = "SELECT 1 FROM label WHERE id=? AND type='genre'";
+      db.get(sql, label.parent_id, (err, row) => {
+        if (err) {
+          reject(err);
+        } else if (!row) {
+          reject('Invalid parent_id');
+        } else {
+          resolve();
+        }
+      });
+    });
+    // Update label
+    const message = await new Promise((resolve, reject) => {
+      const sql = "UPDATE labels SET " + labelSQL + " WHERE id=?";
+      console.log(sql);
+      db.run(sql, [...labelValues, id], err => err
+        ? reject(err)
+        : resolve(`Updated label id: ${id}`));
+    });
+    console.log(message);
+    return message;
+  } catch (err) {
+    console.log(err);
+    return err;
+  }
 };
 // Delete label
 exports.delete = id => {
-  const sql = `DELETE FROM labels WHERE id=?`;
   return new Promise((resolve, reject) => {
+    const sql = `DELETE FROM labels WHERE id=?`;
     db.run(sql, [id], function(err) {
       if (err) {
         reject(err);
@@ -87,8 +113,8 @@ exports.delete = id => {
 };
 // Get label by id
 exports.get = id => {
-  const sql = `SELECT * FROM labels WHERE id=?`;
   return new Promise((resolve, reject) => {
+    const sql = `SELECT * FROM labels WHERE id=?`;
     db.get(sql, [id], (err, rows) => {
       if (err) {
         reject(err);
@@ -102,8 +128,8 @@ exports.get = id => {
 };
 // Get all label separated by type
 exports.getAll = () => {
-  const sql = `SELECT * FROM labels`;
   return new Promise((resolve, reject) => {
+    const sql = `SELECT * FROM labels`;
     db.all(sql, (err, rows) => {
       if (err) {
         reject(err);

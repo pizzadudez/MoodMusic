@@ -15,6 +15,9 @@
 - Give playlists a genre id: this way we automatically set the genre for a song
 - Store album images along side an Album table (will be useful for mp3 tagging too)
 - Store last playlist check somewhere
+- Think of Song ordering
+- Think of Song ratings and up/downvoting songs
+- Playlist default genres field (fk)
 
 ## Steps:
 
@@ -81,9 +84,36 @@
 
 - Add / Remove label from track/s
 
-## Labels Crud:
+# API endpoints:
 
-- crud only 1 label at a time
-- create, update, delete;   read
-- 
+- /labels
+  - GET
+  - POST
+- /labels/add
+  - POST
+- /labels/remove
+  - POST
+- /label/:id
+  - GET
+  - PATCH
+  - DELETE
+
+- /playlists
+  - GET
+  - POST
+- /playlists/check
+  - GET: check for playlist changes; response is same as /playlists
+- /playlist/id
+  - GET
+  - PATCH
+  - DELETE
+
+- /tracks
+  - GET
+- /tracks/add
+  - POST
+- /tracks/remove
+  - POST
+- /tracks/check
+  - GET
 
