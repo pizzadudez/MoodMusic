@@ -41,13 +41,8 @@ router.patch('/:id', validator('modifyPlaylist'), async (req, res, next) => {
     res.status(422).json({errors: errors.array()});
     return;
   }
-  //
-  const playlist = await PlaylistModel.modify(req.params.id, req.body)
-    .catch(err => {
-      console.log(err);
-      res.send(err);
-    });
-  res.send(playlist);
+  const message = await PlaylistModel.modify(req.params.id, req.body)
+  res.send(message);
 });
 
 

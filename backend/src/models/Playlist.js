@@ -62,7 +62,8 @@ exports.delete = id => {
 // Modify playlist fields (api call)
 exports.modify = async (id, update) => {
   try {
-    const playlist = await getRow(id);
+    // Check if playlist_id exists
+    await getRow(id);
     const fields = {
       tracking: update.tracking,
       genre_id: update.genre_id,
@@ -70,18 +71,26 @@ exports.modify = async (id, update) => {
     };
     const fieldsValues = Object.values(fields)
       .filter(val => val != null)
-      .map(val => typeof(val) === 'boolean' ? +val : val);
+      .map(val => typeof(val) === 'boolean' ? +val : val); 
+    if (!fieldsValues.length) { return 'No valid fields to modify'; }
     const fieldsSQL = Object.keys(fields)
       .filter(key => fields[key] != null)
       .map(key => key + '=?')
       .join(', ');
-    if (!fieldsValues.length) { return 'No valid fields to modify'; }
-    
-    const message = await validGenreId(update.genre_id);
-    console.log('check')
+    // Validate genre_id
+    const validId = await validGenreId(update.genre_id);
+    if (!validId) { return 'Invalid genre_id'; }
+    // Update fields
+    const message = await new Promise((resolve, reject) => {
+      const sql = "UPDATE playlists SET " + fieldsSQL + " WHERE id=?";
+      db.run(sql, [...fieldsValues, id], err => err
+        ? reject(err)
+        : resolve(`Updated playlist id: ${id}`));
+    });
+    return message;
   } catch (err) {
     console.log(err);
-    return;
+    return err;
   }
 }
 // Set playlist has changes true/false
@@ -135,18 +144,7 @@ exports.tracksHashMap = id => {
 };
 
 /* Helper functions */
-const getRow = id => {
-  return new Promise((resolve, reject) => {
-    db.get("SELECT * FROM playlists WHERE id=?", [id], (err, row) => {
-      if (row) {
-        resolve(row);
-      } else {
-        reject(`Playlist id: '${id}' not found.`);
-      }
-    });
-  });
-};
-// 
+// Checks if a given label_id is of type 'genre'
 const validGenreId = id => {
   if (!id) { return Promise.resolve(true); }
   return new Promise((resolve, reject) => {
@@ -156,6 +154,18 @@ const validGenreId = id => {
         resolve(true);
       } else {
         reject('Invalid genre_id');
+      }
+    });
+  });
+};
+// Returns playlist_id row object
+const getRow = id => {
+  return new Promise((resolve, reject) => {
+    db.get("SELECT * FROM playlists WHERE id=?", [id], (err, row) => {
+      if (row) {
+        resolve(row);
+      } else {
+        reject(`Playlist id: '${id}' not found.`);
       }
     });
   });

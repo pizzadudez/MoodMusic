@@ -65,8 +65,6 @@ exports.update = async (id, update) => {
       .filter(key => label[key] != null)
       .map(key=> key + '=?')
       .join(', ');
-    console.log(labelValues);
-    console.log(labelSQL);
     // Check if parent_id is valid
     await new Promise((resolve, reject) => {
       if (row.type !== 'subgenre') { resolve(); }
@@ -84,7 +82,6 @@ exports.update = async (id, update) => {
     // Update label
     const message = await new Promise((resolve, reject) => {
       const sql = "UPDATE labels SET " + labelSQL + " WHERE id=?";
-      console.log(sql);
       db.run(sql, [...labelValues, id], err => err
         ? reject(err)
         : resolve(`Updated label id: ${id}`));
