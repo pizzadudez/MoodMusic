@@ -6,6 +6,7 @@
 - [ ] Handle songs removed from playlists
   - [ ] Solution: delete all tracks_playlists relations if tracks no longer in playlist
   - [ ] Keep songs without playlsits (they will have their own 'pseudo playlist')
+- [ ] When Checking multiple playlists we get sql fk constraint fail
 
 ## Ideas / Questions:
 

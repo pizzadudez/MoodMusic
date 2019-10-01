@@ -1,6 +1,6 @@
 const db = require('./db').conn();
 
-// Add tracks from spotify playlists
+// DEPRECATED? Add tracks from spotify playlists
 exports.insertTracks = (tracks, playlistId) => {
   if (!tracks) return;
   const sqlTracks = `INSERT INTO tracks (
@@ -30,6 +30,7 @@ exports.insertTracks = (tracks, playlistId) => {
     });
   });
 };
+// DEPRECATED?
 exports.hashMap = () => {
   const sql = `SELECT id FROM tracks`;
   return new Promise((resolve, reject) => {
@@ -46,6 +47,7 @@ exports.hashMap = () => {
     });
   });
 };
+
 // Add new Tracks
 exports.newTracks = tracks => {
   if (!tracks) return;
@@ -71,6 +73,59 @@ exports.newTracks = tracks => {
     });
   });
 };
+
+// Get all tracks
+exports.getAll = () => {
+  return new Promise((resolve, reject) => {
+    const sql = "SELECT * FROM tracks"
+    db.all(sql, (err, rows) => {
+      if (err) {
+        reject(err);
+      } else {
+        resolve(rows);
+      }
+    });
+  });
+};
+
+// Get all tracks then get labels/pl for each track sepparately
+exports.getAll2 = async () => {
+  const sql = "SELECT * FROM tracks";
+  const sqlLabels = `SELECT tl.label_id FROM tracks_labels tl
+                     LEFT JOIN tracks t ON t.id = tl.track_id
+                     WHERE tl.track_id=?`;
+  const sqlPlaylists = `SELECT tp.playlist_id FROM tracks_playlists tp
+                        LEFT JOIN tracks t ON t.id = tp.track_id
+                        WHERE tp.track_id=?`;
+  let tracks = [];
+  let promises = [];
+  return new Promise((resolve, reject) => {
+    db.each(sql, (err, row) => {
+      if (err) {
+        reject(err);
+      } else {
+        const promise = new Promise((res, rej) => {
+          db.serialize(() => {
+            db.all(sqlPlaylists, row.id, (err, rows) => {
+              row.playlist_ids = rows.map(row => row.playlist_id);
+            });
+            db.all(sqlLabels, row.id, (err, rows) => {
+              row.label_ids = rows.map(row => row.label_id);
+              tracks.push(row);
+              res();
+            });
+          });
+        });
+        promises.push(promise);
+      }
+    }, async (err, numRows) => {
+      await Promise.all(promises);
+      console.log(tracks.length);
+      resolve(tracks);
+    });
+  });
+};
+
 // Add track-playlist relationships
 exports.addTracks = list => {
   if(!list) return;
@@ -105,7 +160,6 @@ exports.addTracks = list => {
 // Remove track-playlist relationships
 exports.removeTracks = list => {
   if(!list) return;
-  const added_at = new Date;
   const sql = `DELETE FROM tracks_playlists WHERE
                track_id=? AND playlist_id=?`;
   return new Promise((resolve, reject) => {

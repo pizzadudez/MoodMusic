@@ -3,11 +3,11 @@ const { validationResult } = require('express-validator');
 const validator = require('../../services/validator');
 const SpotifyService = require('../../services/spotify');
 const TrackModel = require('../../models/Track');
-const TracksService = require('../../services/tracks');
 
 //
-router.get('/', (req, res, next) => {
-  res.send('GET ALL TRACKS HERE');
+router.get('/', async (req, res, next) => {
+  const message = await TrackModel.getAll2();
+  res.send(message);
 });
 //
 router.get('/check', async (req, res, next) => {
