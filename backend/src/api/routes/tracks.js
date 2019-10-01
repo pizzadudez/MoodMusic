@@ -6,18 +6,14 @@ const TrackModel = require('../../models/Track');
 
 //
 router.get('/', async (req, res, next) => {
-  const message = await TrackModel.getAll2();
+  const message = await TrackModel.getAll();
   res.send(message);
 });
 //
 router.get('/check', async (req, res, next) => {
-  try {
-    await SpotifyService.refreshPlaylists();
-    const message = await SpotifyService.refreshTracks();
-    res.send(message);
-  } catch (err) {
-    res.send(err);
-  }
+  await SpotifyService.refreshPlaylists();
+  const message = await SpotifyService.refreshTracks();
+  res.send(message);
 });
 //
 router.post('/add', validator('addTracks'), async (req, res, next) => {

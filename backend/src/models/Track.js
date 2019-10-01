@@ -1,57 +1,9 @@
 const db = require('./db').conn();
 
-// DEPRECATED? Add tracks from spotify playlists
-exports.insertTracks = (tracks, playlistId) => {
-  if (!tracks) return;
-  const sqlTracks = `INSERT INTO tracks (
-                     id, name, artist, album)
-                     VALUES(?, ?, ?, ?)`;
-  const sqlTracksPlaylists = `INSERT INTO tracks_playlists (
-                              track_id, playlist_id, added_at)
-                              VALUES(?, ?, ?)`;
-  return new Promise((resolve, reject) => {
-    db.serialize(() => {
-      db.run("BEGIN TRANSACTION");
-      tracks.forEach(t => {
-        db.run(sqlTracks, [t.id, t.name, t.artist, t.album], err => {
-          if (err && err.code !== 'SQLITE_CONSTRAINT') { reject(err); }
-        });
-        db.run(sqlTracksPlaylists, [t.id, playlistId, t.added_at], err => {
-          if (err && err.code !== 'SQLITE_CONSTRAINT') { reject(err); }
-        });
-      });
-      db.run("COMMIT TRANSACTION", err => {
-        if (err) {
-          reject(err);
-        } else {
-          resolve('success')
-        }
-      });
-    });
-  });
-};
-// DEPRECATED?
-exports.hashMap = () => {
-  const sql = `SELECT id FROM tracks`;
-  return new Promise((resolve, reject) => {
-    db.all(sql, (err, rows) => {
-      if (err) {
-        reject(err);
-      } else {
-        const hashMap = rows.reduce((map, row) => {
-          map[row.id] = true;
-          return map;
-        }, {});
-        resolve(hashMap);
-      }
-    });
-  });
-};
-
 // Add new Tracks
 exports.newTracks = tracks => {
   if (!tracks) return;
-  const sql = `INSERT INTO tracks (
+  const sql = `INSERT OR IGNORE INTO tracks (
                id, name, artist, album)
                VALUES(?, ?, ?, ?)`;
   return new Promise((resolve, reject) => {
@@ -73,23 +25,8 @@ exports.newTracks = tracks => {
     });
   });
 };
-
-// Get all tracks
-exports.getAll = () => {
-  return new Promise((resolve, reject) => {
-    const sql = "SELECT * FROM tracks"
-    db.all(sql, (err, rows) => {
-      if (err) {
-        reject(err);
-      } else {
-        resolve(rows);
-      }
-    });
-  });
-};
-
-// Get all tracks then get labels/pl for each track sepparately
-exports.getAll2 = async () => {
+// List of all track objects (full)
+exports.getAll = async () => {
   const sql = "SELECT * FROM tracks";
   const sqlLabels = `SELECT tl.label_id FROM tracks_labels tl
                      LEFT JOIN tracks t ON t.id = tl.track_id
@@ -120,7 +57,6 @@ exports.getAll2 = async () => {
       }
     }, async (err, numRows) => {
       await Promise.all(promises);
-      console.log(tracks.length);
       resolve(tracks);
     });
   });
@@ -130,7 +66,7 @@ exports.getAll2 = async () => {
 exports.addTracks = list => {
   if(!list) return;
   const added_at = new Date;
-  const sql = `INSERT INTO tracks_playlists (
+  const sql = `INSERT OR IGNORE INTO tracks_playlists (
                track_id, playlist_id, added_at)
                VALUES(?, ?, ?)`;
   return new Promise((resolve, reject) => {
