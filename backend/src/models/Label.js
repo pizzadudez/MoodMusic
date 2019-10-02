@@ -139,7 +139,7 @@ exports.getAll = () => {
 // Add track-label relationships
 // List of {track_id: id, label_ids: [label_id,]}
 exports.addLabels = list => {
-  if(!list) return;
+  if (!list || !list.length) return;
   const added_at = new Date;
   const sql = `INSERT OR IGNORE INTO tracks_labels (
                track_id, label_id, added_at)

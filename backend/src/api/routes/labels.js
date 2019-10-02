@@ -7,12 +7,8 @@ const LabelsService = require('../../services/labels');
 
 // Get all labels separated by type
 router.get('/labels', async (req, res, next) => {
-  const list = await LabelsService.getAll()
-    .catch(err => {
-      console.log(err);
-      res.send(err);
-    });
-  res.send(list);
+  const map = await LabelsService.map()
+  res.send(map);
 });
 // Create new label
 router.post('/labels', validator('createLabel'), async (req, res, next) => {
@@ -24,6 +20,7 @@ router.post('/labels', validator('createLabel'), async (req, res, next) => {
   const message = await LabelModel.create(req.body);
   res.send(message);
 });
+
 // Add Labels to Tracks
 router.post('/labels/add', validator('addLabels'), async (req, res, next) => {
   const errors = validationResult(req);
@@ -52,6 +49,7 @@ router.post('/labels/remove', validator('addLabels'), async (req, res, next) => 
     });
   res.send(message);
 });
+
 // Get a single label
 router.get('/label/:id', async (req, res, next) => {
   const message = await LabelModel.get(req.params.id)

@@ -53,6 +53,7 @@ exports.refreshTracks = async () => {
     // tracks-labels relationships
     const labelPromises = playlistTracks.map(async pl => {
       const genreId = (await PlaylistModel.get(pl.playlist_id)).genre_id;
+      if (!genreId) return []; 
       const list = pl.tracks.map(track => ({
         track_id: track.id,
         label_ids: [genreId]

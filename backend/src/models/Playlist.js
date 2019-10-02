@@ -102,7 +102,7 @@ exports.setChanges = (id, bool) => {
 };
 
 // Get all playlists
-exports.all = () => {
+exports.getAll = () => {
   return new Promise((resolve, reject) => {
     const sql = "SELECT * FROM playlists";
     db.all(sql, (err, rows) => err ? reject(err) : resolve(rows));
@@ -129,7 +129,7 @@ exports.trackedWithChanges = () => {
     });
   });
 };
-// Get hashMap of track_ids associated with the playlist id
+// DEPRECATED Get hashMap of track_ids associated with the playlist id
 exports.tracksHashMap = id => {
   return new Promise((resolve, reject) => {
     const sql = "SELECT track_id FROM tracks_playlists WHERE playlist_id=?";

@@ -1,12 +1,14 @@
 const router = require('express').Router();
 const { validationResult } = require('express-validator');
 const validator = require('../../services/validator');
-const SpotifyService = require('../../services/spotify');
 const PlaylistModel = require('../../models/Playlist');
+const SpotifyService = require('../../services/spotify');
+const PlaylistService = require('../../services/playlists');
 
 // TODO: remove data from response
 router.get('/', async (req, res, next) => {
-  res.send("TODO");
+  const map = await PlaylistService.map();
+  res.send(map);
 });
 // Create new Spotify playlist
 router.post('/', validator('createPlaylist'), async (req, res, next) => {
