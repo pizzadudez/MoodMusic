@@ -15,21 +15,24 @@ exports.refreshPlaylists = async () => {
     };
     const playlists = await new Promise((resolve, reject) => {
       request.get(options, (err, res, body) => {
-        if (err) {
-          reject(err);
+        const error = err || res.statusCode >= 400 ? body : null;
+        if (error) {
+          reject(error);
         } else {
-          resolve(body.items.map(pl => ({
+          const response = body.items.map(pl => ({
             'name': pl.name,
             'id': pl.id,
-            'snapshot_id': pl.snapshot_id,
-          })));
+            'snapshot_id': pl.snapshot_id
+          }));
+          resolve(response);
         }
       });
     });
     await PlaylistModel.update(playlists);
     return 'Tracked Playlists checked';
   } catch (err) {
-    return err;
+    console.log("Playlist refresh error: " + err.error.message);
+    return Promise.reject(err);
   }
 };
 // Get new Tracks from tracked playlists with changes
@@ -67,7 +70,8 @@ exports.refreshTracks = async () => {
     playlistIds.forEach(id => PlaylistModel.setChanges(id, 0));
     return 'New Tracks Added!';
   } catch (err) {
-    return err;
+    console.log("Tracks refresh error: " + err)
+    return Promise.reject(err);
   }
 };
 
@@ -76,20 +80,15 @@ exports.createPlaylist = async name => {
   try {
     const userData = await UserModel.getUser();
     const options = {
-      url: 'https://api.spotify.com/v1/users/' + userData.user_id + '/playlists',
+      url: 'https://api.spotify.com/v1/users/' + userData.user_id + '/playlistz',
       headers: { 'Authorization' : 'Bearer ' + userData.access_token },
-      body: {
-        'name': name
-      },
+      body: { 'name': name },
       json: true,
     };
     const res = await new Promise((resolve, reject) => {
       request.post(options, (err, res, body) => {
-        if (err) {
-          reject(err);
-        } else {
-          resolve(body);
-        }
+        const error = err || res.statusCode >= 400 ? body : null;
+        error ? reject(error) : resolve(body);
       });
     });
     const playlist = {
@@ -103,6 +102,7 @@ exports.createPlaylist = async name => {
       playlist: playlist
     });
   } catch (err) {
+    console.log("Request error: " + err.error.message);
     return err;
   }
 };
@@ -115,15 +115,68 @@ exports.deletePlaylist = async id => {
       headers: { 'Authorization' : 'Bearer ' + userData.access_token },
       json: true,
     };
-    const res = await new Promise((resolve, reject) => {
+    const response = await new Promise((resolve, reject) => {
       request.delete(options, (err, res, body) => {
-        err ? reject(err) : resolve('Removed (unfollowed) playlist.');
+        const error = err || res.statusCode >= 400 ? body : null;
+        error ? reject(error) : resolve('Removed (unfollowed) playlist.');
       });
     });
     await PlaylistModel.delete(id);
-    return res;
+    return response;
   } catch (err) {
+    console.log("Request error: " + err.error.message);
     return err;
+  }
+}
+
+// Add Tracks to Spotify playlist
+exports.addTracks = async playlistsTracks => {
+  try {
+    const token = (await UserModel.getUser()).access_token;
+    const requests = playlistsTracks.map(pl => {
+      return new Promise((resolve, reject) => {
+        const uris = pl.track_ids.map(id => "spotify:track:" + id);
+        const options = {
+          url: 'https://api.spotify.com/v1/playlists/' + pl.playlist_id + '/tracks',
+          headers: { 'Authorization' : 'Bearer ' + token },
+          body: { 'uris': uris },
+          json: true,
+        };
+        request.post(options, (err, res, body) => {
+          const error = err || res.statusCode >= 400 ? body : null;
+          error ? reject(error) : resolve();
+        });
+      });
+    });
+    await Promise.all(requests);
+  } catch (err) {
+    console.log(err.error.message);
+    return Promise.reject(err);
+  }
+};
+// Remove Tracks from Spotify Playlist
+exports.removeTracks = async playlistsTracks => {
+  try {
+    const token = (await UserModel.getUser()).access_token;
+    const requests = playlistsTracks.map(pl => {
+      return new Promise((resolve, reject) => {
+        const uris = pl.track_ids.map(id => "spotify:track:" + id);
+        const options = {
+          url: 'https://api.spotify.com/v1/playlists/' + pl.playlist_id + '/tracks',
+          headers: { 'Authorization' : 'Bearer ' + token },
+          body: { 'uris': uris },
+          json: true,
+        };
+        request.delete(options, (err, res, body) => {
+          const error = err || res.statusCode >= 400 ? body : null;
+          error ? reject(error) : resolve();
+        });
+      });
+    });
+    await Promise.all(requests);
+  } catch (err) {
+    console.log(err.error.message);
+    return Promise.reject(err);
   }
 }
 

@@ -5,10 +5,13 @@ const PlaylistModel = require('../../models/Playlist');
 const SpotifyService = require('../../services/spotify');
 const PlaylistService = require('../../services/playlists');
 
-// TODO: remove data from response
 router.get('/', async (req, res, next) => {
   const map = await PlaylistService.map();
   res.send(map);
+});
+router.get('/check', async (req, res, next) => {
+  const message = await SpotifyService.refreshPlaylists();
+  res.send(message);
 });
 // Create new Spotify playlist
 router.post('/', validator('createPlaylist'), async (req, res, next) => {
