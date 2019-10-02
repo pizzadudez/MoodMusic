@@ -80,7 +80,7 @@ exports.createPlaylist = async name => {
   try {
     const userData = await UserModel.getUser();
     const options = {
-      url: 'https://api.spotify.com/v1/users/' + userData.user_id + '/playlistz',
+      url: 'https://api.spotify.com/v1/users/' + userData.user_id + '/playlists',
       headers: { 'Authorization' : 'Bearer ' + userData.access_token },
       body: { 'name': name },
       json: true,
@@ -127,7 +127,7 @@ exports.deletePlaylist = async id => {
     console.log("Request error: " + err.error.message);
     return err;
   }
-}
+};
 
 // Add Tracks to Spotify playlist
 exports.addTracks = async playlistsTracks => {
@@ -178,7 +178,7 @@ exports.removeTracks = async playlistsTracks => {
     console.log(err.error.message);
     return Promise.reject(err);
   }
-}
+};
 
 /* Helper functions */
 // Get all new Tracks from a playlist

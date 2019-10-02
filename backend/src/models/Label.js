@@ -68,7 +68,7 @@ exports.update = async (id, update) => {
     // Check if parent_id is valid
     await new Promise((resolve, reject) => {
       if (row.type !== 'subgenre') { resolve(); }
-      const sql = "SELECT 1 FROM label WHERE id=? AND type='genre'";
+      const sql = "SELECT 1 FROM labels WHERE id=? AND type='genre'";
       db.get(sql, label.parent_id, (err, row) => {
         if (err) {
           reject(err);
@@ -136,6 +136,7 @@ exports.getAll = () => {
     });
   });
 };
+
 // Add track-label relationships
 // List of {track_id: id, label_ids: [label_id,]}
 exports.addLabels = list => {

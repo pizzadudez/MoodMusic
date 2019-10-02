@@ -92,8 +92,8 @@ exports.modify = async (id, update) => {
     console.log(err);
     return err;
   }
-}
-// Set playlist has changes true/false
+};
+// Set playlist 'changes' true/false
 exports.setChanges = (id, bool) => {
   return new Promise((resolve, reject) => {
     const sql = `UPDATE playlists SET changes=? WHERE id=?`;
@@ -111,7 +111,7 @@ exports.getAll = () => {
 // Get playlist by id
 exports.get = id => {
   return getRow(id);
-}
+};
 // Get list of tracked playlist ids with changes
 exports.trackedWithChanges = () => {
   return new Promise((resolve, reject) => {
@@ -125,23 +125,6 @@ exports.trackedWithChanges = () => {
           return arr;
         }, [])
         resolve(ids);
-      }
-    });
-  });
-};
-// DEPRECATED Get hashMap of track_ids associated with the playlist id
-exports.tracksHashMap = id => {
-  return new Promise((resolve, reject) => {
-    const sql = "SELECT track_id FROM tracks_playlists WHERE playlist_id=?";
-    db.all(sql, [id], (err, rows) => {
-      if (err) {
-        reject(err);
-      } else {
-        const map = rows.reduce((map, row) => {
-          map[row.track_id] = true;
-          return map;
-        }, {});
-        resolve(map);
       }
     });
   });

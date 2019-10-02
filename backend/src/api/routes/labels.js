@@ -54,7 +54,6 @@ router.post('/labels/remove', validator('addLabels'), async (req, res, next) => 
 router.get('/label/:id', async (req, res, next) => {
   const message = await LabelModel.get(req.params.id)
     .catch(err => {
-      console.log(err);
       res.status(404).send(err);
     });
   res.send(message);
@@ -66,11 +65,7 @@ router.patch('/label/:id', validator('updateLabel'), async (req, res, next) => {
     res.status(422).json({errors: errors.array()});
     return;
   };
-  const message = await LabelModel.update(req.params.id, req.body)
-    .catch(err => {
-      console.log(err);
-      res.send(err);
-    });
+  const message = await LabelModel.update(req.params.id, req.body);
   res.send(message);
 });
 // Delete label
