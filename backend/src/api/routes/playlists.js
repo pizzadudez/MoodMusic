@@ -5,10 +5,12 @@ const PlaylistModel = require('../../models/Playlist');
 const SpotifyService = require('../../services/spotify');
 const PlaylistService = require('../../services/playlists');
 
+// Get all playlists as a map
 router.get('/', async (req, res, next) => {
   const map = await PlaylistService.map();
   res.send(map);
 });
+// Update playlist data
 router.get('/check', async (req, res, next) => {
   const message = await SpotifyService.refreshPlaylists();
   res.send(message);

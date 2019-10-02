@@ -21,32 +21,39 @@ exports.init = () => {
             refresh_token TEXT,
             expires INTEGER)`);
     db.run(`CREATE TABLE IF NOT EXISTS playlists (
-            id TEXT UNIQUE,
+            id TEXT NOT NULL PRIMARY KEY,
             name TEXT,
             snapshot_id TEXT,
             genre_id INTEGER DEFAULT NULL,
             mood_playlist INTEGER DEFAULT 0,
             changes INTEGER DEFAULT 1,
             tracking INTEGER DEFAULT 0,
-            PRIMARY KEY (id),
             FOREIGN KEY (genre_id) REFERENCES labels (id) ON DELETE SET NULL)`);
     db.run(`CREATE TABLE IF NOT EXISTS tracks (
-            id TEXT UNIQUE,
+            id TEXT NOT NULL PRIMARY KEY,
             name TEXT,
             artist TEXT,
-            album TEXT,
-            PRIMARY KEY (id))`);
+            album_id TEXT,
+            added_at TEXT,
+            rating INTEGER DEFAULT 0,
+            FOREIGN KEY (album_id) REFERENCES albums (id))`);
+    db.run(`CREATE TABLE IF NOT EXISTS albums (
+            id TEXT NOT NULL PRIMARY KEY,
+            name TEXT,
+            small TEXT,
+            medium TEXT,
+            large TEXT)`);
     db.run(`CREATE TABLE IF NOT EXISTS labels (
-            id INTEGER NOT NULL,
+            id INTEGER NOT NULL PRIMARY KEY,
             type TEXT NOT NULL,
             name TEXT NOT NULL UNIQUE,
             color TEXT,
-            parent_id INTEGER,
-            PRIMARY KEY (id))`);
+            parent_id INTEGER DEFAULT NULL)`);
     db.run(`CREATE TABLE IF NOT EXISTS tracks_playlists (
             track_id TEXT NOT NULL,
             playlist_id TEXT NOT NULL,
             added_at TEXT,
+            position INTEGER DEFAULT NULL,
             PRIMARY KEY (track_id, playlist_id),
             FOREIGN KEY (track_id) REFERENCES tracks (id) ON DELETE CASCADE,
             FOREIGN KEY (playlist_id) REFERENCES playlists (id) ON DELETE CASCADE)`);

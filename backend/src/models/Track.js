@@ -4,30 +4,25 @@ const db = require('./db').conn();
 exports.newTracks = tracks => {
   if (!tracks) return;
   const sql = `INSERT OR IGNORE INTO tracks (
-               id, name, artist, album)
-               VALUES(?, ?, ?, ?)`;
+               id, name, artist, album_id, added_at)
+               VALUES(?, ?, ?, ?, ?)`;
   return new Promise((resolve, reject) => {
     db.serialize(() => {
       db.run('BEGIN TRANSACTION');
       tracks.forEach(t => {
-        const values = [t.id, t.name, t.artist, t.album];
+        const values = [t.id, t.name, t.artist, t.album_id, t.added_at];
         db.run(sql, values, err => {
-          if (err) { reject(err); }
+          if (err) reject(err);
         });
       });
-      db.run('COMMIT TRANSACTION', err => {
-        if (err) {
-          reject(err);
-        } else {
-          resolve('success');
-        }
-      });
+      db.run('COMMIT TRANSACTION', err => err ? reject(err) : resolve());
     });
   });
 };
 // List of all track objects (full)
 exports.getAll = async () => {
   const sql = "SELECT * FROM tracks";
+  const sqlAlbum = `SELECT * FROM albums WHERE id=?`;
   const sqlLabels = `SELECT tl.label_id FROM tracks_labels tl
                      LEFT JOIN tracks t ON t.id = tl.track_id
                      WHERE tl.track_id=?`;
@@ -43,10 +38,23 @@ exports.getAll = async () => {
       } else {
         const promise = new Promise((res, rej) => {
           db.serialize(() => {
+            db.get(sqlAlbum, row.album_id, (err, albumRow) => {
+              if (err) reject(err);
+              row.album = {
+                'name': albumRow.name,
+                'images': {
+                  'small': albumRow.small,
+                  'medium': albumRow.medium,
+                  'large': albumRow.large
+                }
+              };
+            });
             db.all(sqlPlaylists, row.id, (err, rows) => {
+              if (err) reject(err);
               row.playlist_ids = rows.map(row => row.playlist_id);
             });
             db.all(sqlLabels, row.id, (err, rows) => {
+              if (err) reject(err);
               row.label_ids = rows.map(row => row.label_id);
               tracks.push(row);
               res();
@@ -65,7 +73,7 @@ exports.getAll = async () => {
 // Add track-playlist relationships
 exports.addTracks = list => {
   if(!list) return;
-  const added_at = new Date;
+  const added_at = (new Date).toISOString();
   const sql = `INSERT OR IGNORE INTO tracks_playlists (
                track_id, playlist_id, added_at)
                VALUES(?, ?, ?)`;
@@ -117,6 +125,22 @@ exports.removeTracks = list => {
           resolve('Successfully removed tracks from playlists!');
         }
       })
+    });
+  });
+};
+
+// Change a single track's rating field
+exports.rateTrack = (id, rating) => {
+  const sql = "UPDATE tracks SET rating=? WHERE id=?";
+  return new Promise((resolve, reject) => {
+    db.run(sql, [rating, id], function(err) {
+      if (err) {
+        reject(err);
+      } else if (!this.changes) {
+        reject(`There is no track with id: ${id}.`);
+      } else {
+        resolve(`Successfully set rating for track id: ${id}!`);
+      }
     });
   });
 };

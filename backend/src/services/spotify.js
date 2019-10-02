@@ -3,6 +3,7 @@ const UserModel = require('../models/User');
 const PlaylistModel = require('../models/Playlist');
 const TrackModel = require('../models/Track');
 const LabelModel = require('../models/Label');
+const AlbumModel = require('../models/Album');
 
 // Request up to date playlist data from Spotify
 exports.refreshPlaylists = async () => {
@@ -38,12 +39,27 @@ exports.refreshPlaylists = async () => {
 // Get new Tracks from tracked playlists with changes
 exports.refreshTracks = async () => {
   try {
-    const playlistIds = await PlaylistModel.trackedWithChanges();
-    if (!playlistIds.length) { return 'No tracked playlists have changes.'; }
+    const playlists = await PlaylistModel.getAll();
+    const playlistIds = playlists
+      .filter(pl => pl.tracking && pl.changes)
+      .map(pl => pl.id);
+    if (!playlistIds.length) return 'No tracked playlists have changes.';
     const token = (await UserModel.getUser()).access_token;
     const playlistPromises = playlistIds.map(id => getPlaylistTracks(id, token));
     const playlistTracks = await Promise.all(playlistPromises);
 
+    // albums
+    const allAlbums = playlistTracks.reduce((map, pl) => {
+      pl.tracks.forEach(track => {
+        map[track.album_id] = map[track.album_id] || {
+          'id': track.album_id,
+          'name': track.album_name,
+          'images': track.album_images
+        };
+      });
+      return map;
+    }, {})
+    await AlbumModel.newAlbums(allAlbums);
     // tracks
     const allTracks = playlistTracks.reduce((arr, pl) => [...arr, ...pl.tracks], []);
     await TrackModel.newTracks(allTracks);
@@ -61,7 +77,7 @@ exports.refreshTracks = async () => {
         track_id: track.id,
         label_ids: [genreId]
       }));
-      return list
+      return list;
     });
     const tl = (await Promise.all(labelPromises)).flat(Infinity);
     await LabelModel.addLabels(tl);
@@ -70,7 +86,7 @@ exports.refreshTracks = async () => {
     playlistIds.forEach(id => PlaylistModel.setChanges(id, 0));
     return 'New Tracks Added!';
   } catch (err) {
-    console.log("Tracks refresh error: " + err)
+    console.log("Tracks refresh error: " + err);
     return Promise.reject(err);
   }
 };
@@ -199,8 +215,10 @@ const getPlaylistTracks = (id, token, nextUrl, allTracks = []) => {
           'id': obj.track.id,
           'name': obj.track.name,
           'artist': obj.track.artists[0].name,
-          'album': obj.track.album.name,
+          'album_id': obj.track.album.id,
           'added_at': obj.added_at,
+          'album_name': obj.track.album.name,
+          'album_images': obj.track.album.images
         };
         return [...arr, track];
       }, []);

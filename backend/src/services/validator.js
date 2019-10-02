@@ -47,6 +47,11 @@ const validate = method => {
         body('mood_playlist').optional().isBoolean()
       ]
     }
+    case 'rateTrack': {
+      return [
+        body('rating', 'Rating must be 0|1|2|3').isIn([0, 1, 2, 3])
+      ]
+    }
   } 
 };
 

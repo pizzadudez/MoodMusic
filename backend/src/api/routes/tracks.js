@@ -22,7 +22,7 @@ router.get('/check', async (req, res, next) => {
 // Add Tracks to Playlists
 router.post('/add', validator('addTracks'), async (req, res, next) => {
   const errors = validationResult(req);
-  if(!errors.isEmpty()) {
+  if (!errors.isEmpty()) {
     res.status(422).json({errors: errors.array()});
     return;
   }
@@ -38,7 +38,7 @@ router.post('/add', validator('addTracks'), async (req, res, next) => {
 // Remove Tracks from Playlists
 router.post('/remove', validator('addTracks'), async (req, res, next) => {
   const errors = validationResult(req);
-  if(!errors.isEmpty()) {
+  if (!errors.isEmpty()) {
     res.status(422).json({errors: errors.array()});
     return;
   }
@@ -49,6 +49,16 @@ router.post('/remove', validator('addTracks'), async (req, res, next) => {
   } catch (err) {
     res.send(err);
   }
+});
+// Modify a single track's rating
+router.patch('/rate/:id', validator('rateTrack'), async (req, res, next) => {
+  const errors = validationResult(req);
+  if (!errors.isEmpty()) {
+    res.status(422).json({errors: errors.array()});
+    return;
+  }
+  const message = await TrackModel.rateTrack(req.params.id, req.body.rating);
+  res.send(message);
 });
 
 module.exports = router;

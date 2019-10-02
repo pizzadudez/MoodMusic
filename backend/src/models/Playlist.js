@@ -112,23 +112,6 @@ exports.getAll = () => {
 exports.get = id => {
   return getRow(id);
 };
-// Get list of tracked playlist ids with changes
-exports.trackedWithChanges = () => {
-  return new Promise((resolve, reject) => {
-    const sql = "SELECT id FROM playlists WHERE changes=1 AND tracking=1";
-    db.all(sql, (err, rows) => {
-      if (err) {
-        reject(err);
-      } else {
-        const ids = rows.reduce((arr, row) => {
-          arr.push(row.id);
-          return arr;
-        }, [])
-        resolve(ids);
-      }
-    });
-  });
-};
 
 /* Helper functions */
 // Checks if a given label_id is of type 'genre'

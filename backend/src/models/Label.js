@@ -141,7 +141,7 @@ exports.getAll = () => {
 // List of {track_id: id, label_ids: [label_id,]}
 exports.addLabels = list => {
   if (!list || !list.length) return;
-  const added_at = new Date;
+  const added_at = (new Date).toISOString();
   const sql = `INSERT OR IGNORE INTO tracks_labels (
                track_id, label_id, added_at)
                VALUES(?, ?, ?)`;
