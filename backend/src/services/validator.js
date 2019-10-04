@@ -31,8 +31,8 @@ const validate = method => {
     case 'addTracks': {
       return [
         body('*.playlist_id').exists(),
-        body('*.track_ids').custom(list => isArray(list)),
-        body('*.track_ids.*').isAlphanumeric(),
+        body('*.tracks').custom(list => isArray(list)),
+        body('*.tracks.*').isAlphanumeric(),
       ];
     }
     case 'createPlaylist': {
@@ -50,6 +50,11 @@ const validate = method => {
     case 'rateTrack': {
       return [
         body('rating', 'Rating must be 0|1|2|3').isIn([0, 1, 2, 3])
+      ]
+    }
+    case 'reorderTracks': {
+      return [
+        body('tracks', '<tracks> must be an array of track ids').isArray()
       ]
     }
   } 

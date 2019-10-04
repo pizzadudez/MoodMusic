@@ -71,30 +71,44 @@ exports.getAll = async () => {
 };
 
 // Add track-playlist relationships
-exports.addTracks = playlistTracks => {
+exports.addTracks = async playlistTracks => {
   if(!playlistTracks) return;
   const sql = `INSERT OR IGNORE INTO tracks_playlists (
                track_id, playlist_id, added_at, position)
                VALUES(?, ?, ?, ?)`;
+  // Get last positions for playlists
+  let lastPositions = {};
+  const getLastPositions = playlistTracks.map(pl => {
+    return new Promise((resolve, reject) => {
+      const sql = `SELECT position FROM tracks_playlists
+                   WHERE playlist_id=?
+                   ORDER BY position DESC`;
+      db.get(sql, [pl.playlist_id], (err, row) => {
+        if (err) reject(err);
+        else if (row) lastPositions[pl.playlist_id] = row.position;
+        else lastPositions[pl.playlist_id] = 0;
+        resolve();
+      });
+    });
+  });
+
+  await Promise.all(getLastPositions);
   return new Promise((resolve, reject) => {
     db.serialize(() => {
       db.run("BEGIN TRANSACTION");
-      playlistTracks.forEach(async pl => {
-        // Get Last Track position
-        let lastPosition = await new Promise((resolve, reject) => {
-          const sql = `SELECT position FROM tracks_playlists
-                       WHERE playlist_id=?
-                       ORDER BY position DESC`;
-          db.get(sql, [pl.playlist_id], (err, row) => {
-            err ? resolve(0) : row ? resolve(row.position) : resolve(0);
-          });
-        });
-        // Add new Tracks
-        db.serialize(() => {
-          pl.tracks.forEach((track, idx) => {
-            const values = [track.id, pl.playlist_id, track.added_at, lastPosition+idx];
-            db.run(sql, values, err => reject(err));
-          });
+      playlistTracks.forEach(pl => {
+        pl.tracks.forEach((track, idx) => {
+          // TracksObj or just TrackIds
+          const track_id = typeof(track) === 'object' ? track.id : track;
+          const added_at = typeof(track) === 'object' 
+            ? track.added_at : (new Date).toISOString();
+          const values = [
+            track_id,
+            pl.playlist_id,
+            added_at,
+            lastPositions[pl.playlist_id] + idx + 1
+          ];
+          db.run(sql, values, err => { if (err) reject(err); });
         });
       });
       db.run("COMMIT TRANSACTION", err => {
@@ -115,7 +129,7 @@ exports.removeTracks = playlistTracks => {
       playlistTracks.forEach(pl => {
         pl.tracks.forEach(track => {
           // TracksObj or just TrackIds
-          const track_id = typeof(track) === 'Object' ? track.id : track;
+          const track_id = typeof(track) === 'object' ? track.id : track;
           const values = [track_id, pl.playlist_id];
           db.run(sql, values, err => {
             if (err) reject(err);
@@ -126,6 +140,24 @@ exports.removeTracks = playlistTracks => {
         const message = 'Successfully removed tracks from playlists!';
         err ? reject(err) : resolve(message);
       });
+    });
+  });
+};
+// Update Track positions in playlist
+exports.updatePositions = (id, tracks) => {
+  return new Promise((resolve, reject) => {
+    const sql = `UPDATE tracks_playlists SET position=?
+                 WHERE track_id=? AND playlist_id=?`;
+    db.serialize(() => {
+      db.run("BEGIN TRANSACTION");
+      tracks.forEach((track, idx) => {
+        db.run(sql, [idx, track, id], err => {
+          if (err) reject(err);
+        });
+      });
+      db.run("COMMIT TRANSACTION", err => {
+        err ? reject(err) : resolve();
+      })
     });
   });
 };
@@ -145,11 +177,3 @@ exports.rateTrack = (id, rating) => {
     });
   });
 };
-
-// Track positions map for a specific playlist id
-// exports.TrackPositions = playlistId => {
-//   const sql = `SELECT track_id, position FROM tracks_playlists
-//                WHERE playlist_id=?
-//                ORDER BY position, added_at`;
-//   return new Promise((resolve, reject) => {});
-// };

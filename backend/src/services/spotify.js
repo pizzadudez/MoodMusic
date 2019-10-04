@@ -64,10 +64,6 @@ exports.refreshTracks = async () => {
     const allTracks = playlistTracks.reduce((arr, pl) => [...arr, ...pl.tracks], []);
     await TrackModel.newTracks(allTracks);
     // tracks-playlists relationships
-    // const tp = playlistTracks.map(pl => ({
-    //   playlist_id: pl.playlist_id,
-    //   track_ids: pl.tracks.map(t => t.id)
-    // }));
     await TrackModel.addTracks(playlistTracks);
     // tracks-labels relationships
     const labelPromises = playlistTracks.map(async pl => {
@@ -150,18 +146,25 @@ exports.addTracks = async playlistsTracks => {
   try {
     const token = (await UserModel.userData()).access_token;
     const requests = playlistsTracks.map(pl => {
-      return new Promise((resolve, reject) => {
-        const uris = pl.track_ids.map(id => "spotify:track:" + id);
-        const options = {
-          url: 'https://api.spotify.com/v1/playlists/' + pl.playlist_id + '/tracks',
-          headers: { 'Authorization' : 'Bearer ' + token },
-          body: { 'uris': uris },
-          json: true,
-        };
-        request.post(options, (err, res, body) => {
-          const error = err || res.statusCode >= 400 ? body : null;
-          error ? reject(error) : resolve();
-        });
+      return new Promise(async (resolve, reject) => {
+        let uris = pl.tracks.map(id => "spotify:track:" + id);
+        // Up to 100 tracks in one request
+        while (uris.length) {
+          const uriSegment = uris.splice(0, 100);
+          const options = {
+            url: 'https://api.spotify.com/v1/playlists/' + pl.playlist_id + '/tracks',
+            headers: { 'Authorization' : 'Bearer ' + token },
+            body: { 'uris': uriSegment },
+            json: true,
+          };
+          await new Promise((resolve, reject) => {
+            request.post(options, (err, res, body) => {
+              const error = err || res.statusCode >= 400 ? body : null;
+              error ? reject(error) : resolve();
+            });
+          }).catch(err => reject(err));
+        }
+        resolve();
       });
     });
     await Promise.all(requests);
@@ -176,17 +179,21 @@ exports.removeTracks = async playlistsTracks => {
     const token = (await UserModel.userData()).access_token;
     const requests = playlistsTracks.map(pl => {
       return new Promise((resolve, reject) => {
-        const uris = pl.track_ids.map(id => "spotify:track:" + id);
-        const options = {
-          url: 'https://api.spotify.com/v1/playlists/' + pl.playlist_id + '/tracks',
-          headers: { 'Authorization' : 'Bearer ' + token },
-          body: { 'uris': uris },
-          json: true,
-        };
-        request.delete(options, (err, res, body) => {
-          const error = err || res.statusCode >= 400 ? body : null;
-          error ? reject(error) : resolve();
-        });
+        const uris = pl.tracks.map(id => "spotify:track:" + id);
+        // Up to 100 tracks in one request
+        while (uris.length) {
+          const uriSegment = uris.splice(0, 100);
+          const options = {
+            url: 'https://api.spotify.com/v1/playlists/' + pl.playlist_id + '/tracks',
+            headers: { 'Authorization' : 'Bearer ' + token },
+            body: { 'uris': uriSegment },
+            json: true,
+          };
+          request.delete(options, (err, res, body) => {
+            const error = err || res.statusCode >= 400 ? body : null;
+            error ? reject(error) : resolve();
+          });
+        }
       });
     });
     await Promise.all(requests);
@@ -196,15 +203,51 @@ exports.removeTracks = async playlistsTracks => {
   }
 };
 // Update Playlist Track positions
-// exports.updateTrackPositions = async id => {
-//   const token = (await UserModel.userData()).access_token;
-//   const tracks = await getPlaylistTracks(id, token);
-//   return tracks;
-// };
+exports.updatePositions = async (id, tracks) => {
+  try {
+    const token = (await UserModel.userData()).access_token;
+    const currTrackList = await getPlaylistTracks(id, token, true);
+    if (currTrackList.tracks.length != tracks.length) {
+      throw new Error('Malformed tracklist. Unequal lengths');
+    }
+    const hashMap = currTrackList.tracks.reduce((map, trackObj) => {
+      map[trackObj.id] = true;
+      return map;
+    }, {});
+    tracks.forEach(track => {
+      if (!hashMap[track]) throw new Error('Malformed tracklist. Id mismatch');
+    });
+
+    // Validation done, request complete replacement of tracks
+    await new Promise(async (resolve, reject) => {
+      let uris = tracks.map(track => "spotify:track:" + track);
+      // 100 tracks limit per request
+      while (uris.length) {
+        const uriSegment = uris.splice(0, 100);
+        const options = {
+          url: 'https://api.spotify.com/v1/playlists/' + id + '/tracks',
+          headers: { 'Authorization': 'Bearer ' + token },
+          body: { 'uris': uriSegment },
+          json: true,
+        }
+        await new Promise((resolve, reject) => {
+          request.put(options, (err, res, body) => {
+            const error = err || res.statusCode >= 400 ? body : null;
+            error ? reject(error) : resolve();
+          });
+        }).catch(err => reject(err));
+      }
+      resolve();
+    });
+  } catch(err) {
+    console.log(err);
+    return Promise.reject(err);
+  }
+};
 
 /* Helper functions */
 // Get all new Tracks from a playlist
-const getPlaylistTracks = (id, token, nextUrl, allTracks = []) => {
+const getPlaylistTracks = (id, token, simple=false, nextUrl, allTracks=[]) => {
   const filters = '?fields=next,items(track(id,name,artists,album),added_at)';
   const options = {
     url: nextUrl 
@@ -219,12 +262,12 @@ const getPlaylistTracks = (id, token, nextUrl, allTracks = []) => {
       if (error) reject(err);
       const tracks = body.items.map(obj => ({
         'id': obj.track.id,
-        'name': obj.track.name,
-        'artist': obj.track.artists[0].name,
-        'album_id': obj.track.album.id,
-        'added_at': obj.added_at,
-        'album_name': obj.track.album.name,
-        'album_images': obj.track.album.images
+        ... !simple && { 'name': obj.track.name },
+        ... !simple && { 'artist': obj.track.artists[0].name },
+        ... !simple && { 'album_id': obj.track.album.id },
+        ... !simple && { 'added_at': obj.added_at },
+        ... !simple && { 'album_name': obj.track.album.name },
+        ... !simple && { 'album_images': obj.track.album.images }
       }));
       allTracks = [...allTracks, ...tracks];
       body.next
@@ -236,3 +279,4 @@ const getPlaylistTracks = (id, token, nextUrl, allTracks = []) => {
     });
   });
 };
+//

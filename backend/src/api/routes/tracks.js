@@ -29,6 +29,7 @@ router.post('/add', validator('addTracks'), async (req, res, next) => {
   try {
     await SpotifyService.removeTracks(req.body);
     await SpotifyService.addTracks(req.body);
+    await TrackModel.removeTracks(req.body);
     await TrackModel.addTracks(req.body);
     res.send('Tracks added to their coresponding playlists.')
   } catch (err) {

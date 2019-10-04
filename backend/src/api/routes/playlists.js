@@ -2,6 +2,7 @@ const router = require('express').Router();
 const { validationResult } = require('express-validator');
 const validator = require('../../services/validator');
 const PlaylistModel = require('../../models/Playlist');
+const TrackModel = require('../../models/Track');
 const SpotifyService = require('../../services/spotify');
 const PlaylistService = require('../../services/playlists');
 
@@ -43,10 +44,20 @@ router.patch('/:id', validator('modifyPlaylist'), async (req, res, next) => {
   res.send(message);
 });
 
-
-router.get('/test', async (req, res, next) => {
-  const tracks = await SpotifyService.updateTrackPositions('7ktWFgWibSEUMVjxQ4GPHH');
-  res.send(tracks);
+router.post('/:id/reorder', validator('reorderTracks'), async (req, res, next) => {
+  const errors = validationResult(req);
+  if (!errors.isEmpty()) {
+    res.status(422).json({errors: errors.array()});
+    return;
+  }
+  try {
+    await SpotifyService.updatePositions(req.params.id, req.body.tracks);
+    // already validated in SpotifyService
+    await TrackModel.updatePositions(req.params.id, req.body.tracks);
+    res.send('Success!');
+  } catch(err) {
+    res.send(err.message);
+  }
 });
 
 module.exports = router;
