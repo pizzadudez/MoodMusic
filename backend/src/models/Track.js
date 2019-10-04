@@ -71,60 +71,61 @@ exports.getAll = async () => {
 };
 
 // Add track-playlist relationships
-exports.addTracks = list => {
-  if(!list) return;
-  const added_at = (new Date).toISOString();
+exports.addTracks = playlistTracks => {
+  if(!playlistTracks) return;
   const sql = `INSERT OR IGNORE INTO tracks_playlists (
-               track_id, playlist_id, added_at)
-               VALUES(?, ?, ?)`;
+               track_id, playlist_id, added_at, position)
+               VALUES(?, ?, ?, ?)`;
   return new Promise((resolve, reject) => {
     db.serialize(() => {
       db.run("BEGIN TRANSACTION");
-      list.forEach(el => {
-        const playlist_id = el.playlist_id;
-        el.track_ids.forEach(track => {
-          // Accept both track_ids and trackObj
-          const track_id = typeof(track) === 'Object' ? track.id : track;
-          const values = [track_id, playlist_id, added_at];
-          db.run(sql, values, err => {
-            if (err) { reject(err); }
+      playlistTracks.forEach(async pl => {
+        // Get Last Track position
+        let lastPosition = await new Promise((resolve, reject) => {
+          const sql = `SELECT position FROM tracks_playlists
+                       WHERE playlist_id=?
+                       ORDER BY position DESC`;
+          db.get(sql, [pl.playlist_id], (err, row) => {
+            err ? resolve(0) : row ? resolve(row.position) : resolve(0);
           });
         });
-      })
+        // Add new Tracks
+        db.serialize(() => {
+          pl.tracks.forEach((track, idx) => {
+            const values = [track.id, pl.playlist_id, track.added_at, lastPosition+idx];
+            db.run(sql, values, err => reject(err));
+          });
+        });
+      });
       db.run("COMMIT TRANSACTION", err => {
-        if (err) {
-          reject(err);
-        } else {
-          resolve('Successfully added tracks to playlists!');
-        }
-      })
+        const message = 'Successfully added tracks to playlists!';
+        err ? reject(err) : resolve(message);
+      });
     });
   });
 };
 // Remove track-playlist relationships
-exports.removeTracks = list => {
-  if(!list) return;
+exports.removeTracks = playlistTracks => {
+  if(!playlistTracks) return;
   const sql = `DELETE FROM tracks_playlists WHERE
                track_id=? AND playlist_id=?`;
   return new Promise((resolve, reject) => {
     db.serialize(() => {
       db.run("BEGIN TRANSACTION");
-      list.forEach(el => {
-        const playlist_id = el.playlist_id;
-        el.track_ids.forEach(track_id => {
-          const values = [track_id, playlist_id];
+      playlistTracks.forEach(pl => {
+        pl.tracks.forEach(track => {
+          // TracksObj or just TrackIds
+          const track_id = typeof(track) === 'Object' ? track.id : track;
+          const values = [track_id, pl.playlist_id];
           db.run(sql, values, err => {
-            if (err) { reject(err); }
+            if (err) reject(err);
           });
         });
-      })
+      });
       db.run("COMMIT TRANSACTION", err => {
-        if (err) {
-          reject(err);
-        } else {
-          resolve('Successfully removed tracks from playlists!');
-        }
-      })
+        const message = 'Successfully removed tracks from playlists!';
+        err ? reject(err) : resolve(message);
+      });
     });
   });
 };
@@ -144,3 +145,11 @@ exports.rateTrack = (id, rating) => {
     });
   });
 };
+
+// Track positions map for a specific playlist id
+// exports.TrackPositions = playlistId => {
+//   const sql = `SELECT track_id, position FROM tracks_playlists
+//                WHERE playlist_id=?
+//                ORDER BY position, added_at`;
+//   return new Promise((resolve, reject) => {});
+// };

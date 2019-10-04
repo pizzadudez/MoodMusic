@@ -16,14 +16,5 @@ router.get('/callback', async (req, res, next) => {
     res.send(err);
   }
 });
-// Refresh token
-router.get('/refresh_token', async (req, res, next) => {
-  try {
-    await AuthService.refreshToken();
-    res.redirect('/');
-  } catch (err) {
-    res.send(err);
-  }
-});
 
 module.exports = router;

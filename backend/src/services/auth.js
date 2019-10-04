@@ -46,15 +46,39 @@ exports.requestTokens = code => {
     });
   });
 };
+// Request userId and register
+exports.registerUser = async tokensObj => {
+  try {
+    const userId = await new Promise((resolve, reject) => {
+      const options = {
+        url: 'https://api.spotify.com/v1/me',
+        headers: { 'Authorization': 'Bearer ' + tokensObj.accessToken },
+        json: true,
+      };
+      request.get(options, (err, res, body) => {
+        const error = err || res.statusCode >= 400 ? body : null;
+        error ? reject(error) : resolve(body.id);
+      });
+    });
+    const message = await UserModel.createUser(
+      userId, 
+      tokensObj.accessToken, 
+      tokensObj.refreshToken
+    );
+    console.log(message);
+  } catch (err) {
+    console.log(err);
+  };
+};
 // Refresh accessToken
 exports.refreshToken = async () => {
   try {
-    const refreshToken = (await UserModel.getUser()).refresh_token;
+    const userData = await UserModel.userData();
     const authOptions = {
       url: 'https://accounts.spotify.com/api/token',
       form: {
         grant_type: 'refresh_token',
-        refresh_token: refreshToken,
+        refresh_token: userData.refresh_token,
       },
       headers: { 
         'Authorization': 'Basic ' + 
@@ -65,39 +89,14 @@ exports.refreshToken = async () => {
     };
     const res = await new Promise((resolve, reject) => {
       request.post(authOptions, (err, res, body) => {
-        if (err) {
-          reject(err);
-        } else {
-          resolve(body);
-        }
+        const error = err || res.statusCode >= 400 ? body : null;
+        error ? reject(error) : resolve(body);
       });
     });
-    const message = await UserModel.updateToken(res.access_token, res.expires_in);
+    const message = await UserModel.updateToken(res.access_token);
     console.log(message);
+    setTimeout(exports.refreshToken, (res.expires_in - 1) * 1000);
   } catch (err) {
     console.log(err);
   }
-};
-// Request userId and register
-exports.registerUser = async tokensObj => {
-  try {
-    const userId = await new Promise((resolve, reject) => {
-      const options = {
-        url: 'https://api.spotify.com/v1/me',
-        headers: { 'Authorization': 'Bearer ' + tokensObj.accessToken },
-        json: true,
-      };
-      request.get(options, (err, res, body) => 
-        err ? reject(err) : resolve(body.id)
-      );
-    });
-    const message = await UserModel.createUser(userId, 
-      tokensObj.accessToken, 
-      tokensObj.refreshToken,
-      tokensObj.expiresIn
-    );
-    console.log(message);
-  } catch (err) {
-    console.log(err);
-  };
 };

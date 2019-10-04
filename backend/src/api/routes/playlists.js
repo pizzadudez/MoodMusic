@@ -19,7 +19,7 @@ router.get('/check', async (req, res, next) => {
 router.post('/', validator('createPlaylist'), async (req, res, next) => {
   // validate request
   const errors = validationResult(req);
-  if(!errors.isEmpty()) {
+  if (!errors.isEmpty()) {
     res.status(422).json({errors: errors.array()});
     return;
   }
@@ -35,12 +35,18 @@ router.delete('/:id', async (req, res, next) => {
 router.patch('/:id', validator('modifyPlaylist'), async (req, res, next) => {
   // validate request
   const errors = validationResult(req);
-  if(!errors.isEmpty()) {
+  if (!errors.isEmpty()) {
     res.status(422).json({errors: errors.array()});
     return;
   }
   const message = await PlaylistModel.modify(req.params.id, req.body)
   res.send(message);
+});
+
+
+router.get('/test', async (req, res, next) => {
+  const tracks = await SpotifyService.updateTrackPositions('7ktWFgWibSEUMVjxQ4GPHH');
+  res.send(tracks);
 });
 
 module.exports = router;

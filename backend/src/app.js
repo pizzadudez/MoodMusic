@@ -3,6 +3,7 @@ const path = require('path');
 
 const db = require('./models/db');
 const config = require('./config');
+const AuthServices = require('./services/auth');
 const AuthRouter = require('./auth');
 const ApiRouter = require('./api');
 
@@ -14,8 +15,9 @@ app.use(express.static(path.join(__dirname, '../public')));
 app.use('/auth', AuthRouter);
 app.use('/api', ApiRouter);
 
-// Init database
-db.init();
+// Initialization and recurring tasks
+db.init(); // Create database and tables
+AuthServices.refreshToken(); // Refresh Access Token
 
 const port = config.port || 1000;
 app.listen(port, () => {

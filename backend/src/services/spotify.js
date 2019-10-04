@@ -8,7 +8,7 @@ const AlbumModel = require('../models/Album');
 // Request up to date playlist data from Spotify
 exports.refreshPlaylists = async () => {
   try {
-    const userData = await UserModel.getUser();
+    const userData = await UserModel.userData();
     const options = {
       url: 'https://api.spotify.com/v1/users/' + userData.user_id + '/playlists',
       headers: { 'Authorization': 'Bearer ' + userData.access_token },
@@ -44,7 +44,7 @@ exports.refreshTracks = async () => {
       .filter(pl => pl.tracking && pl.changes)
       .map(pl => pl.id);
     if (!playlistIds.length) return 'No tracked playlists have changes.';
-    const token = (await UserModel.getUser()).access_token;
+    const token = (await UserModel.userData()).access_token;
     const playlistPromises = playlistIds.map(id => getPlaylistTracks(id, token));
     const playlistTracks = await Promise.all(playlistPromises);
 
@@ -64,11 +64,11 @@ exports.refreshTracks = async () => {
     const allTracks = playlistTracks.reduce((arr, pl) => [...arr, ...pl.tracks], []);
     await TrackModel.newTracks(allTracks);
     // tracks-playlists relationships
-    const tp = playlistTracks.map(pl => ({
-      playlist_id: pl.playlist_id,
-      track_ids: pl.tracks.map(t => t.id)
-    }));
-    await TrackModel.addTracks(tp);
+    // const tp = playlistTracks.map(pl => ({
+    //   playlist_id: pl.playlist_id,
+    //   track_ids: pl.tracks.map(t => t.id)
+    // }));
+    await TrackModel.addTracks(playlistTracks);
     // tracks-labels relationships
     const labelPromises = playlistTracks.map(async pl => {
       const genreId = (await PlaylistModel.get(pl.playlist_id)).genre_id;
@@ -94,7 +94,7 @@ exports.refreshTracks = async () => {
 // Create Playlist
 exports.createPlaylist = async name => {
   try {
-    const userData = await UserModel.getUser();
+    const userData = await UserModel.userData();
     const options = {
       url: 'https://api.spotify.com/v1/users/' + userData.user_id + '/playlists',
       headers: { 'Authorization' : 'Bearer ' + userData.access_token },
@@ -125,7 +125,7 @@ exports.createPlaylist = async name => {
 // 'Delete' playlist
 exports.deletePlaylist = async id => {
   try {
-    const userData = await UserModel.getUser();
+    const userData = await UserModel.userData();
     const options = {
       url: 'https://api.spotify.com/v1/playlists/' + id + '/followers',
       headers: { 'Authorization' : 'Bearer ' + userData.access_token },
@@ -148,7 +148,7 @@ exports.deletePlaylist = async id => {
 // Add Tracks to Spotify playlist
 exports.addTracks = async playlistsTracks => {
   try {
-    const token = (await UserModel.getUser()).access_token;
+    const token = (await UserModel.userData()).access_token;
     const requests = playlistsTracks.map(pl => {
       return new Promise((resolve, reject) => {
         const uris = pl.track_ids.map(id => "spotify:track:" + id);
@@ -173,7 +173,7 @@ exports.addTracks = async playlistsTracks => {
 // Remove Tracks from Spotify Playlist
 exports.removeTracks = async playlistsTracks => {
   try {
-    const token = (await UserModel.getUser()).access_token;
+    const token = (await UserModel.userData()).access_token;
     const requests = playlistsTracks.map(pl => {
       return new Promise((resolve, reject) => {
         const uris = pl.track_ids.map(id => "spotify:track:" + id);
@@ -195,6 +195,12 @@ exports.removeTracks = async playlistsTracks => {
     return Promise.reject(err);
   }
 };
+// Update Playlist Track positions
+// exports.updateTrackPositions = async id => {
+//   const token = (await UserModel.userData()).access_token;
+//   const tracks = await getPlaylistTracks(id, token);
+//   return tracks;
+// };
 
 /* Helper functions */
 // Get all new Tracks from a playlist
@@ -209,19 +215,17 @@ const getPlaylistTracks = (id, token, nextUrl, allTracks = []) => {
   };
   return new Promise((resolve, reject) => {
     request.get(options, async (err, res, body) => {
-      if (err) { reject (err); }
-      const tracks = body.items.reduce((arr, obj) => {
-        const track = {
-          'id': obj.track.id,
-          'name': obj.track.name,
-          'artist': obj.track.artists[0].name,
-          'album_id': obj.track.album.id,
-          'added_at': obj.added_at,
-          'album_name': obj.track.album.name,
-          'album_images': obj.track.album.images
-        };
-        return [...arr, track];
-      }, []);
+      const error = err || res.statusCode >= 400 ? body : null;
+      if (error) reject(err);
+      const tracks = body.items.map(obj => ({
+        'id': obj.track.id,
+        'name': obj.track.name,
+        'artist': obj.track.artists[0].name,
+        'album_id': obj.track.album.id,
+        'added_at': obj.added_at,
+        'album_name': obj.track.album.name,
+        'album_images': obj.track.album.images
+      }));
       allTracks = [...allTracks, ...tracks];
       body.next
         ? resolve(getPlaylistTracks(id, token, body.next, allTracks))

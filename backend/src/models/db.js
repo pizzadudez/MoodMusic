@@ -1,25 +1,18 @@
 const sqlite3 = require('sqlite3').verbose();
 
 const db = new sqlite3.Database('./db.sqlite3', err => {
-  if (err) {
-    console.log(err);
-  } else {
-    console.log('Database connection established');
-  }
+  err ? console.log(err) : console.log('Database connected');
 });
 // Import this into models
-exports.conn = () => {
-  return db; 
-};
+exports.conn = () => { return db; } 
 // Init database on server start
 exports.init = () => {
   db.serialize(() => {
-    db.get('PRAGMA foreign_keys = ON');
+    db.run('PRAGMA foreign_keys = ON');
     db.run(`CREATE TABLE IF NOT EXISTS users (
             user_id TEXT UNIQUE,
             access_token TEXT,
-            refresh_token TEXT,
-            expires INTEGER)`);
+            refresh_token TEXT)`);
     db.run(`CREATE TABLE IF NOT EXISTS playlists (
             id TEXT NOT NULL PRIMARY KEY,
             name TEXT,

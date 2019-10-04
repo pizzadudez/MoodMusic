@@ -24,7 +24,7 @@ router.post('/labels', validator('createLabel'), async (req, res, next) => {
 // Add Labels to Tracks
 router.post('/labels/add', validator('addLabels'), async (req, res, next) => {
   const errors = validationResult(req);
-  if(!errors.isEmpty()) {
+  if (!errors.isEmpty()) {
     res.status(422).json({errors: errors.array()});
     return;
   }
@@ -38,7 +38,7 @@ router.post('/labels/add', validator('addLabels'), async (req, res, next) => {
 // Remove Labels from Tracks
 router.post('/labels/remove', validator('addLabels'), async (req, res, next) => {
   const errors = validationResult(req);
-  if(!errors.isEmpty()) {
+  if (!errors.isEmpty()) {
     res.status(422).json({errors: errors.array()});
     return;
   }
