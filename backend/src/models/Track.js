@@ -69,6 +69,18 @@ exports.getAll = async () => {
     });
   });
 };
+// List of Playlist's track ids
+exports.getPlaylistTracks = id => {
+  const sql = `SELECT track_id FROM tracks_playlists
+               WHERE playlist_id=?`;
+  return new Promise((resolve, reject) => {
+    db.all(sql, [id], (err, rows) => {
+      if (err) reject(Error(err));
+      const list = rows.map(track => track.track_id);
+      resolve(list);
+    });
+  });
+};
 
 // Add track-playlist relationships
 exports.addTracks = async playlistTracks => {

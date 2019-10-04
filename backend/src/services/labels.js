@@ -1,4 +1,5 @@
 const LabelModel = require('../models/Label');
+const TrackModel = require('../models/Track');
 
 // Label map 
 exports.map = async () => {
@@ -13,4 +14,13 @@ exports.map = async () => {
     console.log(err);
     return err;
   }
+};
+//
+exports.playlistGenre = async (id, genreId) => {
+  const tracks = await TrackModel.getPlaylistTracks(id);
+  const tracksLabels = tracks.map(track => ({
+    track_id: track,
+    label_ids: [genreId]
+  }));
+  await LabelModel.addLabels(tracksLabels);
 };

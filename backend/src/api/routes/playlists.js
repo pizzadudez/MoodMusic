@@ -5,6 +5,7 @@ const PlaylistModel = require('../../models/Playlist');
 const TrackModel = require('../../models/Track');
 const SpotifyService = require('../../services/spotify');
 const PlaylistService = require('../../services/playlists');
+const LabelService = require('../../services/labels');
 
 // Get all playlists as a map
 router.get('/', async (req, res, next) => {
@@ -40,7 +41,11 @@ router.patch('/:id', validator('modifyPlaylist'), async (req, res, next) => {
     res.status(422).json({errors: errors.array()});
     return;
   }
-  const message = await PlaylistModel.modify(req.params.id, req.body)
+  const message = await PlaylistModel.modify(req.params.id, req.body);
+  // Modifying the playlist above will validate the genre_id
+  if (req.body.genre_id) {
+    await LabelService.playlistGenre(req.params.id, req.body.genre_id);
+  }
   res.send(message);
 });
 

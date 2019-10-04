@@ -9,26 +9,7 @@ const AlbumModel = require('../models/Album');
 exports.refreshPlaylists = async () => {
   try {
     const userData = await UserModel.userData();
-    const options = {
-      url: 'https://api.spotify.com/v1/users/' + userData.user_id + '/playlists',
-      headers: { 'Authorization': 'Bearer ' + userData.access_token },
-      json: true,
-    };
-    const playlists = await new Promise((resolve, reject) => {
-      request.get(options, (err, res, body) => {
-        const error = err || res.statusCode >= 400 ? body : null;
-        if (error) {
-          reject(error);
-        } else {
-          const response = body.items.map(pl => ({
-            'name': pl.name,
-            'id': pl.id,
-            'snapshot_id': pl.snapshot_id
-          }));
-          resolve(response);
-        }
-      });
-    });
+    const playlists = await getPlaylists(userData.user_id, userData.access_token);
     await PlaylistModel.update(playlists);
     return 'Tracked Playlists checked';
   } catch (err) {
@@ -249,9 +230,10 @@ exports.updatePositions = async (id, tracks) => {
 // Get all new Tracks from a playlist
 const getPlaylistTracks = (id, token, simple=false, nextUrl, allTracks=[]) => {
   const filters = '?fields=next,items(track(id,name,artists,album),added_at)';
+  console.log(nextUrl)
   const options = {
     url: nextUrl 
-      ? nextUrl 
+      ? nextUrl + filters
       : 'https://api.spotify.com/v1/playlists/' + id + '/tracks' + filters,
     headers: { 'Authorization': 'Bearer ' + token },
     json: true,
@@ -259,7 +241,11 @@ const getPlaylistTracks = (id, token, simple=false, nextUrl, allTracks=[]) => {
   return new Promise((resolve, reject) => {
     request.get(options, async (err, res, body) => {
       const error = err || res.statusCode >= 400 ? body : null;
-      if (error) reject(err);
+      if (error) {
+        console.log(res.statusCode);
+        //console.log(body);
+        reject(error);
+      }
       const tracks = body.items.map(obj => ({
         'id': obj.track.id,
         ... !simple && { 'name': obj.track.name },
@@ -271,7 +257,7 @@ const getPlaylistTracks = (id, token, simple=false, nextUrl, allTracks=[]) => {
       }));
       allTracks = [...allTracks, ...tracks];
       body.next
-        ? resolve(getPlaylistTracks(id, token, body.next, allTracks))
+        ? resolve(getPlaylistTracks(id, token, simple, body.next, allTracks))
         : resolve({
           playlist_id: id,
           tracks: allTracks
@@ -279,4 +265,28 @@ const getPlaylistTracks = (id, token, simple=false, nextUrl, allTracks=[]) => {
     });
   });
 };
-//
+// Get all playlists
+const getPlaylists = (userId, token, nextUrl, allPlaylists=[]) => {
+  const options = {
+    url : nextUrl 
+      ? nextUrl
+      : 'https://api.spotify.com/v1/users/' + userId + '/playlists?limit=50',
+    headers: { 'Authorization': 'Bearer ' + token },
+    json: true
+  };
+  return new Promise((resolve, reject) => {
+    request.get(options, (err, res, body) => {
+      const error = err || res.statusCode >= 400 ? body : null;
+      if (error) reject(Error(err));
+      const playlists = body.items.map(obj => ({
+        'name': obj.name,
+        'id': obj.id,
+        'snapshot_id': obj.snapshot_id
+      }));
+      allPlaylists = [...allPlaylists, ...playlists];
+      body.next
+        ? resolve(getPlaylists(userId, token, body.next, allPlaylists))
+        : resolve(allPlaylists);
+    });
+  });
+};
