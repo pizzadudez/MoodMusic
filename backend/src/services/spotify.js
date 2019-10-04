@@ -22,7 +22,7 @@ exports.refreshTracks = async () => {
   try {
     const playlists = await PlaylistModel.getAll();
     const playlistIds = playlists
-      .filter(pl => pl.tracking && pl.changes)
+      .filter(pl => pl.tracking && !pl.changes && !pl.mood_playlist)
       .map(pl => pl.id);
     if (!playlistIds.length) return 'No tracked playlists have changes.';
     const token = (await UserModel.userData()).access_token;
@@ -230,7 +230,6 @@ exports.updatePositions = async (id, tracks) => {
 // Get all new Tracks from a playlist
 const getPlaylistTracks = (id, token, simple=false, nextUrl, allTracks=[]) => {
   const filters = '?fields=next,items(track(id,name,artists,album),added_at)';
-  console.log(nextUrl)
   const options = {
     url: nextUrl 
       ? nextUrl + filters
@@ -241,11 +240,7 @@ const getPlaylistTracks = (id, token, simple=false, nextUrl, allTracks=[]) => {
   return new Promise((resolve, reject) => {
     request.get(options, async (err, res, body) => {
       const error = err || res.statusCode >= 400 ? body : null;
-      if (error) {
-        console.log(res.statusCode);
-        //console.log(body);
-        reject(error);
-      }
+      if (error) reject(error);
       const tracks = body.items.map(obj => ({
         'id': obj.track.id,
         ... !simple && { 'name': obj.track.name },
