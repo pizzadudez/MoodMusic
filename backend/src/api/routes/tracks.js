@@ -9,7 +9,7 @@ router.get('/', async (req, res, next) => {
   const message = await TrackModel.getAll();
   res.send(message);
 });
-// Fetch new tracks or playlist tracks relations
+// Add new tracks or playlist tracks relations
 router.get('/check', async (req, res, next) => {
   try {
     await SpotifyService.refreshPlaylists();

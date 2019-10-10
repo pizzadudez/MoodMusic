@@ -1,0 +1,3 @@
+export const FETCH_TRACKS = 'FETCH_TRACKS';
+export const FETCH_PLAYLISTS = 'FETCH_PLAYLISTS';
+export const FETCH_LABELS = 'FETCH_LABELS';

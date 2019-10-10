@@ -126,7 +126,7 @@ exports.get = id => {
 // Get all label separated by type
 exports.getAll = () => {
   return new Promise((resolve, reject) => {
-    const sql = `SELECT * FROM labels`;
+    const sql = `SELECT * FROM labels ORDER BY id`;
     db.all(sql, (err, rows) => {
       if (err) {
         reject(err);

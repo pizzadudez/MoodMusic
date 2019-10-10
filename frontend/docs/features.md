@@ -1,0 +1,15 @@
+- [ ] Authorize app
+- [ ] Get Playlists
+- [ ] Playlists view
+  - modify playlist settings
+  - create/delete pl
+- [ ] Labels view
+  - create/delete/update
+- [ ] Tracks view
+  - add/remove labels
+  - change rating
+  - add/remove from playlists
+- [ ] Filtering Component
+  - filter by: tags/artist/album/ name
+- [ ] Playlist Tracks view
+  - used for sorting tracks in a playlist

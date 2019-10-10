@@ -5,10 +5,12 @@ const LabelModel = require('../../models/Label');
 const LabelsService = require('../../services/labels');
 
 
-// Get all labels separated by type
+// Get all labels as a map
 router.get('/labels', async (req, res, next) => {
-  const map = await LabelsService.map()
-  res.send(map);
+  // const map = await LabelsService.map();
+  // res.send(map);
+  const array = await LabelModel.getAll();
+  res.send(array);
 });
 // Create new label
 router.post('/labels', validator('createLabel'), async (req, res, next) => {
