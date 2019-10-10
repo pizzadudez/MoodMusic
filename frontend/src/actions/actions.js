@@ -22,9 +22,14 @@ export const fetchData = () => dispatch => {
   }).catch(err => console.log(err));
 
   axios.get('/api/labels').then(labels => {
+    const labelMap = labels.data.reduce((obj, label) => {
+      return { ...obj, [label.id]: label};
+    }, {});
+    const labelIds = labels.data.map(label => label.id);
     dispatch({
       type: FETCH_LABELS,
-      payload: labels.data,
+      ids: labelIds,
+      map: labelMap,
     });
   }).catch(err => console.log(err));
 };

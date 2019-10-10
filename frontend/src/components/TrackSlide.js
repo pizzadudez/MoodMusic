@@ -2,6 +2,9 @@ import React, { Component } from 'react';
 import { connect } from 'react-redux';
 import styled from 'styled-components';
 
+import Label from './Label';
+import PlaylistLabel from './PlaylistLabel';
+
 class TrackSlide extends Component {
   render() {
     return (
@@ -10,13 +13,24 @@ class TrackSlide extends Component {
         <Section>{this.props.track.artist}</Section>
         <Section>{this.props.track.album.name}</Section>
         <Section>{this.props.track.rating}</Section>
-        <Section>
-          {this.props.track.playlist_ids.map(id => (
-            <Playlist>
-              {this.props.playlists[id] ? this.props.playlists[id].name : ""}
-            </Playlist>
-          ))}
-        </Section>
+        <LabelsSection>
+          {this.props.labelIds.length ?
+            this.props.track.label_ids.map(id => (
+              <Label 
+                label={this.props.labelMap[id]}
+              />
+            ))
+            : null
+          }
+          {this.props.playlists[this.props.track.playlist_ids[0]] ?
+            this.props.track.playlist_ids.map(id => (
+              <PlaylistLabel 
+                playlist={this.props.playlists[id]}
+              />
+            ))
+            : null
+          }
+        </LabelsSection>
       </Container>
     );
   }
@@ -24,6 +38,8 @@ class TrackSlide extends Component {
 
 const mapStateToProps = state => ({
   playlists: state.playlists.playlists,
+  labelIds: state.labels.labelIds,
+  labelMap: state.labels.labelMap,
 });
 
 export default connect(mapStateToProps)(TrackSlide);
@@ -48,6 +64,11 @@ const Section = styled.span`
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
+`;
+
+const LabelsSection = styled.div`
+  display: flex;
+  flex-direction: row;
 `;
 
 const Playlist = styled.span`

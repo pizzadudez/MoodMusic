@@ -1,7 +1,8 @@
 import { FETCH_LABELS } from "../actions/types";
 
 const initialState = {
-  labels: [],
+  labelIds: [],
+  labelMap: {},
 };
 
 export default function(state = initialState, action) {
@@ -9,7 +10,8 @@ export default function(state = initialState, action) {
     case FETCH_LABELS:
       return {
         ...state,
-        labels: action.payload,
+        labelIds: action.ids,
+        labelMap: action.map,
       };
     default:
       return state;

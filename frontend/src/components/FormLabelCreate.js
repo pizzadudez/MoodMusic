@@ -24,8 +24,8 @@ class FormLabelCreate extends Component {
             </Field>
             {values.type === 'subgenre'
               ? <Field name="parent_id" component="select">
-                {this.props.genres.map(genre => (
-                  <option value={genre.id}>{genre.name}</option>
+                {this.props.genreIds.map(id => (
+                  <option value={id}>{this.props.labelMap[id].name}</option>
                 ))}
               </Field>
               : null
@@ -40,8 +40,9 @@ class FormLabelCreate extends Component {
 }
 
 const mapStateToProps = state => ({
-  labels: state.labels.labels,
-  genres: state.labels.labels.filter(label => label.type === 'genre'),
+  labelIds: state.labels.labelIds,
+  labelMap: state.labels.labelMap,
+  genreIds: state.labels.labelIds.filter(id => state.labels.labelMap[id].type === 'genre'),
 });
 
 export default connect(mapStateToProps, { createLabel })(FormLabelCreate);
