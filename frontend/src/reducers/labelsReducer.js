@@ -1,7 +1,7 @@
 import { FETCH_LABELS } from "../actions/types";
 
 const initialState = {
-  labels: {},
+  labels: [],
 };
 
 export default function(state = initialState, action) {

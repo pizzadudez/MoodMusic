@@ -28,3 +28,10 @@ export const fetchData = () => dispatch => {
     });
   }).catch(err => console.log(err));
 };
+
+export const createLabel = json => dispatch => {
+  console.log(json)
+  axios.post('/api/labels', json)
+    .then(res => console.log(res))
+    .catch(err => console.log(err));
+};

@@ -13,7 +13,7 @@ class TrackSlide extends Component {
         <Section>
           {this.props.track.playlist_ids.map(id => (
             <Playlist>
-              {this.props.playlists[id].name}
+              {this.props.playlists[id] ? this.props.playlists[id].name : ""}
             </Playlist>
           ))}
         </Section>
@@ -30,10 +30,10 @@ export default connect(mapStateToProps)(TrackSlide);
 
 const Container = styled.div`
   background-color: palegreen;
-  height: 50px;
+  height: 28px;
   border-bottom: 1px solid green;
   padding: 8px 16px;
-  font-size: 1.25em;
+  font-size: 1em;
   display: grid;
   grid-template-columns: 
     minmax(180px, 2fr)

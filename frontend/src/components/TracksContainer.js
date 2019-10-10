@@ -30,6 +30,7 @@ const mapStateToProps = state => ({
 export default connect(mapStateToProps)(TracksContainer);
 
 const Container = styled.div`
+  grid-area: content;
   border: 1px solid black;
   height: 736px;
   overflow-y: scroll;

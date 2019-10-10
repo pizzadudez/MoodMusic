@@ -1,3 +1,5 @@
 export const FETCH_TRACKS = 'FETCH_TRACKS';
 export const FETCH_PLAYLISTS = 'FETCH_PLAYLISTS';
 export const FETCH_LABELS = 'FETCH_LABELS';
+export const CREATE_LABEL = 'CREATE_LABEL';
+export const MODIFY_LABEL = 'MODIFY_LABEL';

@@ -24,5 +24,5 @@ ReactDOM.render(
     <GlobalStyle />
     <App />
   </Provider>,
-   document.getElementById('root')
+  document.getElementById('root')
 );

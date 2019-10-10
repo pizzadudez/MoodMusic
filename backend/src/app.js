@@ -8,6 +8,7 @@ const AuthRouter = require('./auth');
 const ApiRouter = require('./api');
 
 const app = express();
+app.use(express.urlencoded({ extended: true}));
 app.use(express.json());
 app.set('json spaces', 2);
 // Routers
