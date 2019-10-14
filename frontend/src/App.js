@@ -1,11 +1,12 @@
 import React, { Component } from 'react';
 import { connect } from 'react-redux';
-import { BrowserRouter as Router, Switch, Route, Link } from "react-router-dom";
+import { BrowserRouter as Router, Switch, Route } from "react-router-dom";
 
 import { fetchData } from './actions/actions';
 import Page from './components/Page';
 import FormLabelCreate from './components/FormLabelCreate';
 import TracksContainer from './components/TracksContainer';
+import LabelView from './components/LabelView';
 
 class App extends Component {
   constructor(props) {
@@ -24,6 +25,7 @@ class App extends Component {
           </Route>
           <Route path="/">
             <Page 
+              Sidebar={<LabelView />}
               Content={<TracksContainer />}
             />
           </Route>

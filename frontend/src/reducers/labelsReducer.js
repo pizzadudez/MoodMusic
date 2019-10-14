@@ -1,8 +1,8 @@
 import { FETCH_LABELS } from "../actions/types";
 
 const initialState = {
-  labelIds: [],
   labelMap: {},
+  labelIds: [],
 };
 
 export default function(state = initialState, action) {

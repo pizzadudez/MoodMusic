@@ -5,3 +5,8 @@ export const CREATE_LABEL = 'CREATE_LABEL';
 export const MODIFY_LABEL = 'MODIFY_LABEL';
 
 export const TRACKS_SEARCH = 'TRACKS_SEARCH';
+export const SELECT_TRACK = 'SELECT_TRACK';
+export const SELECT_ALL_TRACKS = 'SELECT_ALL_TRACKS';
+export const DESELECT_ALL_TRACKS = 'DESELECT_ALL_TRACKS';
+
+export const ADD_LABELS = 'ADD_LABELS';

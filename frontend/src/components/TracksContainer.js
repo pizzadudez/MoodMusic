@@ -2,25 +2,25 @@ import React, { Component } from 'react';
 import { connect } from 'react-redux';
 import styled from 'styled-components';
 
+
 import TrackSlide from './TrackSlide';
-import SearchBar from './SearchBar';
+import TrackOperations from './TrackOperations';
 
 class TracksContainer extends Component {
   render() {
     if (!this.props.trackIds.length) {
-      return <p>Loading...</p>;
+      return <Wrapper>Loading...</Wrapper>;
     }
     const trackIds = this.props.trackIdsSearch.length
       ? this.props.trackIdsSearch
-      : this.props.trackIds
-    const slides = trackIds.map(id => 
-      <TrackSlide key={id} track={this.props.trackMap[id]} />
-    );
+      : this.props.trackIds;
     return (
       <Wrapper>
-        <SearchBar />
+        <TrackOperations />
         <Container>
-          {slides}
+          {trackIds.map(id => 
+            <TrackSlide key={id} track={this.props.trackMap[id]} />
+          )}
         </Container>
       </Wrapper>
     );
@@ -35,14 +35,14 @@ const mapStateToProps = state => ({
   labels: state.labels.labels,
 });
 
-export default connect(mapStateToProps)(TracksContainer);
+export default connect(mapStateToProps, {
+})(TracksContainer);
 
+const Wrapper = styled.div`
+  grid-area: content;
+`;
 const Container = styled.div`
   border: 1px solid #272727;
   overflow-y: scroll;
   height: 80vh;
-`;
-
-const Wrapper = styled.div`
-  grid-area: content;
 `;
