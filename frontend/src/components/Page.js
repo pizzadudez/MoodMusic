@@ -5,7 +5,7 @@ import Navbar from './Navbar';
 
 const Grid = styled.div`
   display: grid;
-  grid-template-columns: 230px auto;
+  grid-template-columns: 300px auto;
   grid-template-rows: 70px auto;
   grid-template-areas:
   'navbar navbar'

@@ -1,5 +1,5 @@
 import axios from 'axios'
-import { FETCH_TRACKS, FETCH_PLAYLISTS, FETCH_LABELS } from './types';
+import { FETCH_TRACKS, FETCH_PLAYLISTS, FETCH_LABELS, TRACKS_SEARCH } from './types';
 
 export const fetchData = () => dispatch => {
   axios.get('/api/tracks').then(tracks => {
@@ -35,8 +35,14 @@ export const fetchData = () => dispatch => {
 };
 
 export const createLabel = json => dispatch => {
-  console.log(json)
   axios.post('/api/labels', json)
     .then(res => console.log(res))
     .catch(err => console.log(err));
+};
+
+export const tracksSearch = filter => dispatch => {
+  dispatch({
+    type: TRACKS_SEARCH,
+    payload: filter,
+  });
 };

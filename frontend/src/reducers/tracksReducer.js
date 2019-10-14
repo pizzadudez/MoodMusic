@@ -1,8 +1,9 @@
-import { FETCH_TRACKS } from "../actions/types";
+import { FETCH_TRACKS, TRACKS_SEARCH } from "../actions/types";
 
 const initialState = {
   trackMap: {},
   trackIds: [],
+  trackIdsSearch: [],
 };
 
 export default function(state = initialState, action) {
@@ -13,6 +14,13 @@ export default function(state = initialState, action) {
         trackMap: action.map,
         trackIds: action.ids,
       };
+    case TRACKS_SEARCH:
+      return {
+        ...state,
+        trackIdsSearch: state.trackIds.filter(id => 
+          state.trackMap[id].name.toLowerCase().indexOf(action.payload.toLowerCase()) !== -1
+        ),
+      }
     default:
       return state;
   }

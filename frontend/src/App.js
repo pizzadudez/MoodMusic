@@ -17,13 +17,13 @@ class App extends Component {
       <Router>
         <Switch>
           <Route path="/playlist">
-            <Page 
+            <Page
+              Sidebar={<FormLabelCreate />}
               Content={<TracksContainer />}
             />    
           </Route>
           <Route path="/">
             <Page 
-              Sidebar={<FormLabelCreate />}
               Content={<TracksContainer />}
             />
           </Route>

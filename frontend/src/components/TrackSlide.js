@@ -16,7 +16,8 @@ class TrackSlide extends Component {
         <LabelsSection>
           {this.props.labelIds.length ?
             this.props.track.label_ids.map(id => (
-              <Label 
+              <Label
+                key={id} 
                 label={this.props.labelMap[id]}
               />
             ))
@@ -24,7 +25,8 @@ class TrackSlide extends Component {
           }
           {this.props.playlists[this.props.track.playlist_ids[0]] ?
             this.props.track.playlist_ids.map(id => (
-              <PlaylistLabel 
+              <PlaylistLabel
+                key={id}
                 playlist={this.props.playlists[id]}
               />
             ))
@@ -45,11 +47,10 @@ const mapStateToProps = state => ({
 export default connect(mapStateToProps)(TrackSlide);
 
 const Container = styled.div`
-  background-color: palegreen;
-  height: 28px;
-  border-bottom: 1px solid green;
+  background-color: #333333;
+  height: 30px;
+  border-bottom: 1px solid #272727;
   padding: 8px 16px;
-  font-size: 1em;
   display: grid;
   grid-template-columns: 
     minmax(180px, 2fr)
@@ -64,14 +65,12 @@ const Section = styled.span`
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
+  color: #3fe479;
+  font-size: 1.05em;
+  text-shadow: 0.7px 0.9px #00000099;
 `;
 
 const LabelsSection = styled.div`
   display: flex;
   flex-direction: row;
-`;
-
-const Playlist = styled.span`
-  padding: 0 5px;
-  border-right: 1px solid black;
 `;
