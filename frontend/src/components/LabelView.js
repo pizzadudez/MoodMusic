@@ -31,6 +31,7 @@ class LabelView extends Component {
         </button>
         {labelIds.map(id => (
           <LabelButton
+            key={id}
             label={labelMap[id]}
             onChange={this.handleChange.bind(this)}
           >

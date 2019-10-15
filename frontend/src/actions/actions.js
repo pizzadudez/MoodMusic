@@ -75,10 +75,9 @@ export const addLabels = (trackIds, labelIds) => dispatch => {
       track_id: trackId,
       label_ids: Object.keys(labelIds).filter(id => labelIds[id]),
     }));
-  axios.post('/api/labels/add', json).then(() =>
-    dispatch({
-      type: ADD_LABELS,
-      payload: json,
-    })
-  ).catch(err => console.log(err));
+  
+  dispatch({
+    type: ADD_LABELS,
+    payload: json,
+  })
 };

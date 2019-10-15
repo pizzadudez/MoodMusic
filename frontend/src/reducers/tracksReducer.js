@@ -51,24 +51,29 @@ export default function(state = initialState, action) {
         trackIdsSelected: {}
       }
     case ADD_LABELS: {
-      const trackMap = { ...state.trackMap };
-      const updatedTracks = action.payload.reduce((obj, { track_id, label_ids }) => {
-        const labelIds = label_ids.map(id => parseInt(id));
-        obj[track_id] = {
-          ...trackMap[track_id],
-          label_ids: [...new Set([...trackMap[track_id].label_ids, ... labelIds])]
-        }
-        return obj;
-      }, {})
-
       return {
         ...state,
-        trackMap: {
-          ...trackMap,
-          ...updatedTracks,
-        }
+        trackMap: trackMap(state.trackMap, action)
       };
     }
+    default:
+      return state;
+  }
+}
+
+const trackMap = (state, action) => {
+  switch(action.type) {
+    case ADD_LABELS:
+      return {
+        ...state,
+        ...action.payload.reduce((obj, { track_id, label_ids }) => {
+          obj[track_id] = {
+            ...state[track_id],
+            label_ids: [...new Set([...state[track_id].label_ids, ... label_ids])]
+          }
+          return obj;
+        }, {})
+      };
     default:
       return state;
   }

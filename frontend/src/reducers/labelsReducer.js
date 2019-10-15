@@ -1,8 +1,12 @@
-import { FETCH_LABELS } from "../actions/types";
+import { 
+  FETCH_LABELS 
+} from "../actions/types";
 
 const initialState = {
   labelMap: {},
   labelIds: [],
+  labelsToAdd: {},
+  labelsToRemove: {},
 };
 
 export default function(state = initialState, action) {
