@@ -5,7 +5,7 @@ import {
   FETCH_LABELS, 
   TRACKS_SEARCH, 
   ADD_LABELS,
-  SELECT_TRACK,
+  MODIFY_TRACK_SELECTION,
   SELECT_ALL_TRACKS,
   DESELECT_ALL_TRACKS
 } from './types';
@@ -48,16 +48,17 @@ export const createLabel = json => dispatch => {
     .then(res => console.log(res))
     .catch(err => console.log(err));
 };
-
-export const tracksSearch = filter => dispatch => {
+export const tracksSearch = filter => (dispatch, getState) => {
   dispatch({
     type: TRACKS_SEARCH,
     payload: filter,
+    tracks: getState().tracks,
   });
 };
 
-export const selectTrack = id => dispatch => dispatch({
-  type: SELECT_TRACK,
+// Track Selection
+export const modifyTrackSelection = id => dispatch => dispatch({
+  type: MODIFY_TRACK_SELECTION,
   payload: id,
 });
 export const selectAllTracks = () => dispatch => dispatch({
@@ -73,7 +74,7 @@ export const addLabels = (trackIds, labelIds) => dispatch => {
     .filter(id => trackIds[id])
     .map(trackId => ({
       track_id: trackId,
-      label_ids: Object.keys(labelIds).filter(id => labelIds[id]),
+      label_ids: Object.keys(labelIds).map(id => parseInt(id)),
     }));
   
   dispatch({

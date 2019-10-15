@@ -2,19 +2,19 @@ import React, { Component } from 'react';
 import { connect } from 'react-redux';
 import styled from 'styled-components';
 
-import { selectTrack } from '../actions/actions';
+import { modifyTrackSelection } from '../actions/actions';
 import Label from './Label';
 import PlaylistLabel from './PlaylistLabel';
 
 class TrackSlide extends Component {
   render() {
-    const { track, trackIdsSelected, selectTrack } = this.props;
+    const { track, trackIds, modifyTrackSelection } = this.props;
     return (
       <Container>
         <input
           type="checkbox"
-          checked={trackIdsSelected[track.id] ? true : false}
-          onChange={() => selectTrack(track.id)}
+          checked={trackIds.selected[track.id] ? true : false}
+          onChange={() => modifyTrackSelection(track.id)}
         />
         <Section>{this.props.track.name}</Section>
         <Section>{this.props.track.artist}</Section>
@@ -46,7 +46,7 @@ class TrackSlide extends Component {
 }
 
 const mapStateToProps = state => ({
-  trackIdsSelected: state.tracks.trackIdsSelected,
+  trackIds: state.trackIds,
   playlists: state.playlists.playlists,
   labelIds: state.labels.labelIds,
   labelMap: state.labels.labelMap,
@@ -54,9 +54,7 @@ const mapStateToProps = state => ({
 
 export default connect(
   mapStateToProps,
-  {
-    selectTrack,
-  }
+  { modifyTrackSelection, }
 )(TrackSlide);
 
 const Container = styled.div`

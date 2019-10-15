@@ -8,18 +8,18 @@ import TrackOperations from './TrackOperations';
 
 class TracksContainer extends Component {
   render() {
-    if (!this.props.trackIds.length) {
+    if (!this.props.trackIds.all.length) {
       return <Wrapper>Loading...</Wrapper>;
     }
-    const trackIds = this.props.trackIdsSearch.length
-      ? this.props.trackIdsSearch
-      : this.props.trackIds;
+    const trackIds = this.props.trackIds.searchFiltered.length
+      ? this.props.trackIds.searchFiltered
+      : this.props.trackIds.all;
     return (
       <Wrapper>
         <TrackOperations />
         <Container>
           {trackIds.map(id => 
-            <TrackSlide key={id} track={this.props.trackMap[id]} />
+            <TrackSlide key={id} track={this.props.tracks[id]} />
           )}
         </Container>
       </Wrapper>
@@ -28,9 +28,8 @@ class TracksContainer extends Component {
 }
 
 const mapStateToProps = state => ({
-  trackMap: state.tracks.trackMap,
-  trackIds: state.tracks.trackIds,
-  trackIdsSearch: state.tracks.trackIdsSearch,
+  tracks: state.tracks,
+  trackIds: state.trackIds,
   playlists: state.playlists.playlists,
   labels: state.labels.labels,
 });

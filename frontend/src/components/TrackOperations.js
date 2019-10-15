@@ -11,21 +11,21 @@ import SearchBar from './SearchBar';
 
 class TrackOperations extends Component {
   render() {
-    const { trackIdsSelected } = this.props;
+    const { trackIds } = this.props;
 
     return (
       <Container>
         <SelectButton onClick={() => selectAllTracks()}>V</SelectButton>
         <SelectButton onClick={() => deselectAllTracks()}>X</SelectButton>
         <SearchBar />
-        <SelectButton onClick={() => addLabels(trackIdsSelected)}>Add Labels</SelectButton>
+        <SelectButton onClick={() => addLabels(trackIds.selected)}>Add Labels</SelectButton>
       </Container>
     );
   }
 }
 
 const mapStateToProps = state => ({
-  trackIdsSelected: state.tracks.trackIdsSelected,
+  trackIds: state.tracks.trackIds,
 });
 
 export default connect(mapStateToProps, {

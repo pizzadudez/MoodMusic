@@ -21,11 +21,11 @@ class LabelView extends Component {
     });
   }
   render() {
-    const { labelMap, labelIds, addLabels, trackIdsSelected } = this.props;
+    const { labelMap, labelIds, addLabels, trackIds } = this.props;
     return (
       <Container>
         <button 
-          onClick={() => addLabels(trackIdsSelected, this.state.selectedLabelIds)}
+          onClick={() => addLabels(trackIds.selected, this.state.selectedLabelIds)}
         >
           Add Labels
         </button>
@@ -46,7 +46,7 @@ class LabelView extends Component {
 const mapStateToProps = state => ({
   labelMap: state.labels.labelMap,
   labelIds: state.labels.labelIds,
-  trackIdsSelected: state.tracks.trackIdsSelected,
+  trackIds: state.trackIds,
 });
 
 export default connect(mapStateToProps, {
