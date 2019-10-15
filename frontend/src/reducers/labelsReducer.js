@@ -5,8 +5,6 @@ import {
 const initialState = {
   labelMap: {},
   labelIds: [],
-  labelsToAdd: {},
-  labelsToRemove: {},
 };
 
 export default function(state = initialState, action) {

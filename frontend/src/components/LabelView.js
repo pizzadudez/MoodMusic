@@ -2,7 +2,7 @@ import React, { Component } from 'react';
 import { connect } from 'react-redux';
 import styled from 'styled-components';
 
-import { addLabels } from '../actions/actions';
+import { addOrRemoveLabels, postChanges } from '../actions/actions';
 import LabelButton from './LabelButton';
 
 class LabelView extends Component {
@@ -21,14 +21,20 @@ class LabelView extends Component {
     });
   }
   render() {
-    const { labelMap, labelIds, addLabels, trackIds } = this.props;
+    const { labelMap, labelIds, addOrRemoveLabels, postChanges } = this.props;
     return (
       <Container>
         <button 
-          onClick={() => addLabels(trackIds.selected, this.state.selectedLabelIds)}
+          onClick={() => addOrRemoveLabels(this.state.selectedLabelIds)}
         >
           Add Labels
         </button>
+        <button 
+          onClick={() => addOrRemoveLabels(this.state.selectedLabelIds, false)}
+        >
+          Remove Labels
+        </button>
+        <button onClick={() => postChanges()}>Submit Changes</button>
         {labelIds.map(id => (
           <LabelButton
             key={id}
@@ -46,11 +52,10 @@ class LabelView extends Component {
 const mapStateToProps = state => ({
   labelMap: state.labels.labelMap,
   labelIds: state.labels.labelIds,
-  trackIds: state.trackIds,
 });
 
 export default connect(mapStateToProps, {
-  addLabels,
+  addOrRemoveLabels, postChanges,
 })(LabelView);
 
 const Container = styled.div`

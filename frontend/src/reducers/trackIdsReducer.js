@@ -47,7 +47,7 @@ export default function(state = initialState, action) {
         selected: state.searchFiltered.reduce((obj, id) => ({
           ...obj,
           [id]: true,
-        }))
+        }), {})
       }    
     case DESELECT_ALL_TRACKS:
       return {

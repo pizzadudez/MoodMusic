@@ -5,20 +5,18 @@ import styled from 'styled-components';
 import {
   selectAllTracks,
   deselectAllTracks,
-  addLabels,
 } from '../actions/actions';
 import SearchBar from './SearchBar';
 
 class TrackOperations extends Component {
   render() {
-    const { trackIds } = this.props;
+    const { selectAllTracks, deselectAllTracks } = this.props;
 
     return (
       <Container>
         <SelectButton onClick={() => selectAllTracks()}>V</SelectButton>
         <SelectButton onClick={() => deselectAllTracks()}>X</SelectButton>
         <SearchBar />
-        <SelectButton onClick={() => addLabels(trackIds.selected)}>Add Labels</SelectButton>
       </Container>
     );
   }
@@ -31,7 +29,6 @@ const mapStateToProps = state => ({
 export default connect(mapStateToProps, {
   selectAllTracks,
   deselectAllTracks,
-  addLabels,
 })(TrackOperations);
 
 const SelectButton = styled.button`

@@ -4,10 +4,12 @@ import {
   FETCH_PLAYLISTS, 
   FETCH_LABELS, 
   TRACKS_SEARCH, 
-  ADD_LABELS,
   MODIFY_TRACK_SELECTION,
   SELECT_ALL_TRACKS,
-  DESELECT_ALL_TRACKS
+  DESELECT_ALL_TRACKS,
+  SET_LABEL_CHANGES,
+  UPDATE_TRACKS_LABELS,
+  CLEAR_LABEL_CHANGES
 } from './types';
 
 export const fetchData = () => dispatch => {
@@ -68,17 +70,65 @@ export const deselectAllTracks = () => dispatch => dispatch({
   type: DESELECT_ALL_TRACKS,
 });
 
-export const addLabels = (trackIds, labelIds) => dispatch => {
-  if (!trackIds) return;
-  const json = Object.keys(trackIds)
-    .filter(id => trackIds[id])
-    .map(trackId => ({
-      track_id: trackId,
-      label_ids: Object.keys(labelIds).map(id => parseInt(id)),
-    }));
-  
+// export const addLabels = labelIdsMap => (dispatch, getState) => {
+//   const trackIdsSelectedMap = getState().trackIds.selected;
+//   const json = Object.keys(trackIdsSelectedMap)
+//     .filter(id => trackIdsSelectedMap[id])
+//     .map(trackId => ({
+//       track_id: trackId,
+//       label_ids: Object.keys(labelIdsMap)
+//           .filter(labelId => labelIdsMap[labelId])
+//           .map(id => parseInt(id)),
+//     }));
+//   dispatch({
+//     type: ADD_LABELS,
+//     payload: json,
+//     tracks: getState().tracks,
+//   });
+// };
+
+export const addOrRemoveLabels = (labelIdsMap, addLabels = true) => (dispatch, getState) => {
+  const trackIdsSelectedMap = getState().trackIds.selected;
+  const trackIdsSelected = Object.keys(trackIdsSelectedMap)
+    .filter(id => trackIdsSelectedMap[id]);
+  const labelIds = Object.keys(labelIdsMap)
+    .filter(id => labelIdsMap[id])
+    .map(id => parseInt(id));
+  const tracks = getState().tracks
   dispatch({
-    type: ADD_LABELS,
-    payload: json,
+    type: SET_LABEL_CHANGES,
+    addLabels: addLabels,
+    trackIds: trackIdsSelected,
+    labelIds: labelIds,
+    tracks: tracks,
   })
+  dispatch({
+    type: UPDATE_TRACKS_LABELS,
+    addLabels: addLabels,
+    trackIds: trackIdsSelected,
+    labelIds: labelIds,
+  });
+};
+
+export const postChanges = () => (dispatch, getState) => {
+  const addLabelsMap = getState().changes.labelsToAdd;
+  const removeLabelsMap = getState().changes.labelsToRemove;
+
+  const addLabelsBody = Object.keys(addLabelsMap).map(trackId => ({
+    track_id: trackId,
+    label_ids: addLabelsMap[trackId].filter(id => !removeLabelsMap[trackId] || !removeLabelsMap[trackId].includes(id))
+  }));
+  const removeLabelsBody = Object.keys(removeLabelsMap).map(trackId => ({
+    track_id: trackId,
+    label_ids: removeLabelsMap[trackId].filter(id => !addLabelsMap[trackId] || !addLabelsMap[trackId].includes(id))
+  }));
+
+  axios.post('api/labels/add', addLabelsBody)
+    .then(res => console.log(res));
+  axios.post('api/labels/remove', removeLabelsBody)
+    .then(res => console.log(res));
+
+  dispatch({
+    type: CLEAR_LABEL_CHANGES,
+  });
 };

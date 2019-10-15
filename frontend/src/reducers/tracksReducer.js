@@ -1,6 +1,6 @@
 import {
   FETCH_TRACKS,
-  ADD_LABELS,
+  UPDATE_TRACKS_LABELS,
 } from '../actions/types';
 
 export default function(state = {}, action) {
@@ -10,14 +10,17 @@ export default function(state = {}, action) {
         ...state,
         ...action.map
       }
-    case ADD_LABELS:
+    case UPDATE_TRACKS_LABELS:
       return {
         ...state,
-        ...action.payload.reduce((obj, { track_id, label_ids }) => ({
+        ...action.trackIds.reduce((obj, trackId) => ({
           ...obj,
-          [track_id]: {
-            ...state[track_id],
-            label_ids: [... new Set([...state[track_id].label_ids, ...label_ids])]
+          [trackId]: {
+            ...state[trackId],
+            label_ids: [
+              ...state[trackId].label_ids.filter(id => !action.labelIds.includes(id)),
+              ...action.addLabels ? action.labelIds : []
+            ]
           }
         }), {})
       }

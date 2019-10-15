@@ -2,9 +2,11 @@ import React from 'react';
 import styled from 'styled-components';
 
 export default (props) => {
+  if (!props.label) return null;
+  const { name } = props.label;
   return (
     <Label>
-      <Text>{props.label.name}</Text>
+      <Text>{name}</Text>
     </Label>
   );
 };
