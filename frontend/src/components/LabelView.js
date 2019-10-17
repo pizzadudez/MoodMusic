@@ -2,47 +2,70 @@ import React, { Component } from 'react';
 import { connect } from 'react-redux';
 import styled from 'styled-components';
 
-import { addOrRemoveLabels, postChanges } from '../actions/actions';
+import { addOrRemoveLabels, postChanges, modifyLabelSelection } from '../actions/actions';
 import LabelButton from './LabelButton';
 
 class LabelView extends Component {
-  constructor(props) {
-    super(props);
-    this.state = {
-      selectedLabelIds: {},
-    }
-  }
-  handleChange(e) {
-    this.setState({
-      selectedLabelIds: {
-        ...this.state.selectedLabelIds,
-        [e.target.value]: e.target.checked,
-      }
-    });
-  }
+  handleChange = event => this.props.modifyLabelSelection(event.target.id)
   render() {
-    const { labelMap, labelIds, addOrRemoveLabels, postChanges } = this.props;
+    const {
+      labels,
+      labelIds,
+      addOrRemoveLabels,
+      postChanges,
+    } = this.props;
     return (
       <Container>
-        <button 
-          onClick={() => addOrRemoveLabels(this.state.selectedLabelIds)}
-        >
-          Add Labels
-        </button>
-        <button 
-          onClick={() => addOrRemoveLabels(this.state.selectedLabelIds, false)}
-        >
-          Remove Labels
-        </button>
+        <button onClick={() => addOrRemoveLabels()}>Add Labels</button>
+        <button onClick={() => addOrRemoveLabels(false)}>Remove Labels</button>
         <button onClick={() => postChanges()}>Submit Changes</button>
-        {labelIds.map(id => (
+        {/* {labelIds.all.map(id => (
           <LabelButton
             key={id}
-            label={labelMap[id]}
-            onChange={this.handleChange.bind(this)}
+            label={labels[id]}
+            checked={labelIds.selected[id] ? true : false}
+            onChange={this.handleChange}
           >
-            {labelMap[id].name}
+            {labels[id].name}
           </LabelButton>
+        ))} */}
+        <p>Moods</p>
+        {labelIds.moods.map(id => (
+          <LabelButton
+            key={id}
+            label={labels[id]}
+            checked={labelIds.selected[id] ? true : false}
+            onChange={this.handleChange}
+          >
+            {labels[id].name}
+          </LabelButton>
+        ))}
+        <p>Genres</p>
+        {labelIds.genres.map(id => (
+          <div style={{display: 'flex', flexDirection: 'row'}}>
+            <LabelButton
+              key={id}
+              label={labels[id]}
+              checked={labelIds.selected[id] ? true : false}
+              onChange={this.handleChange}
+            >
+              {labels[id].name}
+            </LabelButton>
+            {labelIds.subgenres[id]
+              ? labelIds.subgenres[id].map(id => (
+                <LabelButton
+                  subgenre={true}
+                  key={id}
+                  label={labels[id]}
+                  checked={labelIds.selected[id] ? true : false}
+                  onChange={this.handleChange}
+                >
+                  {labels[id].name}
+                </LabelButton>
+              ))
+              : null
+            }
+          </div>
         ))}
       </Container>
     );
@@ -50,12 +73,12 @@ class LabelView extends Component {
 }
 
 const mapStateToProps = state => ({
-  labelMap: state.labels.labelMap,
-  labelIds: state.labels.labelIds,
+  labels: state.labels,
+  labelIds: state.labelIds,
 });
 
 export default connect(mapStateToProps, {
-  addOrRemoveLabels, postChanges,
+  addOrRemoveLabels, postChanges, modifyLabelSelection,
 })(LabelView);
 
 const Container = styled.div`

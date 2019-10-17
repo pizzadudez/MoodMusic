@@ -7,8 +7,15 @@ import Label from './Label';
 import PlaylistLabel from './PlaylistLabel';
 
 class TrackSlide extends Component {
+  shouldComponentUpdate(nextProps) {
+    const { track, trackIds, labelIds, playlists } = this.props;
+    if (trackIds.selected[track.id] !== nextProps.trackIds.selected[track.id]) return true;
+    if (track !== nextProps.track) return true;
+    return false;
+  }
   render() {
-    const { track, trackIds, modifyTrackSelection } = this.props;
+    const { track, trackIds, labels, labelIds,
+      playlists, modifyTrackSelection } = this.props;
     return (
       <Container>
         <input
@@ -16,25 +23,25 @@ class TrackSlide extends Component {
           checked={trackIds.selected[track.id] ? true : false}
           onChange={() => modifyTrackSelection(track.id)}
         />
-        <Section>{this.props.track.name}</Section>
-        <Section>{this.props.track.artist}</Section>
-        <Section>{this.props.track.album.name}</Section>
-        <Section>{this.props.track.rating}</Section>
+        <Section>{track.name}</Section>
+        <Section>{track.artist}</Section>
+        <Section>{track.album.name}</Section>
+        <Section>{track.rating}</Section>
         <LabelsSection>
-          {this.props.labelIds.length ?
-            this.props.track.label_ids.map(id => (
+          {labelIds.all.length ?
+            track.label_ids.map(id => (
               <Label
                 key={id} 
-                label={this.props.labelMap[id]}
+                label={labels[id]}
               />
             ))
             : null
           }
-          {this.props.playlists[this.props.track.playlist_ids[0]] ?
-            this.props.track.playlist_ids.map(id => (
+          {playlists[track.playlist_ids[0]] ?
+            track.playlist_ids.map(id => (
               <PlaylistLabel
                 key={id}
-                playlist={this.props.playlists[id]}
+                playlist={playlists[id]}
               />
             ))
             : null
@@ -48,8 +55,8 @@ class TrackSlide extends Component {
 const mapStateToProps = state => ({
   trackIds: state.trackIds,
   playlists: state.playlists.playlists,
-  labelIds: state.labels.labelIds,
-  labelMap: state.labels.labelMap,
+  labels: state.labels,
+  labelIds: state.labelIds,
 });
 
 export default connect(

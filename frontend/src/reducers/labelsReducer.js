@@ -2,18 +2,12 @@ import {
   FETCH_LABELS 
 } from "../actions/types";
 
-const initialState = {
-  labelMap: {},
-  labelIds: [],
-};
-
-export default function(state = initialState, action) {
+export default function(state = {}, action) {
   switch (action.type) {
     case FETCH_LABELS:
       return {
         ...state,
-        labelIds: action.ids,
-        labelMap: action.map,
+        ...action.map
       };
     default:
       return state;

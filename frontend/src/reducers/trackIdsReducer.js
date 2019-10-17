@@ -27,9 +27,9 @@ export default function(state = initialState, action) {
           const { name, artist, album } = action.tracks[id];
           const filter = action.payload.toLowerCase();
           return (
-            name.toLowerCase().indexOf(filter) > -1 ||
-            artist.toLowerCase().indexOf(filter) > -1 ||
-            album.name.toLowerCase().indexOf(filter) > -1
+            name.toLowerCase().includes(filter)
+            || artist.toLowerCase().includes(filter)
+            || album.name.toLowerCase().includes(filter)
           );
         }), 
       }

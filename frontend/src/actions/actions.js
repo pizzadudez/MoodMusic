@@ -9,11 +9,14 @@ import {
   DESELECT_ALL_TRACKS,
   SET_LABEL_CHANGES,
   UPDATE_TRACKS_LABELS,
-  CLEAR_LABEL_CHANGES
+  CLEAR_LABEL_CHANGES,
+  DESELECT_ALL_LABELS,
+  MODIFY_LABEL_SELECTION,
+  LOADING_FINISHED,
 } from './types';
 
-export const fetchData = () => dispatch => {
-  axios.get('/api/tracks').then(tracks => {
+export const fetchData = () => async dispatch => {
+  const tracks = axios.get('/api/tracks').then(tracks => {
     const trackIds = tracks.data.map(track => track.id);
     const trackMap = tracks.data.reduce((obj, track) => {
       return { ...obj, [track.id]: track };
@@ -25,24 +28,37 @@ export const fetchData = () => dispatch => {
     });
   }).catch(err => console.log(err));
 
-  axios.get('/api/playlists').then(playlists => {
+  const playlists = axios.get('/api/playlists').then(playlists => {
     dispatch({
       type: FETCH_PLAYLISTS,
       payload: playlists.data,
     });
   }).catch(err => console.log(err));
 
-  axios.get('/api/labels').then(labels => {
+  const labels = axios.get('/api/labels').then(labels => {
     const labelMap = labels.data.reduce((obj, label) => {
       return { ...obj, [label.id]: label};
     }, {});
     const labelIds = labels.data.map(label => label.id);
+    const types = labelIds.reduce((obj, id) => {
+      const { type, parent_id } = labelMap[id];
+      type === 'subgenre'
+        ? obj[type][parent_id] = [...obj[type][parent_id] || [], id]
+        : obj[type].push(id);
+      return obj;
+    }, { 'genre': [], 'mood': [], 'subgenre': {} })
     dispatch({
       type: FETCH_LABELS,
       ids: labelIds,
       map: labelMap,
+      types: types,
     });
   }).catch(err => console.log(err));
+
+  await Promise.all([tracks, playlists, labels]);
+  dispatch({
+    type: LOADING_FINISHED,
+  })
 };
 
 export const createLabel = json => dispatch => {
@@ -70,29 +86,23 @@ export const deselectAllTracks = () => dispatch => dispatch({
   type: DESELECT_ALL_TRACKS,
 });
 
-// export const addLabels = labelIdsMap => (dispatch, getState) => {
-//   const trackIdsSelectedMap = getState().trackIds.selected;
-//   const json = Object.keys(trackIdsSelectedMap)
-//     .filter(id => trackIdsSelectedMap[id])
-//     .map(trackId => ({
-//       track_id: trackId,
-//       label_ids: Object.keys(labelIdsMap)
-//           .filter(labelId => labelIdsMap[labelId])
-//           .map(id => parseInt(id)),
-//     }));
-//   dispatch({
-//     type: ADD_LABELS,
-//     payload: json,
-//     tracks: getState().tracks,
-//   });
-// };
+// Label Selection
+export const modifyLabelSelection = id => dispatch => dispatch({
+  type: MODIFY_LABEL_SELECTION,
+  payload: id,
+});
+export const deselectAllLabels = () => dispatch => dispatch({
+  type: DESELECT_ALL_LABELS
+})
 
-export const addOrRemoveLabels = (labelIdsMap, addLabels = true) => (dispatch, getState) => {
+
+export const addOrRemoveLabels = (addLabels = true) => (dispatch, getState) => {
   const trackIdsSelectedMap = getState().trackIds.selected;
   const trackIdsSelected = Object.keys(trackIdsSelectedMap)
     .filter(id => trackIdsSelectedMap[id]);
-  const labelIds = Object.keys(labelIdsMap)
-    .filter(id => labelIdsMap[id])
+  const labelIdsSelectedMap = getState().labelIds.selected;
+  const labelIds = Object.keys(labelIdsSelectedMap)
+    .filter(id => labelIdsSelectedMap[id])
     .map(id => parseInt(id));
   const tracks = getState().tracks
   dispatch({
@@ -108,6 +118,9 @@ export const addOrRemoveLabels = (labelIdsMap, addLabels = true) => (dispatch, g
     trackIds: trackIdsSelected,
     labelIds: labelIds,
   });
+  dispatch({
+    type: DESELECT_ALL_LABELS,
+  })
 };
 
 export const postChanges = () => (dispatch, getState) => {

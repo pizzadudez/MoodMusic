@@ -1,21 +1,27 @@
-import React from 'react';
+import React, { Component } from 'react';
 import styled from 'styled-components';
 
-export default (props) => {
-  const { label, onChange } = props;
-  return (
-    <Container>
-      <CheckBox
-        id={label.id}
-        type="checkbox"
-        onChange={onChange}
-        value={label.id}
-      />
-      <Label htmlFor={label.id}>
-        <span>{label.name}</span>
-      </Label>
-    </Container>
-  );
+export default class LabelButton extends Component {
+  shouldComponentUpdate(nextProps) {
+    return this.props.checked !== nextProps.checked ? true : false;
+  }
+  render() {
+    const { label, checked, onChange } = this.props;
+    return (
+      <Container>
+        <CheckBox
+          id={label.id}
+          type="checkbox"
+          checked={checked}
+          onChange={onChange}
+          value={label.id}
+        />
+        <Label htmlFor={label.id} label={label}>
+          <span>{label.name}</span>
+        </Label>
+      </Container>
+    );
+  }
 }
 
 const Container = styled.div`
@@ -33,6 +39,7 @@ const Label = styled.label`
   span {
     padding: 4px;
     margin: auto;
+    font-size: ${props => props.label.type === 'subgenre' ? 0.9 : 1.2}em;
   }
 `;
 const CheckBox = styled.input`

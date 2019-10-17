@@ -2,24 +2,24 @@ import React, { Component } from 'react';
 import { connect } from 'react-redux';
 import styled from 'styled-components';
 
-
 import TrackSlide from './TrackSlide';
 import TrackOperations from './TrackOperations';
 
 class TracksContainer extends Component {
   render() {
-    if (!this.props.trackIds.all.length) {
+    const { loadingFinished, tracks, trackIds } = this.props;
+    if (!loadingFinished) {
       return <Wrapper>Loading...</Wrapper>;
     }
-    const trackIds = this.props.trackIds.searchFiltered.length
-      ? this.props.trackIds.searchFiltered
-      : this.props.trackIds.all;
+    const ids = trackIds.searchFiltered.length
+      ? trackIds.searchFiltered
+      : trackIds.all;
     return (
       <Wrapper>
         <TrackOperations />
         <Container>
-          {trackIds.map(id => 
-            <TrackSlide key={id} track={this.props.tracks[id]} />
+          {ids.map(id => 
+            <TrackSlide key={id} track={tracks[id]} />
           )}
         </Container>
       </Wrapper>
@@ -30,12 +30,10 @@ class TracksContainer extends Component {
 const mapStateToProps = state => ({
   tracks: state.tracks,
   trackIds: state.trackIds,
-  playlists: state.playlists.playlists,
-  labels: state.labels.labels,
+  loadingFinished: state.changes.loadingFinished,
 });
 
-export default connect(mapStateToProps, {
-})(TracksContainer);
+export default connect(mapStateToProps)(TracksContainer);
 
 const Wrapper = styled.div`
   grid-area: content;
