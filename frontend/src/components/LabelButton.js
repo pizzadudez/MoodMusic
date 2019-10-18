@@ -27,19 +27,22 @@ export default class LabelButton extends Component {
 const Container = styled.div`
   margin: 2px;
   position: relative;
+  display: inline-block;
+  min-width: 30px;
 `;
 const Label = styled.label`
-  border: 1px solid black;
+  display: flex;
   border-radius: 3px;
+  border: 1px solid black;
   user-select: none;
   cursor: pointer;
   &:hover {
     background-color: tomato;
   }
   span {
-    padding: 4px;
-    margin: auto;
-    font-size: ${props => props.label.type === 'subgenre' ? 0.9 : 1.2}em;
+    padding: 2px 4px;
+    font-weight: ${props => props.label.type === 'subgenre' ? 400 : 600};
+    align-content: center;
   }
 `;
 const CheckBox = styled.input`

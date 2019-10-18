@@ -8,8 +8,8 @@ import  { createGlobalStyle } from 'styled-components';
 
 const GlobalStyle = createGlobalStyle`
   html {
-    font-family: -apple-system,
-    BlinkMacSystemFont,"Segoe UI",Roboto,Oxygen-Sans,
+    font-family: "Raleway","Proxima Nova","Montserrat",
+    "Segoe UI",Roboto,Oxygen-Sans,
     Ubuntu,Cantarell,"Helvetica Neue",sans-serif;
   }
   body {

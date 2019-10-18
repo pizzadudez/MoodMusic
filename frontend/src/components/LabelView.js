@@ -19,30 +19,10 @@ class LabelView extends Component {
         <button onClick={() => addOrRemoveLabels()}>Add Labels</button>
         <button onClick={() => addOrRemoveLabels(false)}>Remove Labels</button>
         <button onClick={() => postChanges()}>Submit Changes</button>
-        {/* {labelIds.all.map(id => (
-          <LabelButton
-            key={id}
-            label={labels[id]}
-            checked={labelIds.selected[id] ? true : false}
-            onChange={this.handleChange}
-          >
-            {labels[id].name}
-          </LabelButton>
-        ))} */}
-        <p>Moods</p>
-        {labelIds.moods.map(id => (
-          <LabelButton
-            key={id}
-            label={labels[id]}
-            checked={labelIds.selected[id] ? true : false}
-            onChange={this.handleChange}
-          >
-            {labels[id].name}
-          </LabelButton>
-        ))}
+
         <p>Genres</p>
         {labelIds.genres.map(id => (
-          <div style={{display: 'flex', flexDirection: 'row'}}>
+          <>
             <LabelButton
               key={id}
               label={labels[id]}
@@ -54,7 +34,6 @@ class LabelView extends Component {
             {labelIds.subgenres[id]
               ? labelIds.subgenres[id].map(id => (
                 <LabelButton
-                  subgenre={true}
                   key={id}
                   label={labels[id]}
                   checked={labelIds.selected[id] ? true : false}
@@ -65,7 +44,19 @@ class LabelView extends Component {
               ))
               : null
             }
-          </div>
+          </>
+        ))}
+
+        <p>Moods</p>
+        {labelIds.moods.map(id => (
+          <LabelButton
+            key={id}
+            label={labels[id]}
+            checked={labelIds.selected[id] ? true : false}
+            onChange={this.handleChange}
+          >
+            {labels[id].name}
+          </LabelButton>
         ))}
       </Container>
     );
