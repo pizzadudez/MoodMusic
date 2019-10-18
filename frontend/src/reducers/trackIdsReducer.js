@@ -3,7 +3,8 @@ import {
   TRACKS_SEARCH,
   MODIFY_TRACK_SELECTION,
   SELECT_ALL_TRACKS,
-  DESELECT_ALL_TRACKS
+  DESELECT_ALL_TRACKS,
+  FILTER_BY_PLAYLIST
 } from '../actions/types';
 
 const initialState = {
@@ -18,12 +19,22 @@ export default function(state = initialState, action) {
     case FETCH_TRACKS:
       return {
         ...state,
-        all: action.ids
+        all: action.ids,
+        filtered: action.ids
+      }
+    case FILTER_BY_PLAYLIST:
+      return {
+        ...state,
+        filtered: state.all.filter(id => 
+          action.tracks[id].playlist_ids.some(id => 
+            action.filter[id]
+          )
+        )
       }
     case TRACKS_SEARCH:
       return {
         ...state,
-        searchFiltered: state.all.filter(id => {
+        searchFiltered: state.filtered.filter(id => {
           const { name, artist, album } = action.tracks[id];
           const filter = action.payload.toLowerCase();
           return (

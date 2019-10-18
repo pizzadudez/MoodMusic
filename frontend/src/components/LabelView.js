@@ -6,7 +6,7 @@ import { addOrRemoveLabels, postChanges, modifyLabelSelection } from '../actions
 import LabelButton from './LabelButton';
 
 class LabelView extends Component {
-  handleChange = event => this.props.modifyLabelSelection(event.target.id)
+  handleChange = event => this.props.modifyLabelSelection(event.target.value)
   render() {
     const {
       labels,

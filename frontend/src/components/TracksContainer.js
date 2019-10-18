@@ -13,7 +13,8 @@ class TracksContainer extends Component {
     }
     const ids = trackIds.searchFiltered.length
       ? trackIds.searchFiltered
-      : trackIds.all;
+      : trackIds.filtered;
+
     return (
       <Wrapper>
         <TrackOperations />

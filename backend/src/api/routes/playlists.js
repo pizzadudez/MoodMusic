@@ -4,13 +4,13 @@ const validator = require('../../services/validator');
 const PlaylistModel = require('../../models/Playlist');
 const TrackModel = require('../../models/Track');
 const SpotifyService = require('../../services/spotify');
-const PlaylistService = require('../../services/playlists');
 const LabelService = require('../../services/labels');
+const PlaylistService = require('../../services/playlists');
 
-// Get all playlists as a map
+// Get all playlists (array of objects)
 router.get('/', async (req, res, next) => {
-  const map = await PlaylistService.map();
-  res.send(map);
+  const all = await PlaylistModel.getAll();
+  res.send(all);
 });
 // Update playlist data
 router.get('/check', async (req, res, next) => {

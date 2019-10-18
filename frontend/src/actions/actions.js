@@ -29,9 +29,18 @@ export const fetchData = () => async dispatch => {
   }).catch(err => console.log(err));
 
   const playlists = axios.get('/api/playlists').then(playlists => {
+    const playlistMap = ArrayToMap(playlists.data);
+    const playlistIds = playlists.data.map(item => item.id);
+    const types = playlistIds.reduce((obj, id) => {
+      const { mood_playlist } = playlistMap[id];
+      mood_playlist ? obj.custom.push(id) : obj.default.push(id);
+      return obj;
+    }, { 'default': [], 'custom': [] });
     dispatch({
       type: FETCH_PLAYLISTS,
-      payload: playlists.data,
+      map: playlistMap,
+      ids: playlistIds,
+      types: types,
     });
   }).catch(err => console.log(err));
 
@@ -145,3 +154,9 @@ export const postChanges = () => (dispatch, getState) => {
     type: CLEAR_LABEL_CHANGES,
   });
 };
+
+/* Helpers */
+const ArrayToMap = arr => arr.reduce((obj, item) => ({
+  ...obj,
+  [item.id]: item,
+}), {});

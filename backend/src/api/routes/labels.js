@@ -4,13 +4,10 @@ const validator = require('../../services/validator');
 const LabelModel = require('../../models/Label');
 const LabelsService = require('../../services/labels');
 
-
-// Get all labels as a map
+// Get all labels (array of objects)
 router.get('/labels', async (req, res, next) => {
-  // const map = await LabelsService.map();
-  // res.send(map);
-  const array = await LabelModel.getAll();
-  res.send(array);
+  const all = await LabelModel.getAll();
+  res.send(all);
 });
 // Create new label
 router.post('/labels', validator('createLabel'), async (req, res, next) => {

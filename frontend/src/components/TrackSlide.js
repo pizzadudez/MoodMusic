@@ -54,7 +54,7 @@ class TrackSlide extends Component {
 
 const mapStateToProps = state => ({
   trackIds: state.trackIds,
-  playlists: state.playlists.playlists,
+  playlists: state.playlists,
   labels: state.labels,
   labelIds: state.labelIds,
 });
