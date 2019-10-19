@@ -8,19 +8,18 @@ import PlaylistLabel from './PlaylistLabel';
 
 class TrackSlide extends Component {
   shouldComponentUpdate(nextProps) {
-    const { track, trackIds, labelIds, playlists } = this.props;
-    if (trackIds.selected[track.id] !== nextProps.trackIds.selected[track.id]) return true;
+    const { track, tracks } = this.props;
+    if (tracks.selected[track.id] !== nextProps.tracks.selected[track.id]) return true;
     if (track !== nextProps.track) return true;
     return false;
   }
   render() {
-    const { track, trackIds, labels, labelIds,
-      playlists, modifyTrackSelection } = this.props;
+    const { track, tracks, labels, playlists, modifyTrackSelection } = this.props;
     return (
       <Container>
         <input
           type="checkbox"
-          checked={trackIds.selected[track.id] ? true : false}
+          checked={tracks.selected[track.id] ? true : false}
           onChange={() => modifyTrackSelection(track.id)}
         />
         <Section>{track.name}</Section>
@@ -28,20 +27,20 @@ class TrackSlide extends Component {
         <Section>{track.album.name}</Section>
         <Section>{track.rating}</Section>
         <LabelsSection>
-          {labelIds.all.length ?
+          {labels.all.length ?
             track.label_ids.map(id => (
               <Label
                 key={id} 
-                label={labels[id]}
+                label={labels.map[id]}
               />
             ))
             : null
           }
-          {playlists[track.playlist_ids[0]] ?
+          {playlists.map[track.playlist_ids[0]] ?
             track.playlist_ids.map(id => (
               <PlaylistLabel
                 key={id}
-                playlist={playlists[id]}
+                playlist={playlists.map[id]}
               />
             ))
             : null
@@ -53,10 +52,18 @@ class TrackSlide extends Component {
 }
 
 const mapStateToProps = state => ({
-  trackIds: state.trackIds,
-  playlists: state.playlists,
-  labels: state.labels,
-  labelIds: state.labelIds,
+  tracks: { 
+    all: state.tracks.all,
+    selected: state.tracks.selected,
+  },
+  labels: { 
+    map: state.labels.map,
+    all: state.labels.all,
+  }, 
+  playlists: {
+    map: state.playlists.map,
+    all: state.playlists.all,
+  },
 });
 
 export default connect(

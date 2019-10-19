@@ -7,7 +7,7 @@ import { createLabel } from '../actions/actions';
 
 class FormLabelCreate extends Component {
   render() {
-    const { labels, labelIds, createLabel } = this.props;
+    const { labels, createLabel } = this.props;
     return (
       <Formik 
         // initialValues={}
@@ -24,8 +24,8 @@ class FormLabelCreate extends Component {
             </Field>
             {values.type === 'subgenre'
               ? <Field name="parent_id" component="select">
-                {labelIds.genres.map(id => (
-                  <option value={id}>{labels[id].name}</option>
+                {labels.genres.map(id => (
+                  <option value={id}>{labels.map[id].name}</option>
                 ))}
               </Field>
               : null
@@ -40,8 +40,10 @@ class FormLabelCreate extends Component {
 }
 
 const mapStateToProps = state => ({
-  labels: state.labels,
-  labelIds: state.labelIds,
+  labels: {
+    map: state.labels.map,
+    genres: state.labels.genres,
+  },
 });
 
 export default connect(mapStateToProps, { createLabel })(FormLabelCreate);

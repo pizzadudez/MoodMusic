@@ -23,12 +23,11 @@ class TrackOperations extends Component {
 }
 
 const mapStateToProps = state => ({
-  trackIds: state.tracks.trackIds,
+
 });
 
 export default connect(mapStateToProps, {
-  selectAllTracks,
-  deselectAllTracks,
+  selectAllTracks, deselectAllTracks,
 })(TrackOperations);
 
 const SelectButton = styled.button`

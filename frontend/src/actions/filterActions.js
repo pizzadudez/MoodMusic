@@ -10,8 +10,7 @@ export const filterByPlaylist = id => (dispatch, getState) => {
   });
   dispatch({
     type: FILTER_BY_PLAYLIST,
-    filter: getState().playlistIds.filter,
-    tracks: getState().tracks,
+    filter: getState().playlists.filter,
   });
 };
 

@@ -75,11 +75,10 @@ export const createLabel = json => dispatch => {
     .then(res => console.log(res))
     .catch(err => console.log(err));
 };
-export const tracksSearch = filter => (dispatch, getState) => {
+export const tracksSearch = filter => dispatch => {
   dispatch({
     type: TRACKS_SEARCH,
     payload: filter,
-    tracks: getState().tracks,
   });
 };
 
@@ -106,26 +105,25 @@ export const deselectAllLabels = () => dispatch => dispatch({
 
 
 export const addOrRemoveLabels = (addLabels = true) => (dispatch, getState) => {
-  const trackIdsSelectedMap = getState().trackIds.selected;
-  const trackIdsSelected = Object.keys(trackIdsSelectedMap)
-    .filter(id => trackIdsSelectedMap[id]);
-  const labelIdsSelectedMap = getState().labelIds.selected;
-  const labelIds = Object.keys(labelIdsSelectedMap)
-    .filter(id => labelIdsSelectedMap[id])
+  const tracksSelectedMap = getState().tracks.selected;
+  const tracksSelected = Object.keys(tracksSelectedMap)
+    .filter(id => tracksSelectedMap[id]);
+  const labelsSelectedMap = getState().labels.selected;
+  const labelsSelected = Object.keys(labelsSelectedMap)
+    .filter(id => labelsSelectedMap[id])
     .map(id => parseInt(id));
-  const tracks = getState().tracks
+  const tracks = getState().tracks.map;
   dispatch({
     type: SET_LABEL_CHANGES,
     addLabels: addLabels,
-    trackIds: trackIdsSelected,
-    labelIds: labelIds,
+    trackIds: tracksSelected,
+    labelIds: labelsSelected,
     tracks: tracks,
   })
   dispatch({
     type: UPDATE_TRACKS_LABELS,
     addLabels: addLabels,
-    trackIds: trackIdsSelected,
-    labelIds: labelIds,
+    labelIds: labelsSelected,
   });
   dispatch({
     type: DESELECT_ALL_LABELS,

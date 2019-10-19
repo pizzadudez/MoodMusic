@@ -2,18 +2,19 @@ import React, { Component } from 'react';
 import { connect } from 'react-redux';
 import styled from 'styled-components';
 
-import { addOrRemoveLabels, postChanges, modifyLabelSelection } from '../actions/actions';
+import {
+  addOrRemoveLabels,
+  postChanges,
+  modifyLabelSelection
+} from '../actions/actions';
 import LabelButton from './LabelButton';
 
 class LabelView extends Component {
   handleChange = event => this.props.modifyLabelSelection(event.target.value)
   render() {
-    const {
-      labels,
-      labelIds,
-      addOrRemoveLabels,
-      postChanges,
-    } = this.props;
+    const { labels, addOrRemoveLabels, postChanges, loadingFinished } = this.props;
+
+    if (!loadingFinished) return <Container>Loading</Container>;
     return (
       <Container>
         <button onClick={() => addOrRemoveLabels()}>Add Labels</button>
@@ -21,41 +22,41 @@ class LabelView extends Component {
         <button onClick={() => postChanges()}>Submit Changes</button>
 
         <p>Genres</p>
-        {labelIds.genres.map(id => (
-          <>
+        {labels.genres.map(id => (
+          <React.Fragment key={id}>
             <LabelButton
               key={id}
-              label={labels[id]}
-              checked={labelIds.selected[id] ? true : false}
+              label={labels.map[id]}
+              checked={labels.selected[id] ? true : false}
               onChange={this.handleChange}
             >
-              {labels[id].name}
+              {labels.map[id].name}
             </LabelButton>
-            {labelIds.subgenres[id]
-              ? labelIds.subgenres[id].map(id => (
+            {labels.subgenres[id]
+              ? labels.subgenres[id].map(id => (
                 <LabelButton
                   key={id}
-                  label={labels[id]}
-                  checked={labelIds.selected[id] ? true : false}
+                  label={labels.map[id]}
+                  checked={labels.selected[id] ? true : false}
                   onChange={this.handleChange}
                 >
-                  {labels[id].name}
+                  {labels.map[id].name}
                 </LabelButton>
               ))
               : null
             }
-          </>
+          </React.Fragment>
         ))}
 
         <p>Moods</p>
-        {labelIds.moods.map(id => (
+        {labels.moods.map(id => (
           <LabelButton
             key={id}
-            label={labels[id]}
-            checked={labelIds.selected[id] ? true : false}
+            label={labels.map[id]}
+            checked={labels.selected[id] ? true : false}
             onChange={this.handleChange}
           >
-            {labels[id].name}
+            {labels.map[id].name}
           </LabelButton>
         ))}
       </Container>
@@ -65,7 +66,7 @@ class LabelView extends Component {
 
 const mapStateToProps = state => ({
   labels: state.labels,
-  labelIds: state.labelIds,
+  loadingFinished: state.changes.loadingFinished,
 });
 
 export default connect(mapStateToProps, {

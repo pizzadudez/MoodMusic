@@ -20,7 +20,7 @@ class SearchBar extends Component {
 }
 
 const mapStateToProps = state => ({
-  tracks: state.tracks,
+
 });
 
 export default connect(mapStateToProps, { tracksSearch })(SearchBar);

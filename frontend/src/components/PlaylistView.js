@@ -8,15 +8,16 @@ import PlaylistFilter from './PlaylistFilter';
 class PlaylistView extends Component {
   handleChange = event => this.props.filterByPlaylist(event.target.value)
   render() {
-    const { playlists, playlistIds } = this.props;
+    const { playlists } = this.props;
     return (
       <Container>
         <p>Default Playlists</p>
-        {playlistIds.default.map(id => (
+        {playlists.default.map(id => (
           <PlaylistFilter
-            playlist={playlists[id]}
+            key={id}
+            playlist={playlists.map[id]}
             onChange={this.handleChange}
-            checked={playlistIds.filter[id] ? true : false}
+            checked={playlists.filter[id] ? true : false}
           />
         ))}
         <p>Custom Playlists</p>
@@ -26,8 +27,12 @@ class PlaylistView extends Component {
 }
 
 const mapStateToProps = state => ({
-  playlists: state.playlists,
-  playlistIds: state.playlistIds,
+  playlists: {
+    map: state.playlists.map,
+    default: state.playlists.default,
+    custom: state.playlists.custom,
+    filter: state.playlists.filter,
+  },
 });
 
 export default connect(mapStateToProps, {
