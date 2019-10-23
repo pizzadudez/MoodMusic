@@ -2,8 +2,7 @@ import axios from 'axios'
 import { 
   FETCH_TRACKS, 
   FETCH_PLAYLISTS, 
-  FETCH_LABELS, 
-  TRACKS_SEARCH, 
+  FETCH_LABELS,
   MODIFY_TRACK_SELECTION,
   SELECT_ALL_TRACKS,
   DESELECT_ALL_TRACKS,
@@ -67,7 +66,7 @@ export const fetchData = () => async dispatch => {
   await Promise.all([tracks, playlists, labels]);
   dispatch({
     type: LOADING_FINISHED,
-  })
+  });
 };
 
 export const createLabel = json => dispatch => {
@@ -75,21 +74,20 @@ export const createLabel = json => dispatch => {
     .then(res => console.log(res))
     .catch(err => console.log(err));
 };
-export const tracksSearch = filter => dispatch => {
-  dispatch({
-    type: TRACKS_SEARCH,
-    payload: filter,
-  });
-};
 
 // Track Selection
 export const modifyTrackSelection = id => dispatch => dispatch({
   type: MODIFY_TRACK_SELECTION,
   payload: id,
 });
-export const selectAllTracks = () => dispatch => dispatch({
-  type: SELECT_ALL_TRACKS,
-});
+export const selectAllTracks = () => (dispatch, getState) => {
+  const selected = getState().filter.tracks
+    .reduce((obj, id) => ({ ...obj, [id]: true }), {})
+  dispatch({
+    type: SELECT_ALL_TRACKS,
+    selected,
+  });
+};
 export const deselectAllTracks = () => dispatch => dispatch({
   type: DESELECT_ALL_TRACKS,
 });

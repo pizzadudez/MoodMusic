@@ -7,7 +7,7 @@ import TrackOperations from './TrackOperations';
 
 class TracksContainer extends Component {
   render() {
-    const { loadingFinished, tracks } = this.props;
+    const { loadingFinished, tracks, filtered } = this.props;
 
     if (!loadingFinished) return <Wrapper>Loading...</Wrapper>;
     const ids = tracks.searchFiltered.length
@@ -17,7 +17,7 @@ class TracksContainer extends Component {
       <Wrapper>
         <TrackOperations />
         <Container>
-          {ids.map(id => 
+          {filtered.map(id => 
             <TrackSlide key={id} track={tracks.map[id]} />
           )}
         </Container>
@@ -27,8 +27,9 @@ class TracksContainer extends Component {
 }
 
 const mapStateToProps = state => ({
-  tracks: state.tracks,
   loadingFinished: state.changes.loadingFinished,
+  tracks: state.tracks,
+  filtered: state.filter.tracks,
 });
 
 export default connect(mapStateToProps)(TracksContainer);

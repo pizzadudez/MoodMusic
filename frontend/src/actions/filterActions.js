@@ -1,34 +1,104 @@
 import {
   MODIFY_PLAYLIST_FILTER,
-  FILTER_BY_PLAYLIST,
   MODIFY_LABEL_FILTER,
+  SELECT_ALL_PLAYLIST_FILTERS,
+  DESELECT_ALL_PLAYLIST_FILTERS,
+  DESELECT_ALL_LABEL_FILTERS,
+  FILTER_BY_PLAYLIST,
   FILTER_BY_LABEL,
+  FILTER_BY_SEARCH,
+  MODIFY_SEARCH_FILTER,
+  REMOVE_SEARCH_FILTER,
 } from './types';
 
+// Playlist
 export const filterByPlaylist = id => (dispatch, getState) => {
   dispatch({
     type: MODIFY_PLAYLIST_FILTER,
-    payload: id,
+    id: id,
   });
   dispatch({
-    type: FILTER_BY_LABEL,
-    playlistFilter: getState().playlists.filter,
-    labelFilter: getState().labels.filter,
+    type: FILTER_BY_PLAYLIST,
+    tracks: {
+      map: getState().tracks.map,
+      all: getState().tracks.all,
+    }
   });
 };
-
-export const filterByLabel = id => (dispatch, getState) => {
+export const selectAllPlaylistFilters = () => (dispatch, getState) => {
   dispatch({
-    type: MODIFY_LABEL_FILTER,
-    payload: id,
-  })
+    type: SELECT_ALL_PLAYLIST_FILTERS,
+    ids: getState().playlists.all,
+    tracks: {
+      all: getState().tracks.all,
+    }
+  });
+  // No playlist filter required => filter next
   dispatch({
     type: FILTER_BY_LABEL,
-    playlistFilter: getState().playlists.filter,
-    labelFilter: getState().labels.filter,
+    tracks: {
+      map: getState().tracks.map,
+      all: getState().tracks.all,
+    }
+  });
+};
+export const deselectAllPlaylistFilters = () => dispatch => {
+  // No filtering required since we have no tracks
+  dispatch({
+    type: DESELECT_ALL_PLAYLIST_FILTERS,
+  });
+};
+// Label
+export const filterByLabel = id => (dispatch, getState) => {
+  const subgenres = getState().labels.subgenres;
+  dispatch({
+    type: MODIFY_LABEL_FILTER,
+    id: id,
+    ...subgenres[id] && { subgenreIds: subgenres[id] }
+  });
+  dispatch({
+    type: FILTER_BY_LABEL,
+    tracks: {
+      map: getState().tracks.map,
+    }
+  });
+};
+export const deselectAllLabelFilters = () => (dispatch, getState) => {
+  dispatch({
+    type: DESELECT_ALL_LABEL_FILTERS,
+    ids: getState().labels.all,
+  });
+  dispatch({
+    type: FILTER_BY_LABEL,
+    tracks: {
+      map: getState().tracks.map,
+    }
+  });
+};
+// Search Bar
+export const filterBySearch = filter => (dispatch, getState) => {
+  dispatch({
+    type: MODIFY_SEARCH_FILTER,
+    filter
+  });
+  dispatch({
+    type: FILTER_BY_SEARCH,
+    tracks: {
+      map: getState().tracks.map,
+    }
   })
-}
+};
+export const removeSearchFilter = () => (dispatch, getState) => {
+  dispatch({
+    type: REMOVE_SEARCH_FILTER,
+  });
+  dispatch({
+    type: FILTER_BY_SEARCH,
+    tracks: {
+      map: getState().tracks.map,
+    }
+  })
+};
 
-// const filterBySearch
 
-// const filterByRating
+// TODO: filterByRating ????

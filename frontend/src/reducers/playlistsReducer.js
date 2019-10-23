@@ -1,6 +1,5 @@
 import {
   FETCH_PLAYLISTS,
-  MODIFY_PLAYLIST_FILTER,
 } from '../actions/types';
 
 const initialState = {
@@ -8,7 +7,6 @@ const initialState = {
   all: [],
   default: [],
   custom: [],
-  filter: {},
 }
 
 export default function(state = initialState, action) {
@@ -25,14 +23,6 @@ export default function(state = initialState, action) {
           [id]: true,
         }), {})
       }
-    case MODIFY_PLAYLIST_FILTER:
-      return {
-        ...state,
-        filter: {
-          ...state.filter,
-          [action.payload]: !state.filter[action.payload]
-        }
-      } 
     default: 
       return state;
   }

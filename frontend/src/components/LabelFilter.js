@@ -5,7 +5,6 @@ export default class LabelFilter extends Component {
   shouldComponentUpdate(nextProps) {
     return !(nextProps.filter === this.props.filter)
   }
-  componentDidUpdate() {console.log('times')}
   render () {
     const { label, filter, onClick } = this.props;
     return(

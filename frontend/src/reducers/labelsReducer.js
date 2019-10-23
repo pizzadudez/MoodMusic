@@ -2,7 +2,6 @@ import {
   FETCH_LABELS,
   MODIFY_LABEL_SELECTION,
   DESELECT_ALL_LABELS,
-  MODIFY_LABEL_FILTER,
 } from "../actions/types";
 
 const initialState = {
@@ -12,7 +11,6 @@ const initialState = {
   moods: [],
   subgenres: {},
   selected: {},
-  filter: {},
 }
 
 export default (state = initialState, action) => {
@@ -39,24 +37,7 @@ export default (state = initialState, action) => {
         ...state,
         selected: {}
       }
-    case MODIFY_LABEL_FILTER:
-      return {
-        ...state,
-        filter: filterChange(state.filter, action.payload)
-      }
     default:
       return state;
-  }
-}
-
-const filterChange = (state, id) => {
-  if (state[id] === false) {
-    delete state[id];
-    return state;
-  } else {
-    return {
-      ...state,
-      [id]: state[id] === true ? false : true,
-    }
   }
 }

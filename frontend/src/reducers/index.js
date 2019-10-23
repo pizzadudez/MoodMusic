@@ -3,10 +3,12 @@ import tracksReducer from './tracksReducer';
 import labelsReducer from './labelsReducer';
 import playlistsReducer from './playlistsReducer';
 import changesReducer from './changesReducer';
+import filterReducer from './filterReducer';
 
 export default combineReducers({
   tracks: tracksReducer,
   labels: labelsReducer,
   playlists: playlistsReducer,
   changes: changesReducer,
+  filter: filterReducer,
 });
