@@ -6,6 +6,7 @@ import {
   DESELECT_ALL_TRACKS,
   FILTER_BY_PLAYLIST,
   UPDATE_TRACKS_LABELS,
+  FILTER_BY_LABEL,
 } from '../actions/types';
 
 const initialState = {
@@ -25,14 +26,29 @@ export default function(state = initialState, action) {
         all: action.ids,
         filtered: action.ids
       }
-    case FILTER_BY_PLAYLIST:
+    // TODO: filterPL { return filterLB(result) { return filterS(result)}}
+    case FILTER_BY_LABEL:
       return {
         ...state,
         filtered: state.all.filter(id => 
           state.map[id].playlist_ids.some(id => 
-            action.filter[id]
+            action.playlistFilter[id]
           )
-        )
+        ).filter(id => {
+          let includes = false;
+          let excludes = false;
+          const labels = state.map[id].label_ids;
+          const filters = action.labelFilter;
+          for (let i = 0; i < labels.length; i++){
+            if (filters[labels[i]] === false) {
+              excludes = true;
+              break;
+            } else if (filters[labels[i]] === true) {
+              includes = true;
+            }
+          }
+          return includes && !excludes;
+        })
       }
     case TRACKS_SEARCH:
       return {
@@ -68,7 +84,6 @@ export default function(state = initialState, action) {
         ...state,
         selected: {}
       }
-    //TODO
     case UPDATE_TRACKS_LABELS:
       return {
         ...state,

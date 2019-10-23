@@ -8,6 +8,7 @@ import FormLabelCreate from './components/FormLabelCreate';
 import TracksContainer from './components/TracksContainer';
 import LabelView from './components/LabelView';
 import PlaylistView from './components/PlaylistView';
+import LabelFilterView from './components/LabelFilterView';
 
 class App extends Component {
   constructor(props) {
@@ -18,9 +19,9 @@ class App extends Component {
     return (
       <Router>
         <Switch>
-          <Route path="/playlist">
+          <Route path="/labels">
             <Page
-              Sidebar={<PlaylistView />}
+              Sidebar={<LabelView />}
               Content={<TracksContainer />}
             />
           </Route>
@@ -30,9 +31,15 @@ class App extends Component {
               Content={<TracksContainer />}
             />    
           </Route>
+          <Route path="/manage/playlists">
+            <Page
+              Sidebar={<FormLabelCreate />}
+              Content={<TracksContainer />}
+            />    
+          </Route>
           <Route path="/">
             <Page 
-              Sidebar={<LabelView />}
+              Sidebar={<div><PlaylistView /> <LabelFilterView /> </div>}
               Content={<TracksContainer />}
             />
           </Route>

@@ -74,7 +74,6 @@ export default connect(mapStateToProps, {
 })(LabelView);
 
 const Container = styled.div`
-  grid-area: sidebar;
   width: 300px;
   height: 400px;
   background-color: palegoldenrod;

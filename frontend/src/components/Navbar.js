@@ -6,10 +6,10 @@ export default () => {
   return (
     <Nav>
       <Links>
-        <li><NavLink to="/"><button>Tracks</button></NavLink></li>
-        <li><NavLink to="/playlist"><button>Playlist</button></NavLink></li>
-        <li><NavLink to="/manage/playlists"><button>Manage</button></NavLink></li>
-        <li><NavLink to="/manage/labels"><button>Manage</button></NavLink></li>
+        <li><NavLink to="/"><button>Filter</button></NavLink></li>
+        <li><NavLink to="/labels"><button>Labels</button></NavLink></li>
+        <li><NavLink to="/manage/playlists"><button>Manage Playlists</button></NavLink></li>
+        <li><NavLink to="/manage/labels"><button>Manage Labels</button></NavLink></li>
       </Links>
     </Nav>
   );
