@@ -10,6 +10,6 @@
   - change rating
   - add/remove from playlists
 - [ ] Filtering Component
-  - filter by: tags/artist/album/ name
+  - filter by: playlist | labels | name/artist/album/stars
 - [ ] Playlist Tracks view
   - used for sorting tracks in a playlist

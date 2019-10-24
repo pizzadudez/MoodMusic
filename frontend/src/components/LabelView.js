@@ -17,10 +17,6 @@ class LabelView extends Component {
     if (!loadingFinished) return <Container>Loading</Container>;
     return (
       <Container>
-        <button onClick={() => addOrRemoveLabels()}>Add Labels</button>
-        <button onClick={() => addOrRemoveLabels(false)}>Remove Labels</button>
-        <button onClick={() => postChanges()}>Submit Changes</button>
-
         <p>Genres</p>
         {labels.genres.map(id => (
           <React.Fragment key={id}>
@@ -59,6 +55,10 @@ class LabelView extends Component {
             {labels.map[id].name}
           </LabelButton>
         ))}
+
+        <button onClick={() => addOrRemoveLabels()}>Add Labels</button>
+        <button onClick={() => addOrRemoveLabels(false)}>Remove Labels</button>
+        <button onClick={() => postChanges()}>Submit Changes</button>
       </Container>
     );
   }
@@ -76,5 +76,8 @@ export default connect(mapStateToProps, {
 const Container = styled.div`
   width: 300px;
   height: 400px;
-  background-color: palegoldenrod;
+  background-color: #292929;
+  z-index: 3;
+  position: absolute;
+  color: #bdbdbd;
 `;

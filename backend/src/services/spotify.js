@@ -88,11 +88,17 @@ exports.createPlaylist = async name => {
       id: res.id,
       name: res.name,
       snapshot_id: res.snapshot_id
-    }
+    };
     await PlaylistModel.create(playlist);
     return ({
       message: 'Successfully created new Playlist!',
-      playlist: playlist
+      playlist: {
+        ...playlist,
+        genre_id: null,
+        mood_playlist: 1,
+        changes: 0,
+        tracking: 0,
+      }
     });
   } catch (err) {
     console.log("Request error: " + err.error.message);

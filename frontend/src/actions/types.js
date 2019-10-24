@@ -38,3 +38,4 @@ export const FILTER_BY_SEARCH = 'FILTER_BY_SEARCH';
 
 // Playlist Management
 export const MODIFY_PLAYLIST_FIELD = 'MODIFY_PLAYLIST_FIELD';
+export const CREATE_PLAYLIST = 'CREATE_PLAYLIST';

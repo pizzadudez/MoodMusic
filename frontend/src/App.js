@@ -10,6 +10,7 @@ import LabelView from './components/LabelView';
 import PlaylistView from './components/PlaylistView';
 import LabelFilterView from './components/LabelFilterView';
 import PlaylistManager from './components/PlaylistManager';
+import FormPlaylistCreate from './components/FormPlaylistCreate';
 
 class App extends Component {
   constructor(props) {
@@ -28,7 +29,7 @@ class App extends Component {
           </Route>
           <Route path="/manage/playlists">
             <Page
-              Sidebar={<FormLabelCreate />}
+              Sidebar={<FormPlaylistCreate />}
               Content={<PlaylistManager />}
             />    
           </Route>

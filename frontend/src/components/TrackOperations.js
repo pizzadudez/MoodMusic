@@ -7,8 +7,17 @@ import {
   deselectAllTracks,
 } from '../actions/actions';
 import SearchBar from './SearchBar';
+import LabelView from './LabelView';
 
 class TrackOperations extends Component {
+  constructor(props) {
+    super(props);
+    this.state = {
+      showLabelMenu: false,
+    }
+  }
+  handleLabelMenu = () => 
+    this.setState({ showLabelMenu: ! this.state.showLabelMenu })
   render() {
     const { selectAllTracks, deselectAllTracks } = this.props;
 
@@ -17,7 +26,12 @@ class TrackOperations extends Component {
         <Button onClick={() => selectAllTracks()}>V</Button>
         <Button onClick={() => deselectAllTracks()}>X</Button>
         <SearchBar />
-        <Button>Add / Remove Labels</Button>
+        <div style={{position: 'relative'}}>
+          <Button onClick={this.handleLabelMenu}>Add / Remove Labels</Button>
+          {this.state.showLabelMenu ? (
+            <LabelView />
+          ) : null}
+        </div>
         <Button>Add / Remove Tracks</Button>
       </Container>
     );
@@ -36,5 +50,6 @@ const Button = styled.button`
   margin: 0 2px;
 `;
 const Container = styled.div`
-  height: 40px;
+  display: flex;
+  margin-bottom: 6px;
 `;

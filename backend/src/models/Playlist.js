@@ -46,9 +46,9 @@ exports.update = playlists => {
 exports.create = playlist => {
   return new Promise((resolve, reject) => {
     const sql = `INSERT INTO playlists (
-                 id, name, snapshot_id, mood_playlist)
-                 VALUES (?, ?, ?, ?)`;
-    const values = [playlist.id, playlist.name, playlist.snapshot_id, 1];
+                 id, name, snapshot_id, mood_playlist, changes)
+                 VALUES (?, ?, ?, ?, ?)`;
+    const values = [playlist.id, playlist.name, playlist.snapshot_id, 1, 0];
     db.run(sql, values, err => err ? reject(err) : resolve());
   });
 };
