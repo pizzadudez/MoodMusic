@@ -1,4 +1,4 @@
-import axios from 'axios'
+import axios from 'axios';
 import { 
   FETCH_TRACKS, 
   FETCH_PLAYLISTS, 
@@ -142,9 +142,11 @@ export const postChanges = () => (dispatch, getState) => {
   }));
 
   axios.post('api/labels/add', addLabelsBody)
-    .then(res => console.log(res));
+    .then(res => console.log(res))
+    .catch(err => console.log(err));
   axios.post('api/labels/remove', removeLabelsBody)
-    .then(res => console.log(res));
+    .then(res => console.log(res))
+    .catch(err => console.log(err));
 
   dispatch({
     type: CLEAR_LABEL_CHANGES,

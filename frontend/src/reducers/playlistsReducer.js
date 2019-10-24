@@ -1,5 +1,5 @@
 import {
-  FETCH_PLAYLISTS,
+  FETCH_PLAYLISTS, MODIFY_PLAYLIST_FIELD,
 } from '../actions/types';
 
 const initialState = {
@@ -18,10 +18,17 @@ export default function(state = initialState, action) {
         all: action.ids,
         default: action.types.default,
         custom: action.types.custom,
-        filter: action.ids.reduce((obj, id) => ({
-          ...obj,
-          [id]: true,
-        }), {})
+      }
+    case MODIFY_PLAYLIST_FIELD:
+      return {
+        ...state,
+        map: {
+          ...state.map,
+          [action.id]: {
+            ...state.map[action.id],
+            [action.field] : action.value,
+          }
+        }
       }
     default: 
       return state;

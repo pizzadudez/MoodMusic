@@ -14,9 +14,11 @@ class TrackOperations extends Component {
 
     return (
       <Container>
-        <SelectButton onClick={() => selectAllTracks()}>V</SelectButton>
-        <SelectButton onClick={() => deselectAllTracks()}>X</SelectButton>
+        <Button onClick={() => selectAllTracks()}>V</Button>
+        <Button onClick={() => deselectAllTracks()}>X</Button>
         <SearchBar />
+        <Button>Add / Remove Labels</Button>
+        <Button>Add / Remove Tracks</Button>
       </Container>
     );
   }
@@ -30,7 +32,7 @@ export default connect(mapStateToProps, {
   selectAllTracks, deselectAllTracks,
 })(TrackOperations);
 
-const SelectButton = styled.button`
+const Button = styled.button`
   margin: 0 2px;
 `;
 const Container = styled.div`

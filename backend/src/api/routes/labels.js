@@ -27,6 +27,10 @@ router.post('/labels/add', validator('addLabels'), async (req, res, next) => {
     res.status(422).json({errors: errors.array()});
     return;
   }
+  if (req.body.length < 1) {
+    res.status(400).json({ errors: 'Empty request' });
+    return;
+  }
   const message = await LabelModel.addLabels(req.body)
     .catch(err => {
       console.log(err);
@@ -39,6 +43,10 @@ router.post('/labels/remove', validator('addLabels'), async (req, res, next) => 
   const errors = validationResult(req);
   if (!errors.isEmpty()) {
     res.status(422).json({errors: errors.array()});
+    return;
+  }
+  if (req.body.length < 1) {
+    res.status(400).json({ errors: 'Empty request' });
     return;
   }
   const message = await LabelModel.removeLabels(req.body)
