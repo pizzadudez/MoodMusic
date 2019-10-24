@@ -2,6 +2,8 @@ import React from 'react';
 import { NavLink } from "react-router-dom";
 import styled from 'styled-components';
 
+import Button from './Button';
+
 export default () => {
   return (
     <Nav>
@@ -11,6 +13,12 @@ export default () => {
         <li><NavLink to="/manage/playlists"><button>Manage Playlists</button></NavLink></li>
         <li><NavLink to="/manage/labels"><button>Manage Labels</button></NavLink></li>
       </Links>
+      <a href="http://localhost:8888/auth" target="_blank">
+        <Button 
+          text={'Authorize'}
+          onClick={() => console.log('authTest')}
+        />
+      </a>
     </Nav>
   );
 };
@@ -19,6 +27,8 @@ const Nav = styled.nav`
   height: 50px;
   width: 100%;
   grid-area: navbar;
+  display: flex;
+  align-items: center;
 `;
 const Links = styled.ul`
   display: flex;

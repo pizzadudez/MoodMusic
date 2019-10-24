@@ -2,23 +2,23 @@
 
 - [x] Buffer() deprecation warning 
 - [ ] Eliminate useless track inserts (use hash maps to see what to not insert)
-- [ ] Handle playlists/tracks with over 100 songs (and playlists when over 20)
-- [ ] Handle songs removed from playlists
-  - [ ] Solution: delete all tracks_playlists relations if tracks no longer in playlist
+- [x] Handle playlists/tracks with over 100 songs (and playlists when over 20)
+- [x] Handle songs removed from playlists
+  - [x] Solution: delete all tracks_playlists relations if tracks no longer in playlist
   - [ ] Keep songs without playlsits (they will have their own 'pseudo playlist')
-- [ ] When Checking multiple playlists we get sql fk constraint fail
+- [x] When Checking multiple playlists we get sql fk constraint fail
 
 ## Ideas / Questions:
 
 - What determines if a song is new and requires attention?
-- How do I handle songs with multiple artists?
+- [x] How do I handle songs with multiple artists? A: only first artist
 - add all labels using the same post request (make sure to specify what type of label it is)
-- Give playlists a genre id: this way we automatically set the genre for a song
-- Store album images along side an Album table (will be useful for mp3 tagging too)
+- [x] Give playlists a genre id: this way we automatically set the genre for a song
+- [x] Store album images along side an Album table (will be useful for mp3 tagging too)
 - Store last playlist check somewhere
-- Think of Song ordering
-- Think of Song ratings and up/downvoting songs
-- Playlist default genres field (fk)
+- [x] Think of Song ordering
+- [x] Think of Song ratings and up/downvoting songs
+- [x] Playlist default genres field (fk)
 
 ## Steps:
 

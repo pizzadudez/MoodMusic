@@ -1,5 +1,5 @@
 ## Features:
-- auto refresh token
+- [x] auto refresh token
 
 ### Playlists:
 *track containers*:
@@ -16,7 +16,7 @@
 ## QUESTIONS:
 - should the app create non-mood playlists?
   - no
-- Playlist folders
+- Playlist folders A: not possible
 
 # Operations done in app:
 *Playlist*:
