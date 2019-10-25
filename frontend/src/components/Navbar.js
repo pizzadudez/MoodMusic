@@ -13,12 +13,10 @@ export default () => {
         <li><NavLink to="/manage/playlists"><button>Manage Playlists</button></NavLink></li>
         <li><NavLink to="/manage/labels"><button>Manage Labels</button></NavLink></li>
       </Links>
-      <a href="http://localhost:8888/auth" target="_blank">
-        <Button 
-          text={'Authorize'}
-          onClick={() => console.log('authTest')}
-        />
-      </a>
+      <Button 
+        text={'Check for Updates'}
+        onClick={() => console.log('update')}
+      />
     </Nav>
   );
 };

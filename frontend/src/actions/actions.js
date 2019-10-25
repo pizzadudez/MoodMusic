@@ -15,11 +15,9 @@ import {
 } from './types';
 
 export const fetchData = () => async dispatch => {
-  const tracks = axios.get('/api/tracks').then(tracks => {
-    const trackIds = tracks.data.map(track => track.id);
-    const trackMap = tracks.data.reduce((obj, track) => {
-      return { ...obj, [track.id]: track };
-    }, {});
+  const fetchTracks = axios.get('/api/tracks').then(res => {
+    const trackMap = arrayToMap(res.data);
+    const trackIds = res.data.map(track => track.id);
     dispatch({
       type: FETCH_TRACKS,
       ids: trackIds,
@@ -27,9 +25,9 @@ export const fetchData = () => async dispatch => {
     });
   }).catch(err => console.log(err));
 
-  const playlists = axios.get('/api/playlists').then(playlists => {
-    const playlistMap = ArrayToMap(playlists.data);
-    const playlistIds = playlists.data.map(item => item.id);
+  const fetchPlaylists = axios.get('/api/playlists').then(res => {
+    const playlistMap = arrayToMap(res.data);
+    const playlistIds = res.data.map(item => item.id);
     const types = playlistIds.reduce((obj, id) => {
       const { mood_playlist } = playlistMap[id];
       mood_playlist ? obj.custom.push(id) : obj.default.push(id);
@@ -43,11 +41,9 @@ export const fetchData = () => async dispatch => {
     });
   }).catch(err => console.log(err));
 
-  const labels = axios.get('/api/labels').then(labels => {
-    const labelMap = labels.data.reduce((obj, label) => {
-      return { ...obj, [label.id]: label};
-    }, {});
-    const labelIds = labels.data.map(label => label.id);
+  const fetchLabels = axios.get('/api/labels').then(res => {
+    const labelMap = arrayToMap(res.data);
+    const labelIds = res.data.map(label => label.id);
     const types = labelIds.reduce((obj, id) => {
       const { type, parent_id } = labelMap[id];
       type === 'subgenre'
@@ -63,7 +59,7 @@ export const fetchData = () => async dispatch => {
     });
   }).catch(err => console.log(err));
 
-  await Promise.all([tracks, playlists, labels]);
+  await Promise.all([fetchTracks, fetchPlaylists, fetchLabels]);
   dispatch({
     type: LOADING_FINISHED,
   });
@@ -154,7 +150,7 @@ export const postChanges = () => (dispatch, getState) => {
 };
 
 /* Helpers */
-const ArrayToMap = arr => arr.reduce((obj, item) => ({
+const arrayToMap = arr => arr.reduce((obj, item) => ({
   ...obj,
   [item.id]: item,
 }), {});

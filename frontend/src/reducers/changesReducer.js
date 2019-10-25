@@ -1,22 +1,15 @@
 import { 
   SET_LABEL_CHANGES,
   CLEAR_LABEL_CHANGES,
-  LOADING_FINISHED,
 } from '../actions/types';
 
 const initialState = {
-  loadingFinished: false,
   labelsToAdd: {},
   labelsToRemove: {},
 };
 
 export default (state = initialState, action) => {
   switch (action.type) {
-    case LOADING_FINISHED:
-      return {
-        ...state,
-        loadingFinished: true
-      }
     case SET_LABEL_CHANGES:
       return {
         ...state,

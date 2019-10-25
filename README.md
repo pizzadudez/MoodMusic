@@ -22,13 +22,14 @@
 - Update (name, color, parent_genre)
 - Color Picker
 
-# Filter Tracks
-1. By playlists
-2. By labels
+# Track Filter and Sort
+1. Filter by playlists
+2. Filter by labels
    - track must contain any *include* label
    - track must not contain any *exclude* labels
-2. By search
+3. Filter by search
    - track name, artist or album must contain the searched string
+- Sort Filtered tracks by: date_added, rating (default date_added from backend)
 
 # Track Operations
 - add/remove labels/playlists
@@ -43,7 +44,6 @@
     - upon add/remove click track attributes are locally updated
     - submit changes remotely immediately or after some more operations
 - Menu to change star rating (individual track or selection)
-- Sort Filtered tracks by: date_added, rating (default date_added from backend)
 
 
 # Features that might make it

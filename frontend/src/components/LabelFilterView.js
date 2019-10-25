@@ -61,7 +61,7 @@ class LabelFilterView extends Component {
 }
 
 const mapStateToProps = state => ({
-  loadingFinished: state.changes.loadingFinished,
+  loadingFinished: state.app.loadingFinished,
   labels: state.labels,
   filters: state.filter.labels,
 });

@@ -13,10 +13,14 @@ router.get('/', async (req, res, next) => {
 router.get('/check', async (req, res, next) => {
   try {
     await SpotifyService.refreshPlaylists();
-    const message = await SpotifyService.refreshTracks();
-    res.send(message);
+    const response = await SpotifyService.refreshTracks();
+    res.status(200).json(response);
   } catch (err) {
-    res.send(err);
+    console.log(err);
+    res.status(500).json({
+      message: 'Internal server error',
+      error: err
+    });
   }
 });
 // Add Tracks to Playlists

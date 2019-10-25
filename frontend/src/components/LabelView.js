@@ -66,7 +66,7 @@ class LabelView extends Component {
 
 const mapStateToProps = state => ({
   labels: state.labels,
-  loadingFinished: state.changes.loadingFinished,
+  loadingFinished: state.app.loadingFinished,
 });
 
 export default connect(mapStateToProps, {

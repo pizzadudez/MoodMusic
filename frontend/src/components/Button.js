@@ -3,7 +3,9 @@ import styled from 'styled-components';
 
 export default ({ text, onClick}) => {
   return (
-    <Button>
+    <Button
+      onClick={onClick}
+    >
       <span>{text}</span>
     </Button>
   );

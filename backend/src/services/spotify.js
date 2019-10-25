@@ -10,8 +10,11 @@ exports.refreshPlaylists = async () => {
   try {
     const userData = await UserModel.userData();
     const playlists = await getPlaylists(userData.user_id, userData.access_token);
-    await PlaylistModel.update(playlists);
-    return 'Tracked Playlists checked';
+    const res = await PlaylistModel.update(playlists);
+    return {
+      message: res.message,
+      ...res.changes && { playlists: await PlaylistModel.getAll() }
+    };
   } catch (err) {
     console.log("Playlist refresh error: " + err.error.message);
     return Promise.reject(err);
@@ -22,9 +25,11 @@ exports.refreshTracks = async () => {
   try {
     const playlists = await PlaylistModel.getAll();
     const playlistIds = playlists
-      .filter(pl => pl.tracking && !pl.changes && !pl.mood_playlist)
+      .filter(pl => pl.tracking && pl.changes && !pl.mood_playlist)
       .map(pl => pl.id);
-    if (!playlistIds.length) return 'No tracked playlists have changes.';
+    if (!playlistIds.length) return {
+      message: 'No tracked playlists have changes.',
+    };
     const token = (await UserModel.userData()).access_token;
     const playlistPromises = playlistIds.map(id => getPlaylistTracks(id, token));
     const playlistTracks = await Promise.all(playlistPromises);
@@ -60,8 +65,16 @@ exports.refreshTracks = async () => {
     await LabelModel.addLabels(tl);
 
     // Set the changes field to false on checked playlists
-    playlistIds.forEach(id => PlaylistModel.setChanges(id, 0));
-    return 'New Tracks Added!';
+    const changePromises = playlistIds.map(async id =>
+      PlaylistModel.setChanges(id, 0)
+    );
+    await Promise.all(changePromises);
+    
+    return {
+      message: 'Track library updated!',
+      playlists: await PlaylistModel.getAll(),
+      tracks: await TrackModel.getAll(),
+    }
   } catch (err) {
     console.log("Tracks refresh error: " + err);
     return Promise.reject(err);

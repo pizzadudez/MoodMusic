@@ -14,8 +14,16 @@ router.get('/', async (req, res, next) => {
 });
 // Update playlist data
 router.get('/check', async (req, res, next) => {
-  const message = await SpotifyService.refreshPlaylists();
-  res.send(message);
+  try {
+    const response = await SpotifyService.refreshPlaylists();
+    res.status(200).json(response);
+  } catch(err) {
+    console.log(err);
+    res.status(500).json({
+      message: 'Internal server error',
+      error: err
+    });
+  }
 });
 // Create new Spotify playlist
 router.post('/', validator('createPlaylist'), async (req, res, next) => {

@@ -2,6 +2,7 @@ const db = require('./db').conn();
 
 // Update Playlist model with up to date playlist data and inserts new ones.
 exports.update = playlists => {
+  let changes = false;
   const insertSQL = `INSERT INTO playlists (
                      id, name, snapshot_id, changes, tracking)
                      VALUES (?, ?, ?, ?, ?)`;
@@ -11,31 +12,41 @@ exports.update = playlists => {
   return new Promise((resolve, reject) => {
     db.serialize(() => {
       db.run("BEGIN TRANSACTION");
-      // INSERT || UPDATE
       playlists.forEach(pl => {
+        // Insert
         const values = [pl.id, pl.name, pl.snapshot_id, 1, 0];
         db.run(insertSQL, values, err => {
-          if (err && err.code === 'SQLITE_CONSTRAINT') {
-            const values = [pl.snapshot_id, 1, pl.id, pl.snapshot_id];
-            db.run(updateSQL, values, function(err) {
-              if (err) {
-                reject(err);
-              } else if (this.changes) {
-                console.log(`Playlist changed: '${pl.name}'`)
-              }
-            });
-          } else if (err) {
+          if (err && err.code !== 'SQLITE_CONSTRAINT') {
             reject(err);
-          } else {
+          } else if (!err) {
+            changes = true;
             console.log(`Playlist added: '${pl.name}'`);
+          }
+        });
+        // Update
+        const values2 = [pl.snapshot_id, 1, pl.id, pl.snapshot_id];
+        db.run(updateSQL, values2, function(err) {
+          if (err) {
+            reject(err);
+          } else if (this.changes) {
+            changes = true;
+            console.log(`Playlist changed: '${pl.name}'`)
           }
         });
       })
       db.run("COMMIT TRANSACTION", err => {
         if (err) {
           reject(err);
+        } else if (changes) {
+          resolve({
+            message: 'Playlists Updated!',
+            changes: true,
+          })
         } else {
-          resolve('Updated Playlist Model!')
+          resolve({
+            message: 'No Updates',
+            changes: false,
+          })
         }
       });
     });

@@ -27,7 +27,7 @@ class TracksContainer extends Component {
 }
 
 const mapStateToProps = state => ({
-  loadingFinished: state.changes.loadingFinished,
+  loadingFinished: state.app.loadingFinished,
   tracks: state.tracks,
   filtered: state.filter.tracks,
 });

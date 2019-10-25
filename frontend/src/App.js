@@ -2,7 +2,7 @@ import React, { Component } from 'react';
 import { connect } from 'react-redux';
 import { BrowserRouter as Router, Switch, Route } from "react-router-dom";
 
-import { fetchData } from './actions/actions';
+import { fetchData } from './actions/dataActions';
 import Page from './components/Page';
 import FormLabelCreate from './components/FormLabelCreate';
 import TracksContainer from './components/TracksContainer';
@@ -11,6 +11,7 @@ import PlaylistView from './components/PlaylistView';
 import LabelFilterView from './components/LabelFilterView';
 import PlaylistManager from './components/PlaylistManager';
 import FormPlaylistCreate from './components/FormPlaylistCreate';
+import Button from './components/Button';
 
 class App extends Component {
   constructor(props) {
@@ -18,6 +19,14 @@ class App extends Component {
     this.props.fetchData();
   }
   render() {
+    if (!this.props.authorized) return (
+      <a href="http://localhost:8888/auth">
+        <Button 
+          text={'Authorize'}
+          onClick={() => console.log('authTest')}
+        />
+      </a>
+    );
     return (
       <Router>
         <Switch>
@@ -51,4 +60,6 @@ class App extends Component {
   }
 };
 
-export default connect(null, { fetchData })(App);
+const mapStateToProps = state => ({ authorized: state.app.authorized })
+
+export default connect(mapStateToProps, { fetchData })(App);

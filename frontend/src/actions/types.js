@@ -1,8 +1,10 @@
-// fetch data
+// Initial Loading
+export const LOADING_FINISHED = 'LOADING_FINISHED';
+export const LOADING_STARTED = 'LOADING_STARTED';
+export const SET_AUTHORIZED = 'SET_AUTHORIZED';
 export const FETCH_TRACKS = 'FETCH_TRACKS';
 export const FETCH_PLAYLISTS = 'FETCH_PLAYLISTS';
 export const FETCH_LABELS = 'FETCH_LABELS';
-export const LOADING_FINISHED = 'LOADING_FINISHED';
 
 // Label CRUD
 export const CREATE_LABEL = 'CREATE_LABEL';

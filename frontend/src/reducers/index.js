@@ -4,11 +4,13 @@ import labelsReducer from './labelsReducer';
 import playlistsReducer from './playlistsReducer';
 import changesReducer from './changesReducer';
 import filterReducer from './filterReducer';
+import appReducer from './appReducer';
 
 export default combineReducers({
+  app: appReducer,
   tracks: tracksReducer,
-  labels: labelsReducer,
   playlists: playlistsReducer,
-  changes: changesReducer,
+  labels: labelsReducer,
   filter: filterReducer,
+  changes: changesReducer,
 });
