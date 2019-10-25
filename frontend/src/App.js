@@ -7,7 +7,7 @@ import Page from './components/Page';
 import FormLabelCreate from './components/FormLabelCreate';
 import TracksContainer from './components/TracksContainer';
 import LabelView from './components/LabelView';
-import PlaylistView from './components/PlaylistView';
+import PlaylistFilterView from './components/PlaylistFilterView';
 import LabelFilterView from './components/LabelFilterView';
 import PlaylistManager from './components/PlaylistManager';
 import FormPlaylistCreate from './components/FormPlaylistCreate';
@@ -50,7 +50,7 @@ class App extends Component {
           </Route>
           <Route path="/">
             <Page 
-              Sidebar={<div><PlaylistView /> <LabelFilterView /> </div>}
+              Sidebar={<div><PlaylistFilterView /> <LabelFilterView /> </div>}
               Content={<TracksContainer />}
             />
           </Route>

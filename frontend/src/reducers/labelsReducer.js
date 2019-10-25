@@ -48,7 +48,7 @@ export default (state = initialState, action) => {
         ...state,
         selected: {
           ...state.selected,
-          [action.payload]: !state.selected[action.payload]
+          [action.id]: !state.selected[action.id]
         }
       }
     case DESELECT_ALL_LABELS:

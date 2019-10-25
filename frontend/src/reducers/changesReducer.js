@@ -1,11 +1,14 @@
 import { 
   SET_LABEL_CHANGES,
   CLEAR_LABEL_CHANGES,
+  SET_TRACK_CHANGES,
 } from '../actions/types';
 
 const initialState = {
   labelsToAdd: {},
   labelsToRemove: {},
+  tracksToAdd: {},
+  tracksToRemove: {},
 };
 
 export default (state = initialState, action) => {
@@ -19,6 +22,16 @@ export default (state = initialState, action) => {
         labelsToRemove: !action.addLabels
           ? setLabelChanges(state.labelsToRemove, action) 
           : state.labelsToRemove,
+      }
+    case SET_TRACK_CHANGES:
+      return {
+        ...state,
+        tracksToAdd: action.addTracks
+          ? setTrackChanges(state.tracksToAdd, action)
+          : state.tracksToAdd,
+        tracksToRemove: !action.addTracks
+          ? setTrackChanges(state.tracksToRemove, action)
+          : state.tracksToRemove,
       }
     case CLEAR_LABEL_CHANGES:
       return {
@@ -48,5 +61,22 @@ const setLabelChanges = (state, action) => {
       }
     default:
       return state;
+  }
+};
+const setTrackChanges = (state, action) => {
+  switch (action.type) {
+    case SET_TRACK_CHANGES:
+      return {
+        ...state,
+        ...action.playlistIds.reduce((obj, playlistId) => ({
+          ...obj,
+          [playlistId]: [
+            ...state[playlistId] ? state[playlistId] : [],
+            ...action.trackIds.filter(id =>
+              action.addTracks !== action.tracks[id].playlist_ids.includes(playlistId)  
+            )
+          ]
+        }), {})
+      }
   }
 }

@@ -2,6 +2,7 @@ import {
   FETCH_PLAYLISTS,
   MODIFY_PLAYLIST_FIELD,
   CREATE_PLAYLIST,
+  MODIFY_PLAYLIST_SELECTION,
 } from '../actions/types';
 
 const initialState = {
@@ -9,6 +10,7 @@ const initialState = {
   all: [],
   default: [],
   custom: [],
+  selected: {},
 }
 
 export default function(state = initialState, action) {
@@ -41,6 +43,14 @@ export default function(state = initialState, action) {
         },
         all: [...state.all, action.playlist.id],
         custom: [...state.custom, action.playlist.id]
+      }
+    case MODIFY_PLAYLIST_SELECTION:
+      return {
+        ...state,
+        selected: {
+          ...state.selected,
+          [action.id]: !state.selected[action.id]
+        }
       }
     default: 
       return state;

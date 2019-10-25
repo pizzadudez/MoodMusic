@@ -4,6 +4,7 @@ import {
   SELECT_ALL_TRACKS,
   DESELECT_ALL_TRACKS,
   UPDATE_TRACKS_LABELS,
+  UPDATE_TRACKS_PLAYLISTS,
 } from '../actions/types';
 
 const initialState = {
@@ -52,6 +53,25 @@ export default function(state = initialState, action) {
                 label_ids: [
                   ...state.map[id].label_ids.filter(id => !action.labelIds.includes(id)),
                   ...action.addLabels ? action.labelIds : []
+                ]
+              }
+            }), {})
+        }
+      }
+    case UPDATE_TRACKS_PLAYLISTS:
+      return {
+        ...state,
+        map: {
+          ...state.map,
+          ...Object.keys(state.selected)
+            .filter(id => state.selected[id])
+            .reduce((obj, id) => ({
+              ...obj,
+              [id]: {
+                ...state.map[id],
+                playlist_ids: [
+                  ...state.map[id].playlist_ids.filter(id => !action.playlistIds.includes(id)),
+                  ...action.addPlaylists ? action.playlistIds : []
                 ]
               }
             }), {})

@@ -9,6 +9,9 @@ import {
   DESELECT_ALL_LABELS,
   MODIFY_LABEL_SELECTION,
   CREATE_LABEL,
+  MODIFY_PLAYLIST_SELECTION,
+  SET_TRACK_CHANGES,
+  UPDATE_TRACKS_PLAYLISTS,
 } from './types';
 
 export const createLabel = json => dispatch => {
@@ -41,11 +44,17 @@ export const deselectAllTracks = () => dispatch => dispatch({
 // Label Selection
 export const modifyLabelSelection = id => dispatch => dispatch({
   type: MODIFY_LABEL_SELECTION,
-  payload: id,
+  id,
 });
 export const deselectAllLabels = () => dispatch => dispatch({
-  type: DESELECT_ALL_LABELS
-})
+  type: DESELECT_ALL_LABELS,
+});
+
+// Playlist Selection
+export const modifyPlaylistSelection = id => dispatch => dispatch({
+  type: MODIFY_PLAYLIST_SELECTION,
+  id,
+});
 
 
 export const addOrRemoveLabels = (addLabels = true) => (dispatch, getState) => {
@@ -73,6 +82,27 @@ export const addOrRemoveLabels = (addLabels = true) => (dispatch, getState) => {
     type: DESELECT_ALL_LABELS,
   })
 };
+export const addOrRemoveToPlaylists = (addTracks = true) => (dispatch, getState) => {
+  const tracksSelectedMap = getState().tracks.selected;
+  const tracksSelected = Object.keys(tracksSelectedMap)
+    .filter(id => tracksSelectedMap[id]);
+  const playlistsSelectedMap = getState().playlists.selected;
+  const playlistsSelected = Object.keys(playlistsSelectedMap)
+    .filter(id => playlistsSelectedMap[id]);
+  const tracks = getState().tracks.map;
+  dispatch({
+    type: SET_TRACK_CHANGES,
+    addTracks: addTracks,
+    trackIds: tracksSelected,
+    playlistIds: playlistsSelected,
+    tracks: tracks,
+  });
+  dispatch({
+    type: UPDATE_TRACKS_PLAYLISTS,
+    addPlaylists: addTracks,
+    playlistIds: playlistsSelected,
+  })
+};
 
 export const postChanges = () => (dispatch, getState) => {
   const addLabelsMap = getState().changes.labelsToAdd;
@@ -98,3 +128,27 @@ export const postChanges = () => (dispatch, getState) => {
     type: CLEAR_LABEL_CHANGES,
   });
 };
+
+export const postChanges2 = () => (dispatch, getState) => {
+  const addTracksMap = getState().changes.tracksToAdd;
+  const removeTracksMap = getState().changes.tracksToRemove;
+
+  const addTracksBody = Object.keys(addTracksMap).map(playlistId => ({
+    playlist_id: playlistId,
+    tracks: addTracksMap[playlistId].filter(id => 
+      !removeTracksMap[playlistId] || !removeTracksMap[playlistId].includes(id)
+    )
+  }));
+  const removeTracksBody = Object.keys(removeTracksMap).map(playlistId => ({
+    playlist_id: playlistId,
+    tracks: removeTracksMap[playlistId].filter(id => 
+      !addTracksMap[playlistId] || !addTracksMap[playlistId].includes(id)  
+    )
+  }));
+  axios.post('api/tracks/add', addTracksBody)
+    .then(res => console.log(res))
+    .catch(err => console.log(err));
+  axios.post('api/tracks/remove', removeTracksBody)
+    .then(res => console.log(res))
+    .catch(err => console.log(err));
+}

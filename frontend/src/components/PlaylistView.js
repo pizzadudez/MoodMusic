@@ -3,52 +3,52 @@ import { connect } from 'react-redux';
 import styled from 'styled-components';
 
 import {
-  filterByPlaylist,
-  selectAllPlaylistFilters,
-  deselectAllPlaylistFilters,
-} from '../actions/filterActions';
+  addOrRemoveToPlaylists,
+  postChanges2,
+  modifyPlaylistSelection
+} from '../actions/actions';
 import PlaylistFilter from './PlaylistFilter';
 
 class PlaylistView extends Component {
-  handleChange = event => this.props.filterByPlaylist(event.target.value)
+  handleChange = event => this.props.modifyPlaylistSelection(event.target.value)
   render() {
-    const { playlists, filters, selectAllPlaylistFilters, 
-      deselectAllPlaylistFilters } = this.props;
+    const { playlists, addOrRemoveToPlaylists, postChanges2, loadingFinished } = this.props;
+    if (!loadingFinished) return <Container>Loading</Container>;
+
     return (
       <Container>
-        <p>Default Playlists</p>
-        <button onClick={() => selectAllPlaylistFilters()}>All</button>
-        <button onClick={() => deselectAllPlaylistFilters()}>None</button>
-        {playlists.default.map(id => (
+        <p>Mood Playlists</p>
+        {playlists.custom.map(id => (
           <PlaylistFilter
             key={id}
             playlist={playlists.map[id]}
+            checked={playlists.selected[id] ? true : false}
             onChange={this.handleChange}
-            checked={filters[id] ? true : false}
           />
         ))}
-        <p>Custom Playlists</p>
+
+        <button onClick={() => addOrRemoveToPlaylists()}>Add to Playlists</button>
+        <button onClick={() => addOrRemoveToPlaylists(false)}>Remove to Playlists</button>
+        <button onClick={() => postChanges2()}>Submit Changes</button>
       </Container>
     );
   }
 }
 
 const mapStateToProps = state => ({
-  playlists: {
-    map: state.playlists.map,
-    default: state.playlists.default,
-    custom: state.playlists.custom,
-    filter: state.playlists.filter,
-  },
-  filters: state.filter.playlists,
+  playlists: state.playlists,
+  loadingFinished: state.app.loadingFinished,
 });
 
 export default connect(mapStateToProps, {
-  filterByPlaylist, selectAllPlaylistFilters, deselectAllPlaylistFilters,
+  addOrRemoveToPlaylists, postChanges2, modifyPlaylistSelection,
 })(PlaylistView);
 
 const Container = styled.div`
-  height: 300px;
+  width: 300px;
+  height: 400px;
   background-color: #292929;
+  z-index: 3;
+  position: absolute;
   color: #bdbdbd;
 `;
