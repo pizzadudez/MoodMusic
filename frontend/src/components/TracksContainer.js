@@ -8,11 +8,8 @@ import TrackOperations from './TrackOperations';
 class TracksContainer extends Component {
   render() {
     const { loadingFinished, tracks, filtered } = this.props;
-
     if (!loadingFinished) return <Wrapper>Loading...</Wrapper>;
-    const ids = tracks.searchFiltered.length
-      ? tracks.searchFiltered
-      : tracks.filtered;
+    
     return (
       <Wrapper>
         <TrackOperations />

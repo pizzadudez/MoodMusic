@@ -1,8 +1,5 @@
 import axios from 'axios';
-import { 
-  FETCH_TRACKS, 
-  FETCH_PLAYLISTS, 
-  FETCH_LABELS,
+import {
   MODIFY_TRACK_SELECTION,
   SELECT_ALL_TRACKS,
   DESELECT_ALL_TRACKS,
@@ -11,64 +8,17 @@ import {
   CLEAR_LABEL_CHANGES,
   DESELECT_ALL_LABELS,
   MODIFY_LABEL_SELECTION,
-  LOADING_FINISHED,
+  CREATE_LABEL,
 } from './types';
 
-export const fetchData = () => async dispatch => {
-  const fetchTracks = axios.get('/api/tracks').then(res => {
-    const trackMap = arrayToMap(res.data);
-    const trackIds = res.data.map(track => track.id);
-    dispatch({
-      type: FETCH_TRACKS,
-      ids: trackIds,
-      map: trackMap,
-    });
-  }).catch(err => console.log(err));
-
-  const fetchPlaylists = axios.get('/api/playlists').then(res => {
-    const playlistMap = arrayToMap(res.data);
-    const playlistIds = res.data.map(item => item.id);
-    const types = playlistIds.reduce((obj, id) => {
-      const { mood_playlist } = playlistMap[id];
-      mood_playlist ? obj.custom.push(id) : obj.default.push(id);
-      return obj;
-    }, { 'default': [], 'custom': [] });
-    dispatch({
-      type: FETCH_PLAYLISTS,
-      map: playlistMap,
-      ids: playlistIds,
-      types: types,
-    });
-  }).catch(err => console.log(err));
-
-  const fetchLabels = axios.get('/api/labels').then(res => {
-    const labelMap = arrayToMap(res.data);
-    const labelIds = res.data.map(label => label.id);
-    const types = labelIds.reduce((obj, id) => {
-      const { type, parent_id } = labelMap[id];
-      type === 'subgenre'
-        ? obj[type][parent_id] = [...obj[type][parent_id] || [], id]
-        : obj[type].push(id);
-      return obj;
-    }, { 'genre': [], 'mood': [], 'subgenre': {} })
-    dispatch({
-      type: FETCH_LABELS,
-      ids: labelIds,
-      map: labelMap,
-      types: types,
-    });
-  }).catch(err => console.log(err));
-
-  await Promise.all([fetchTracks, fetchPlaylists, fetchLabels]);
-  dispatch({
-    type: LOADING_FINISHED,
-  });
-};
-
 export const createLabel = json => dispatch => {
-  axios.post('/api/labels', json)
-    .then(res => console.log(res))
-    .catch(err => console.log(err));
+  axios.post('/api/labels', json).then(res => {
+    console.log(res.data.label)
+    dispatch({
+      type: CREATE_LABEL,
+      label: res.data.label,
+    });
+  }).catch(err => console.log(err));
 };
 
 // Track Selection
@@ -148,9 +98,3 @@ export const postChanges = () => (dispatch, getState) => {
     type: CLEAR_LABEL_CHANGES,
   });
 };
-
-/* Helpers */
-const arrayToMap = arr => arr.reduce((obj, item) => ({
-  ...obj,
-  [item.id]: item,
-}), {});

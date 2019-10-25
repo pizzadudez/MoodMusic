@@ -9,8 +9,6 @@ import {
 const initialState = {
   map: {},
   all: [],
-  filtered: [],
-  searchFiltered: [],
   selected: {},
 };
 
@@ -21,7 +19,6 @@ export default function(state = initialState, action) {
         ...state,
         map: action.map,
         all: action.ids,
-        filtered: action.ids
       }
     case MODIFY_TRACK_SELECTION:
       return {

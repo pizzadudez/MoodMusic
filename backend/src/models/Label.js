@@ -25,18 +25,29 @@ exports.create = async label => {
       });
     });
     // Insert Label
-    const message = await new Promise((resolve, reject) => {
+    const response = await new Promise((resolve, reject) => {
       const sql = `INSERT INTO labels (type, name, color, parent_id)
                    VALUES(?, ?, ?, ?)`;
-      db.run(sql, values, err => err 
-        ? reject(err)
-        : resolve(`Created <${label.type}> label: '${label.name}'`));
+      db.run(sql, values, function(err) {
+        if (err) {
+          reject(err)
+        } else {
+          resolve({
+            message: `Created <${label.type}> label: '${label.name}'`,
+            label: {
+              id: this.lastID,
+              type: values[0],
+              name: values[1],
+              color: values[2],
+              parent_id: values[3],
+            }
+          });
+        }
+      });
     });
-    console.log(message);
-    return message;
+    return response;
   } catch (err) {
-    console.log(err)
-    return err;
+    return Promise.reject(err);
   }
 };
 // Update existing label

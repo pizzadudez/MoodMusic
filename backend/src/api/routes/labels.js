@@ -16,8 +16,15 @@ router.post('/labels', validator('createLabel'), async (req, res, next) => {
     res.status(422).json({errors: errors.array()});
     return;
   }
-  const message = await LabelModel.create(req.body);
-  res.send(message);
+  try {
+    const response = await LabelModel.create(req.body);
+    res.status(200).json(response);
+  } catch(err) {
+    console.log(err);
+    res.status(400).json({
+      error: err,
+    })
+  }
 });
 
 // Add Labels to Tracks
