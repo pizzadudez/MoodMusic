@@ -36,6 +36,23 @@ router.post('/', validator('createPlaylist'), async (req, res, next) => {
   const message = await SpotifyService.createPlaylist(req.body.name);
   res.send(message);
 });
+// Modify settings for multiple playlists
+router.patch('/', validator('modifyPlaylists'), async (req, res, next) => {
+  const errors = validationResult(req);
+  if (!errors.isEmpty()) {
+    res.status(422).json({errors: errors.array()});
+    return;
+  }
+  try{
+    await PlaylistModel.modifyMany(req.body);
+    const playlists = await PlaylistModel.getAll();
+    res.status(200).json({ message: 'Updated playlist settings!', playlists });
+  } catch (err) {
+    console.log(err);
+    res.status(500).json({ message: 'Internal Server Error' });
+  }
+});
+
 // Remove Spotify playlist
 router.delete('/:id', async (req, res, next) => {
   const message = await SpotifyService.deletePlaylist(req.params.id);

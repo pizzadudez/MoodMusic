@@ -52,10 +52,7 @@ class TrackSlide extends Component {
 }
 
 const mapStateToProps = state => ({
-  tracks: { 
-    all: state.tracks.all,
-    selected: state.tracks.selected,
-  },
+  tracks: { selected: state.tracks.selected },
   labels: { 
     map: state.labels.map,
     all: state.labels.all,

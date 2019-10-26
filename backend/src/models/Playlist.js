@@ -104,6 +104,40 @@ exports.modify = async (id, update) => {
     return err;
   }
 };
+// Modify multiple playlists (settings fields)
+exports.modifyMany = arr => {
+  return new Promise((resolve, reject) => {
+    db.serialize(() => {
+      db.run("BEGIN TRANSACTION");
+      arr.forEach(pl => {
+        // Add genre_id if it exists with validation
+        if (pl.genre_id) {
+          const sql = `UPDATE playlists SET genre_id=? WHERE id=? AND (
+                        SELECT 1 FROM labels WHERE id=? AND type='genre')`;
+          const values = [pl.genre_id, pl.playlist_id, pl.genre_id];
+          db.run(sql, values, err => err ? reject(Error(err)) : null);
+        }
+        // Add other fields normally
+        const fields = {
+          ...pl.tracking !== undefined && { tracking: +pl.tracking },
+          ...pl.mood_playlist !== undefined && { mood_playlist: +pl.mood_playlist }
+        };
+        if (!Object.values(fields).length) return;
+        const fieldsSQL = Object.keys(fields).map(key => key + '=?').join(', ');
+        const sql = "UPDATE playlists SET " + fieldsSQL + " WHERE id=?";
+        const values = [...Object.values(fields), pl.playlist_id];
+        db.run(sql, values, err => err ? reject(Error(err)) : null);
+      });
+      db.run("COMMIT TRANSACTION", err => {
+        if (err) {
+          reject(Error(err));
+        } else {
+          resolve('done');
+        }
+      });
+    });
+  });
+}
 // Set playlist 'changes' true/false
 exports.setChanges = (id, bool) => {
   return new Promise((resolve, reject) => {
@@ -127,15 +161,11 @@ exports.get = id => {
 /* Helper functions */
 // Checks if a given label_id is of type 'genre'
 const validGenreId = id => {
-  if (!id) { return Promise.resolve(true); }
+  if (!id) { return Promise.resolve(false); }
   return new Promise((resolve, reject) => {
     const sql = "SELECT 1 FROM labels WHERE id=? AND type='genre'";
     db.get(sql, id, (err, row) => {
-      if (row) {
-        resolve(true);
-      } else {
-        reject('Invalid genre_id');
-      }
+      row ? resolve(true) : resolve(false)
     });
   });
 };

@@ -47,6 +47,15 @@ const validate = method => {
         body('mood_playlist').optional().isBoolean()
       ]
     }
+    case 'modifyPlaylists': {
+      return [
+        body('').isArray().exists(),
+        body('*.playlist_id').exists(),
+        body('*.tracking').optional().isBoolean(),
+        body('*.genre_id').optional().isNumeric(),
+        body('*.mood_playlist').optional().isBoolean()
+      ]
+    }
     case 'rateTrack': {
       return [
         body('rating', 'Rating must be 0|1|2|3').isIn([0, 1, 2, 3])
