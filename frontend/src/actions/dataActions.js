@@ -53,11 +53,11 @@ const arrayToMap = arr => arr.reduce((obj, item) => ({
   ...obj,
   [item.id]: item,
 }), {});
-const parseTracks = tracks => ({
+export const parseTracks = tracks => ({
   map: arrayToMap(tracks),
   ids: tracks.map(obj => obj.id),
 });
-const parsePlaylists = playlists => {
+export const parsePlaylists = playlists => {
   const map = arrayToMap(playlists);
   const ids = playlists.map(obj => obj.id);
   const types = ids.reduce((obj, id) => {

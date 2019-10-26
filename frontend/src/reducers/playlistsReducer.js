@@ -23,17 +23,6 @@ export default function(state = initialState, action) {
         default: action.types.default,
         custom: action.types.custom,
       }
-    case MODIFY_PLAYLIST_FIELD:
-      return {
-        ...state,
-        map: {
-          ...state.map,
-          [action.id]: {
-            ...state.map[action.id],
-            [action.field] : action.value,
-          }
-        }
-      }
     case CREATE_PLAYLIST:
       return {
         ...state,

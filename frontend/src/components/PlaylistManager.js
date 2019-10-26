@@ -2,13 +2,15 @@ import React, { Component } from 'react';
 import { connect } from 'react-redux';
 import styled from 'styled-components';
 
+import { submitPlaylistChanges } from '../actions/playlistActions';
 import PlaylistManagerSlide from './PlaylistManagerSlide';
 
 class PlaylistManager extends Component {
   render() {
-    const { playlists } = this.props;
+    const { playlists, submitPlaylistChanges } = this.props;
     return (
       <Container>
+        <button onClick={() => submitPlaylistChanges()}>Submit Changes</button>
         {playlists.all.map(id => (
           <PlaylistManagerSlide
             key={id}
@@ -25,7 +27,7 @@ const mapStateToProps = state => ({
 });
 
 export default connect(mapStateToProps, {
-
+  submitPlaylistChanges,
 })(PlaylistManager);
 
 const Container = styled.div`

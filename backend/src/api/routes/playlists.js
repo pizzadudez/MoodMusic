@@ -44,9 +44,18 @@ router.patch('/', validator('modifyPlaylists'), async (req, res, next) => {
     return;
   }
   try{
-    await PlaylistModel.modifyMany(req.body);
+    const genreChanges = await PlaylistModel.modifyMany(req.body);
+    const applyGenreChanges = genreChanges.map(obj => {
+      LabelService.playlistGenre(obj.playlist_id, obj.genre_id);
+    })
+    await Promise.all(applyGenreChanges);
     const playlists = await PlaylistModel.getAll();
-    res.status(200).json({ message: 'Updated playlist settings!', playlists });
+    const tracks = genreChanges.length ? await TrackModel.getAll() : null;
+    res.status(200).json({
+      message: 'Updated playlist settings!',
+      playlists,
+      ...tracks && { tracks: tracks }
+    });
   } catch (err) {
     console.log(err);
     res.status(500).json({ message: 'Internal Server Error' });

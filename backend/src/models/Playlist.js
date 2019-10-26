@@ -71,6 +71,7 @@ exports.delete = id => {
   });
 };
 // Modify playlist fields (api call)
+// TODO: remove or change (no more async validation)
 exports.modify = async (id, update) => {
   try {
     // Check if playlist_id exists
@@ -107,6 +108,7 @@ exports.modify = async (id, update) => {
 // Modify multiple playlists (settings fields)
 exports.modifyMany = arr => {
   return new Promise((resolve, reject) => {
+    const genreChanges = []; // Store genre changes here
     db.serialize(() => {
       db.run("BEGIN TRANSACTION");
       arr.forEach(pl => {
@@ -115,7 +117,16 @@ exports.modifyMany = arr => {
           const sql = `UPDATE playlists SET genre_id=? WHERE id=? AND (
                         SELECT 1 FROM labels WHERE id=? AND type='genre')`;
           const values = [pl.genre_id, pl.playlist_id, pl.genre_id];
-          db.run(sql, values, err => err ? reject(Error(err)) : null);
+          db.run(sql, values, function(err) {
+            if (err) {
+              reject(Error(err));
+            } else if (this.changes) {
+              genreChanges.push({
+                playlist_id: pl.playlist_id,
+                genre_id: pl.genre_id,
+              });
+            }
+          });
         }
         // Add other fields normally
         const fields = {
@@ -132,7 +143,7 @@ exports.modifyMany = arr => {
         if (err) {
           reject(Error(err));
         } else {
-          resolve('done');
+          resolve(genreChanges);
         }
       });
     });

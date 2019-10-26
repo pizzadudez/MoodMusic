@@ -8,6 +8,33 @@ import DropDown from './Playlist/DropDown';
 import Switch from './Playlist/Switch';
 
 class PlaylistManagerSlide extends Component {
+  constructor(props) {
+    super(props);
+    const { genre_id, mood_playlist, tracking } = props.playlist;
+    this.state = {
+      genre_id,
+      mood_playlist,
+      tracking,
+    }
+  }
+  handleGenre = event => {
+    const { modifyPlaylistField, playlist } = this.props;
+    const value = event.target.value;
+    this.setState({ genre_id: value});
+    modifyPlaylistField(playlist.id, 'genre_id', value);
+  }
+  handleMoodPlaylist = event => {
+    const { modifyPlaylistField, playlist } = this.props;
+    const value = +event.target.checked;
+    this.setState({ mood_playlist: value});
+    modifyPlaylistField(playlist.id, 'mood_playlist', value);
+  }
+  handleTracking = event => {
+    const { modifyPlaylistField, playlist } = this.props;
+    const value = +event.target.checked;
+    this.setState({ tracking: value});
+    modifyPlaylistField(playlist.id, 'tracking', value);
+  }
   render() {
     const { playlist, labels, modifyPlaylistField } = this.props;
     return (
@@ -15,15 +42,15 @@ class PlaylistManagerSlide extends Component {
         <span>{playlist.name}</span>
         <DropDown 
           options={labels.genres}
-          onClick={event => modifyPlaylistField(playlist.id, 'genre_id', event.target.value)}
+          onClick={this.handleGenre}
         />
         <Switch 
-          checked={playlist.mood_playlist ? true : false}
-          onChange={event => modifyPlaylistField(playlist.id, 'mood_playlist', +event.target.checked)}
+          checked={this.state.mood_playlist ? true : false}
+          onChange={this.handleMoodPlaylist}
         />
         <Switch 
-          checked={playlist.tracking ? true : false}
-          onChange={event => modifyPlaylistField(playlist.id, 'tracking', +event.target.checked)}
+          checked={this.state.tracking ? true : false}
+          onChange={this.handleTracking}
         />
       </Container>
     );

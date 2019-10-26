@@ -2,6 +2,8 @@ import {
   SET_LABEL_CHANGES,
   CLEAR_LABEL_CHANGES,
   SET_TRACK_CHANGES,
+  MODIFY_PLAYLIST_FIELD,
+  CLEAR_PLAYLIST_CHANGES,
 } from '../actions/types';
 
 const initialState = {
@@ -9,6 +11,7 @@ const initialState = {
   labelsToRemove: {},
   tracksToAdd: {},
   tracksToRemove: {},
+  playlists: {},
 };
 
 export default (state = initialState, action) => {
@@ -38,6 +41,22 @@ export default (state = initialState, action) => {
         ...state,
         labelsToAdd: {},
         labelsToRemove: {},
+      }
+    case MODIFY_PLAYLIST_FIELD:
+      return {
+        ...state,
+        playlists: {
+          ...state.playlists,
+          [action.id]: {
+            ...state.playlists[action.id],
+            [action.field]: action.value,
+          }
+        }
+      }
+    case CLEAR_PLAYLIST_CHANGES:
+      return {
+        ...state,
+        playlists: {}
       }
     default:
       return state;
