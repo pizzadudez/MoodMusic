@@ -14,6 +14,9 @@ import {
   UPDATE_TRACKS_PLAYLISTS,
 } from './types';
 
+
+
+// TO: labelActions
 export const createLabel = json => dispatch => {
   axios.post('/api/labels', json).then(res => {
     console.log(res.data.label)
@@ -24,7 +27,9 @@ export const createLabel = json => dispatch => {
   }).catch(err => console.log(err));
 };
 
-// Track Selection
+
+
+// To: Track Actions or local state
 export const modifyTrackSelection = id => dispatch => dispatch({
   type: MODIFY_TRACK_SELECTION,
   payload: id,
@@ -41,6 +46,10 @@ export const deselectAllTracks = () => dispatch => dispatch({
   type: DESELECT_ALL_TRACKS,
 });
 
+
+
+
+//MIGHT REMOVE in favor of local state
 // Label Selection
 export const modifyLabelSelection = id => dispatch => dispatch({
   type: MODIFY_LABEL_SELECTION,
@@ -49,7 +58,6 @@ export const modifyLabelSelection = id => dispatch => dispatch({
 export const deselectAllLabels = () => dispatch => dispatch({
   type: DESELECT_ALL_LABELS,
 });
-
 // Playlist Selection
 export const modifyPlaylistSelection = id => dispatch => dispatch({
   type: MODIFY_PLAYLIST_SELECTION,
@@ -57,6 +65,9 @@ export const modifyPlaylistSelection = id => dispatch => dispatch({
 });
 
 
+
+
+// TO track ACTIONS
 export const addOrRemoveLabels = (addLabels = true) => (dispatch, getState) => {
   const tracksSelectedMap = getState().tracks.selected;
   const tracksSelected = Object.keys(tracksSelectedMap)
@@ -103,7 +114,6 @@ export const addOrRemoveToPlaylists = (addTracks = true) => (dispatch, getState)
     playlistIds: playlistsSelected,
   })
 };
-
 export const postChanges = () => (dispatch, getState) => {
   const addLabelsMap = getState().changes.labelsToAdd;
   const removeLabelsMap = getState().changes.labelsToRemove;
@@ -128,7 +138,6 @@ export const postChanges = () => (dispatch, getState) => {
     type: CLEAR_LABEL_CHANGES,
   });
 };
-
 export const postChanges2 = () => (dispatch, getState) => {
   const addTracksMap = getState().changes.tracksToAdd;
   const removeTracksMap = getState().changes.tracksToRemove;

@@ -7,9 +7,9 @@ import {
   postChanges2,
   modifyPlaylistSelection
 } from '../actions/actions';
-import PlaylistFilter from './PlaylistFilter';
+import PlaylistFilterButton from './PlaylistFilterButton';
 
-class PlaylistView extends Component {
+class PlaylistSelector extends Component {
   handleChange = event => this.props.modifyPlaylistSelection(event.target.value)
   render() {
     const { playlists, addOrRemoveToPlaylists, postChanges2, loadingFinished } = this.props;
@@ -19,7 +19,7 @@ class PlaylistView extends Component {
       <Container>
         <p>Mood Playlists</p>
         {playlists.custom.map(id => (
-          <PlaylistFilter
+          <PlaylistFilterButton
             key={id}
             playlist={playlists.map[id]}
             checked={playlists.selected[id] ? true : false}
@@ -42,7 +42,7 @@ const mapStateToProps = state => ({
 
 export default connect(mapStateToProps, {
   addOrRemoveToPlaylists, postChanges2, modifyPlaylistSelection,
-})(PlaylistView);
+})(PlaylistSelector);
 
 const Container = styled.div`
   width: 300px;

@@ -12,9 +12,8 @@ class Navbar extends Component {
       <Nav>
         <Links>
           <li><NavLink to="/"><button>Filter</button></NavLink></li>
-          <li><NavLink to="/labels"><button>Labels</button></NavLink></li>
-          <li><NavLink to="/manage/playlists"><button>Manage Playlists</button></NavLink></li>
-          <li><NavLink to="/manage/labels"><button>Manage Labels</button></NavLink></li>
+          <li><NavLink to="/playlists"><button>Manage Playlists</button></NavLink></li>
+          <li><NavLink to="/labels"><button>Manage Labels</button></NavLink></li>
         </Links>
         <Button 
           text={'Check for Updates'}

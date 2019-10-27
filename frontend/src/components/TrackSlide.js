@@ -4,7 +4,6 @@ import styled from 'styled-components';
 
 import { modifyTrackSelection } from '../actions/actions';
 import Label from './Label';
-import PlaylistLabel from './PlaylistLabel';
 
 class TrackSlide extends Component {
   shouldComponentUpdate(nextProps) {
@@ -14,7 +13,7 @@ class TrackSlide extends Component {
     return false;
   }
   render() {
-    const { track, tracks, labels, playlists, modifyTrackSelection } = this.props;
+    const { track, tracks, labels, playlists, modifyTrackSelection, onClick } = this.props;
     return (
       <Container>
         <input
@@ -26,6 +25,7 @@ class TrackSlide extends Component {
         <Section>{track.artist}</Section>
         <Section>{track.album.name}</Section>
         <Section>{track.rating}</Section>
+        <button onClick={onClick}>+</button>
         <LabelsSection>
           {labels.all.length ?
             track.label_ids.map(id => (
@@ -38,7 +38,7 @@ class TrackSlide extends Component {
           }
           {playlists.map[track.playlist_ids[0]] ?
             track.playlist_ids.map(id => (
-              <PlaylistLabel
+              <Label
                 key={id}
                 playlist={playlists.map[id]}
               />
@@ -80,6 +80,7 @@ const Container = styled.div`
     minmax(120px, 1fr)
     minmax(70px, 1fr)
     minmax(20px, 30px)
+    max-content
     minmax(30px, 3fr);
   align-items: center;
 `;

@@ -4,8 +4,23 @@ import styled from 'styled-components';
 
 import TrackSlide from './TrackSlide';
 import TrackOperations from './TrackOperations';
+import Modal from './Modal';
+import TrackManager from './TrackManager';
 
 class TracksContainer extends Component {
+  constructor(props) {
+    super(props);
+    this.state = {
+      trackManagerOpen: false,
+      trackId: null,
+    };
+  }
+  handleTrackManager(trackId) {
+    this.setState({
+      trackManagerOpen: !this.state.trackManagerOpen,
+      trackId: this.state.trackId ? null : trackId,
+    });
+  }
   render() {
     const { loadingFinished, tracks, filtered } = this.props;
     if (!loadingFinished) return <Wrapper>Loading...</Wrapper>;
@@ -15,9 +30,16 @@ class TracksContainer extends Component {
         <TrackOperations />
         <Container>
           {filtered.map(id => 
-            <TrackSlide key={id} track={tracks.map[id]} />
+            <TrackSlide key={id} track={tracks.map[id]} onClick={() => this.handleTrackManager(id)}/>
           )}
         </Container>
+        {this.state.trackManagerOpen ? (
+          <Modal onClick={() => this.handleTrackManager()}>
+            <TrackManager 
+              trackId={this.state.trackId}
+            />
+          </Modal>
+        ) : null}
       </Wrapper>
     );
   }

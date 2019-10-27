@@ -1,8 +1,7 @@
 import React, { Component } from 'react';
-import { connect } from 'react-redux';
 import styled from 'styled-components';
 
-class Modal extends Component {
+export default class Modal extends Component {
   render() {
     const { onClick, children} = this.props;
     return (
@@ -15,8 +14,6 @@ class Modal extends Component {
     );
   }
 }
-
-export default connect()(Modal);
 
 const Background = styled.div`
   position: fixed;

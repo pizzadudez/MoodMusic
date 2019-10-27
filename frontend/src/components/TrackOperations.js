@@ -7,16 +7,16 @@ import {
   deselectAllTracks,
 } from '../actions/actions';
 import SearchBar from './SearchBar';
-import LabelView from './LabelView';
-import PlaylistView from './PlaylistView';
+import LabelSelector from './LabelSelector';
+import PlaylistSelector from './PlaylistSelector';
 import Modal from './Modal';
 
 class TrackOperations extends Component {
   constructor(props) {
     super(props);
     this.state = {
-      label: <LabelView />,
-      playlist: <PlaylistView />,
+      label: <LabelSelector />,
+      playlist: <PlaylistSelector />,
       menu: null,
     }
   }

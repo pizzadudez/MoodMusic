@@ -7,9 +7,9 @@ import {
   postChanges,
   modifyLabelSelection
 } from '../actions/actions';
-import LabelButton from './LabelButton';
+import LabelSelectorButton from './LabelSelectorButton';
 
-class LabelView extends Component {
+class LabelSelector extends Component {
   handleChange = event => this.props.modifyLabelSelection(event.target.value)
   render() {
     const { labels, addOrRemoveLabels, postChanges, loadingFinished } = this.props;
@@ -20,24 +20,24 @@ class LabelView extends Component {
         <p>Genres</p>
         {labels.genres.map(id => (
           <React.Fragment key={id}>
-            <LabelButton
+            <LabelSelectorButton
               key={id}
               label={labels.map[id]}
               checked={labels.selected[id] ? true : false}
               onChange={this.handleChange}
             >
               {labels.map[id].name}
-            </LabelButton>
+            </LabelSelectorButton>
             {labels.subgenres[id]
               ? labels.subgenres[id].map(id => (
-                <LabelButton
+                <LabelSelectorButton
                   key={id}
                   label={labels.map[id]}
                   checked={labels.selected[id] ? true : false}
                   onChange={this.handleChange}
                 >
                   {labels.map[id].name}
-                </LabelButton>
+                </LabelSelectorButton>
               ))
               : null
             }
@@ -46,14 +46,14 @@ class LabelView extends Component {
 
         <p>Moods</p>
         {labels.moods.map(id => (
-          <LabelButton
+          <LabelSelectorButton
             key={id}
             label={labels.map[id]}
             checked={labels.selected[id] ? true : false}
             onChange={this.handleChange}
           >
             {labels.map[id].name}
-          </LabelButton>
+          </LabelSelectorButton>
         ))}
 
         <button onClick={() => addOrRemoveLabels()}>Add Labels</button>
@@ -71,7 +71,7 @@ const mapStateToProps = state => ({
 
 export default connect(mapStateToProps, {
   addOrRemoveLabels, postChanges, modifyLabelSelection,
-})(LabelView);
+})(LabelSelector);
 
 const Container = styled.div`
   width: 300px;

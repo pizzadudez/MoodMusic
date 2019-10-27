@@ -1,7 +1,7 @@
 import React, { Component } from 'react';
 import styled from 'styled-components';
 
-export default class LabelButton extends Component {
+export default class LabelSelectorButton extends Component {
   shouldComponentUpdate(nextProps) {
     return this.props.checked !== nextProps.checked ? true : false;
   }

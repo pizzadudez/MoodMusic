@@ -3,9 +3,9 @@ import { connect } from 'react-redux';
 import styled from 'styled-components';
 import _ from 'lodash';
 
-import { modifyPlaylistField } from '../actions/playlistActions';
-import DropDown from './Playlist/DropDown';
-import Switch from './Playlist/Switch';
+import { modifyPlaylistField } from '../../actions/playlistActions';
+import DropDown from './DropDown';
+import Switch from './Switch';
 
 class PlaylistManagerSlide extends Component {
   constructor(props) {

@@ -6,9 +6,8 @@ import { fetchData } from './actions/dataActions';
 import Page from './components/Page';
 import FormLabelCreate from './components/FormLabelCreate';
 import TracksContainer from './components/TracksContainer';
-import LabelView from './components/LabelView';
-import PlaylistFilterView from './components/PlaylistFilterView';
-import LabelFilterView from './components/LabelFilterView';
+import PlaylistFilter from './components/PlaylistFilter';
+import LabelFilter from './components/LabelFilter';
 import PlaylistManager from './components/PlaylistManager';
 import FormPlaylistCreate from './components/FormPlaylistCreate';
 import Button from './components/Button';
@@ -30,19 +29,13 @@ class App extends Component {
     return (
       <Router>
         <Switch>
-          <Route path="/labels">
-            <Page
-              Sidebar={<LabelView />}
-              Content={<TracksContainer />}
-            />
-          </Route>
-          <Route path="/manage/playlists">
+          <Route path="/playlists">
             <Page
               Sidebar={<FormPlaylistCreate />}
               Content={<PlaylistManager />}
             />    
           </Route>
-          <Route path="/manage/labels">
+          <Route path="/labels">
             <Page
               Sidebar={<FormLabelCreate />}
               Content={<TracksContainer />}
@@ -50,7 +43,7 @@ class App extends Component {
           </Route>
           <Route path="/">
             <Page 
-              Sidebar={<div><PlaylistFilterView /> <LabelFilterView /> </div>}
+              Sidebar={<div><PlaylistFilter /> <LabelFilter /> </div>}
               Content={<TracksContainer />}
             />
           </Route>

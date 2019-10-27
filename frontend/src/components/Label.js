@@ -2,10 +2,9 @@ import React from 'react';
 import styled from 'styled-components';
 
 export default (props) => {
-  if (!props.label) return null;
-  const { name } = props.label;
+  const { name } = props.label || props.playlist;
   return (
-    <Label>
+    <Label type={props.label ? 'label' : 'playlist'}>
       <Text>{name}</Text>
     </Label>
   );
@@ -14,7 +13,8 @@ export default (props) => {
 const Label = styled.div`
   height: 14px;
   max-width: 50px;
-  background-color: #be5dda;
+  background-color: ${props => 
+    props.type === 'label' ? '#6fb1c7' : '#be5dda'};
   padding: 3px;
   margin: 0 1px;
   display: flex;

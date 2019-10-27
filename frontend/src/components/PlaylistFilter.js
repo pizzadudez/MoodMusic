@@ -1,70 +1,54 @@
 import React, { Component } from 'react';
+import { connect } from 'react-redux';
 import styled from 'styled-components';
 
-export default class PlaylistFilter extends Component {
+import {
+  filterByPlaylist,
+  selectAllPlaylistFilters,
+  deselectAllPlaylistFilters,
+} from '../actions/filterActions';
+import PlaylistFilterButton from './PlaylistFilterButton';
+
+class PlaylistFilter extends Component {
+  handleChange = event => this.props.filterByPlaylist(event.target.value)
   render() {
-    const { playlist, checked, onChange } = this.props;
+    const { playlists, filters, selectAllPlaylistFilters, 
+      deselectAllPlaylistFilters } = this.props;
     return (
       <Container>
-        <Input 
-          id={'filter' + playlist.id}
-          value={playlist.id}
-          type="checkbox"
-          checked={checked}
-          onChange={onChange}
-        />
-        <Label 
-          htmlFor={'filter' + playlist.id}
-        >
-          <span>{playlist.name}</span>
-        </Label>
+        <p>Default Playlists</p>
+        <button onClick={() => selectAllPlaylistFilters()}>All</button>
+        <button onClick={() => deselectAllPlaylistFilters()}>None</button>
+        {playlists.default.map(id => (
+          <PlaylistFilterButton
+            key={id}
+            playlist={playlists.map[id]}
+            onChange={this.handleChange}
+            checked={filters[id] ? true : false}
+          />
+        ))}
+        <p>Custom Playlists</p>
       </Container>
     );
   }
 }
 
+const mapStateToProps = state => ({
+  playlists: {
+    map: state.playlists.map,
+    default: state.playlists.default,
+    custom: state.playlists.custom,
+    filter: state.playlists.filter,
+  },
+  filters: state.filter.playlists,
+});
+
+export default connect(mapStateToProps, {
+  filterByPlaylist, selectAllPlaylistFilters, deselectAllPlaylistFilters,
+})(PlaylistFilter);
+
 const Container = styled.div`
-  position: relative;
-  margin-bottom: 2px;
-`;
-
-const Label = styled.label`
-  position: relative;
-  user-select: none;
-  cursor: pointer;
-  &::before {
-    content: "";
-    opacity: 0;
-    width: 4px;
-    height: 100%;
-    position: absolute;
-    left: 0;
-    top: 0;
-    background-color: #3fe479;
-  }
-  span {
-    margin-left: 4px;
-    padding: 0 3px;
-  }
-  &:hover {
-    span {
-      color: white;
-    }
-  }
-`;
-
-const Input = styled.input`
-  position: absolute;
-  opacity: 0;
-  z-index: -1;
-  &:checked {
-    ~ label {
-      &::before {
-        opacity: 1;
-      }
-      span {
-        color: white;
-      }
-    }
-  }
+  height: 300px;
+  background-color: #292929;
+  color: #bdbdbd;
 `;

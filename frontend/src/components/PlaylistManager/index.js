@@ -2,7 +2,7 @@ import React, { Component } from 'react';
 import { connect } from 'react-redux';
 import styled from 'styled-components';
 
-import { submitPlaylistChanges } from '../actions/playlistActions';
+import { submitPlaylistChanges } from '../../actions/playlistActions';
 import PlaylistManagerSlide from './PlaylistManagerSlide';
 
 class PlaylistManager extends Component {
