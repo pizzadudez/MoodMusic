@@ -9,39 +9,36 @@ import {
 import SearchBar from './SearchBar';
 import LabelView from './LabelView';
 import PlaylistView from './PlaylistView';
+import Modal from './Modal';
 
 class TrackOperations extends Component {
   constructor(props) {
     super(props);
     this.state = {
-      showLabelMenu: false,
-      showPlaylistMenu: false,
+      label: <LabelView />,
+      playlist: <PlaylistView />,
+      menu: null,
     }
   }
-  handleLabelMenu = () => 
-    this.setState({ showLabelMenu: ! this.state.showLabelMenu })
-  handlePlaylistMenu = () =>
-    this.setState({ showPlaylistMenu: ! this.state.showPlaylistMenu })
+  handleClick(menuType) {
+    this.setState({
+      ...this.state.menu ? { menu: null } : { menu: menuType }
+    });
+  }
   render() {
     const { selectAllTracks, deselectAllTracks } = this.props;
-
     return (
       <Container>
         <Button onClick={() => selectAllTracks()}>V</Button>
         <Button onClick={() => deselectAllTracks()}>X</Button>
         <SearchBar />
-        <div style={{position: 'relative'}}>
-          <Button onClick={this.handleLabelMenu}>Add / Remove Labels</Button>
-          {this.state.showLabelMenu ? (
-            <LabelView />
-          ) : null}
-        </div>
-        <div style={{position: 'relative'}}>
-          <Button onClick={this.handlePlaylistMenu}>Add / Remove Playlists</Button>
-          {this.state.showPlaylistMenu ? (
-            <PlaylistView />
-          ) : null}
-        </div>
+        <Button onClick={() => this.handleClick('label')}>Add/Remove Labels</Button>
+        <Button onClick={() => this.handleClick('playlist')}>Add/Remove Playlists</Button>
+        {this.state.menu ? (
+          <Modal onClick={() => this.handleClick()}>
+            {this.state[this.state.menu]}
+          </Modal>
+        ) : null}
       </Container>
     );
   }

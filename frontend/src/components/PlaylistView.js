@@ -49,6 +49,5 @@ const Container = styled.div`
   height: 400px;
   background-color: #292929;
   z-index: 3;
-  position: absolute;
   color: #bdbdbd;
 `;

@@ -15,4 +15,5 @@ export default ({ text, onClick, highlight}) => {
 const Button = styled.button`
   ${props => props.highlight ? 'background-color: yellow' : ''};
   height: 36px;
+  cursor: pointer;
 `;
