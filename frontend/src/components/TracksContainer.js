@@ -30,16 +30,20 @@ class TracksContainer extends Component {
         <TrackOperations />
         <Container>
           {filtered.map(id => 
-            <TrackSlide key={id} track={tracks.map[id]} onClick={() => this.handleTrackManager(id)}/>
-          )}
-        </Container>
-        {this.state.trackManagerOpen ? (
-          <Modal onClick={() => this.handleTrackManager()}>
-            <TrackManager 
-              trackId={this.state.trackId}
+            <TrackSlide
+              key={id}
+              track={tracks.map[id]}
+              onClick={() => this.handleTrackManager(id)}
             />
-          </Modal>
-        ) : null}
+          )}
+          {this.state.trackManagerOpen ? (
+            <Modal onClick={() => this.handleTrackManager()}>
+              <TrackManager 
+                track={tracks.map[this.state.trackId]}
+              />
+            </Modal>
+          ) : null}
+        </Container>
       </Wrapper>
     );
   }

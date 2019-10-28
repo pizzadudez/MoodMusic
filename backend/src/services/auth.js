@@ -5,10 +5,15 @@ const UserModel = require('../models/User');
 // Spotify authorization uri
 exports.authUri = () => {
   const scope = [
-    'user-read-private',
-    'user-read-email',
     'user-library-read',
+    'user-library-modify',
+    //
     'playlist-modify-public',
+    'user-library-modify',
+    //
+    'user-modify-playback-state',
+    'user-read-playback-state',
+    'user-read-currently-playing',
   ].join(' ');
   const uri = 'https://accounts.spotify.com/authorize?' +
     'client_id=' + config.clientId + '&response_type=code' +

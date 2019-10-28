@@ -3,6 +3,7 @@ import { connect } from 'react-redux';
 import styled from 'styled-components';
 
 import { modifyTrackSelection } from '../actions/actions';
+import { playTrack } from '../actions/playerActions';
 import Label from './Label';
 
 class TrackSlide extends Component {
@@ -12,10 +13,12 @@ class TrackSlide extends Component {
     if (track !== nextProps.track) return true;
     return false;
   }
+  playTrackHandler = () => this.props.playTrack(this.props.track.id)
   render() {
     const { track, tracks, labels, playlists, modifyTrackSelection, onClick } = this.props;
     return (
       <Container>
+        <button onClick={this.playTrackHandler}>></button>
         <input
           type="checkbox"
           checked={tracks.selected[track.id] ? true : false}
@@ -63,10 +66,9 @@ const mapStateToProps = state => ({
   },
 });
 
-export default connect(
-  mapStateToProps,
-  { modifyTrackSelection, }
-)(TrackSlide);
+export default connect(mapStateToProps,{
+  modifyTrackSelection, playTrack, 
+})(TrackSlide);
 
 const Container = styled.div`
   background-color: #333333;
@@ -74,7 +76,8 @@ const Container = styled.div`
   border-bottom: 1px solid #272727;
   padding: 4px 16px;
   display: grid;
-  grid-template-columns: 
+  grid-template-columns:
+    max-content
     15px
     minmax(180px, 2fr)
     minmax(120px, 1fr)
