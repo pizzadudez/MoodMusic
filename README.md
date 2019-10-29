@@ -47,8 +47,9 @@
 
 
 # Features that might make it
-- Liked songs added and treated as special container playlist
-- Play button or fully integrated playback
+- [ ] Liked songs added and treated as special container playlist
+- [ ] Play button or fully integrated playback
+- [ ] Toasts
 - Query/filter based playlists that can be auto updated with fitting tracks
 - Mp3 file tag injection
 - Changes rollback (store snapshots of changes)

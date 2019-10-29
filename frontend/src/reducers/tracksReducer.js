@@ -44,18 +44,18 @@ export default function(state = initialState, action) {
         ...state,
         map: {
           ...state.map,
-          ...Object.keys(state.selected)
-            .filter(id => state.selected[id])
-            .reduce((obj, id) => ({
-              ...obj,
-              [id]: {
-                ...state.map[id],
-                label_ids: [
-                  ...state.map[id].label_ids.filter(id => !action.labelIds.includes(id)),
-                  ...action.addLabels ? action.labelIds : []
-                ]
-              }
-            }), {})
+          ...action.trackIds.reduce((obj, trackId) => ({
+            ...obj,
+            [trackId]: {
+              ...state.map[trackId],
+              label_ids: [
+                ...state.map[trackId].label_ids.filter(id => 
+                  !action.toRemove[trackId].includes(id)
+                  && !action.toAdd[trackId].includes(id)),
+                ...action.toAdd[trackId]
+              ]
+            }
+          }), {})
         }
       }
     case UPDATE_TRACKS_PLAYLISTS:
@@ -63,18 +63,20 @@ export default function(state = initialState, action) {
         ...state,
         map: {
           ...state.map,
-          ...Object.keys(state.selected)
-            .filter(id => state.selected[id])
-            .reduce((obj, id) => ({
-              ...obj,
-              [id]: {
-                ...state.map[id],
-                playlist_ids: [
-                  ...state.map[id].playlist_ids.filter(id => !action.playlistIds.includes(id)),
-                  ...action.addPlaylists ? action.playlistIds : []
-                ]
-              }
-            }), {})
+          ...action.trackIds.reduce((obj, trackId) => ({
+            ...obj,
+            [trackId]: {
+              ...state.map[trackId],
+              playlist_ids: [
+                ...state.map[trackId].playlist_ids.filter(id =>
+                  !(action.toRemove[id] && action.toRemove[id].includes(trackId))
+                  && !(action.toAdd[id] && action.toAdd[id].includes(trackId))),
+                ...Object.keys(action.toAdd).filter(id => 
+                  action.toAdd[id].includes(trackId)
+                  && !(action.toRemove[id] && action.toRemove[id].includes(trackId)))
+              ]
+            }
+          }), {})
         }
       }
     default:

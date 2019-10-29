@@ -1,35 +1,20 @@
 import axios from 'axios';
+import _ from 'lodash';
 import {
   MODIFY_TRACK_SELECTION,
   SELECT_ALL_TRACKS,
   DESELECT_ALL_TRACKS,
+
   SET_LABEL_CHANGES,
-  UPDATE_TRACKS_LABELS,
   CLEAR_LABEL_CHANGES,
-  DESELECT_ALL_LABELS,
-  MODIFY_LABEL_SELECTION,
-  CREATE_LABEL,
-  MODIFY_PLAYLIST_SELECTION,
+  UPDATE_TRACKS_LABELS,
+
   SET_TRACK_CHANGES,
+  CLEAR_TRACK_CHANGES,
   UPDATE_TRACKS_PLAYLISTS,
 } from './types';
 
-
-
-// TO: labelActions
-export const createLabel = json => dispatch => {
-  axios.post('/api/labels', json).then(res => {
-    console.log(res.data.label)
-    dispatch({
-      type: CREATE_LABEL,
-      label: res.data.label,
-    });
-  }).catch(err => console.log(err));
-};
-
-
-
-// To: Track Actions or local state
+// Track Selecting
 export const modifyTrackSelection = id => dispatch => dispatch({
   type: MODIFY_TRACK_SELECTION,
   payload: id,
@@ -46,26 +31,41 @@ export const deselectAllTracks = () => dispatch => dispatch({
   type: DESELECT_ALL_TRACKS,
 });
 
-
-
-
-//MIGHT REMOVE in favor of local state
-// Label Selection
-export const modifyLabelSelection = id => dispatch => dispatch({
-  type: MODIFY_LABEL_SELECTION,
-  id,
-});
-export const deselectAllLabels = () => dispatch => dispatch({
-  type: DESELECT_ALL_LABELS,
-});
-// Playlist Selection
-export const modifyPlaylistSelection = id => dispatch => dispatch({
-  type: MODIFY_PLAYLIST_SELECTION,
-  id,
-});
-
-
-
+//
+export const modifyTrackLabels = selectorState => (dispatch, getState) => {
+  const trackIds = Object.keys(_.pickBy(getState().tracks.selected));
+  dispatch({
+    type: SET_LABEL_CHANGES,
+    trackMap: getState().tracks.map,
+    trackIds,
+    toAdd: Object.keys(_.pickBy(selectorState.toAdd)).map(id => parseInt(id)),
+    toRemove: Object.keys(_.pickBy(selectorState.toRemove)).map(id => parseInt(id)),
+  });
+  const changes = getState().changes;
+  dispatch({
+    type: UPDATE_TRACKS_LABELS,
+    trackIds,
+    toAdd: changes.labelsToAdd,
+    toRemove: changes.labelsToRemove,
+  });
+};
+export const modifyPlaylistTracks = selectorState => (dispatch, getState) => {
+  const trackIds = Object.keys(_.pickBy(getState().tracks.selected));
+  dispatch({
+    type: SET_TRACK_CHANGES,
+    trackMap: getState().tracks.map,
+    trackIds,
+    toAdd: Object.keys(_.pickBy(selectorState.toAdd)),
+    toRemove: Object.keys(_.pickBy(selectorState.toRemove)),
+  });
+  const changes = getState().changes;
+  dispatch({
+    type: UPDATE_TRACKS_PLAYLISTS,
+    trackIds,
+    toAdd: changes.tracksToAdd,
+    toRemove: changes.tracksToRemove,
+  });
+}
 
 // TO track ACTIONS
 export const addOrRemoveLabels = (addLabels = true) => (dispatch, getState) => {
@@ -89,9 +89,6 @@ export const addOrRemoveLabels = (addLabels = true) => (dispatch, getState) => {
     addLabels: addLabels,
     labelIds: labelsSelected,
   });
-  dispatch({
-    type: DESELECT_ALL_LABELS,
-  })
 };
 export const addOrRemoveToPlaylists = (addTracks = true) => (dispatch, getState) => {
   const tracksSelectedMap = getState().tracks.selected;

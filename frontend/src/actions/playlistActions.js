@@ -1,7 +1,6 @@
 import axios from 'axios';
 import { parsePlaylists, parseTracks } from './dataActions';
 import {
-  MODIFY_PLAYLIST_FIELD,
   CREATE_PLAYLIST,
   FETCH_PLAYLISTS,
   FETCH_TRACKS,
@@ -16,14 +15,7 @@ export const createPlaylist = json => dispatch => {
     });
   }).catch(err => console.log(err));
 };
-export const modifyPlaylistField = (id, field, value) => dispatch => {
-  dispatch({
-    type: MODIFY_PLAYLIST_FIELD,
-    id,
-    field,
-    value
-  });
-};
+
 export const submitPlaylistChanges = () => (dispatch, getState) => {
   const changesMap = getState().changes.playlists;
   const json = Object.keys(changesMap).map(id => ({

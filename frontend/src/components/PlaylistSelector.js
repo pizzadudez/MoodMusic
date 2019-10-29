@@ -3,33 +3,59 @@ import { connect } from 'react-redux';
 import styled from 'styled-components';
 
 import {
-  addOrRemoveToPlaylists,
-  postChanges2,
-  modifyPlaylistSelection
-} from '../actions/actions';
-import PlaylistFilterButton from './PlaylistFilterButton';
+  modifyPlaylistTracks,
+} from '../actions/trackActions';
+import SelectorButton from './SelectorButton';
 
 class PlaylistSelector extends Component {
-  handleChange = event => this.props.modifyPlaylistSelection(event.target.value)
+  constructor(props) {
+    super(props);
+    this.state = {
+      toAdd: {},
+      toRemove: {},
+      adding: true,
+    };
+  }
+  handleSelect = event => {
+    const id = event.target.value;
+    const { adding, toAdd, toRemove } = this.state;
+    if (adding) {
+      toRemove[id] = false;
+      toAdd[id] = !toAdd[id];
+    } else {
+      toAdd[id] = false;
+      toRemove[id] = !toRemove[id];
+    }
+    this.setState({ toAdd, toRemove });
+  }
+  handleSwitch = () => this.setState({ adding: !this.state.adding })
+  handleUpdate = () => {
+    const { toAdd, toRemove } = this.state;
+    this.props.modifyPlaylistTracks({ toAdd, toRemove });
+  }
   render() {
-    const { playlists, addOrRemoveToPlaylists, postChanges2, loadingFinished } = this.props;
+    const { playlists, loadingFinished } = this.props;
+    const { toAdd, toRemove } = this.state;
     if (!loadingFinished) return <Container>Loading</Container>;
 
     return (
       <Container>
         <p>Mood Playlists</p>
         {playlists.custom.map(id => (
-          <PlaylistFilterButton
+          <SelectorButton
             key={id}
-            playlist={playlists.map[id]}
-            checked={playlists.selected[id] ? true : false}
-            onChange={this.handleChange}
+            id={id}
+            name={playlists.map[id].name}
+            checked={(toAdd[id] || toRemove[id]) ? true : false}
+            adding={toAdd[id]}
+            onChange={this.handleSelect}
           />
         ))}
 
-        <button onClick={() => addOrRemoveToPlaylists()}>Add to Playlists</button>
-        <button onClick={() => addOrRemoveToPlaylists(false)}>Remove to Playlists</button>
-        <button onClick={() => postChanges2()}>Submit Changes</button>
+        <button onClick={this.handleSwitch}
+          style={{backgroundColor: this.state.adding ? 'green' : 'red'}}
+        >Add/Remove</button>
+        <button onClick={this.handleUpdate}>Done</button>
       </Container>
     );
   }
@@ -41,7 +67,7 @@ const mapStateToProps = state => ({
 });
 
 export default connect(mapStateToProps, {
-  addOrRemoveToPlaylists, postChanges2, modifyPlaylistSelection,
+  modifyPlaylistTracks,
 })(PlaylistSelector);
 
 const Container = styled.div`

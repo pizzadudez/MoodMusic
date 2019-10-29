@@ -3,41 +3,66 @@ import { connect } from 'react-redux';
 import styled from 'styled-components';
 
 import {
-  addOrRemoveLabels,
-  postChanges,
-  modifyLabelSelection
-} from '../actions/actions';
-import LabelSelectorButton from './LabelSelectorButton';
+  modifyTrackLabels,
+} from '../actions/trackActions';
+import SelectorButton from './SelectorButton';
 
 class LabelSelector extends Component {
-  handleChange = event => this.props.modifyLabelSelection(event.target.value)
+  constructor(props) {
+    super(props);
+    this.state = {
+      toAdd: {},
+      toRemove: {},
+      adding: true,
+    };
+  }
+  handleSelect = event => {
+    const id = event.target.value;
+    const { adding, toAdd, toRemove } = this.state;
+    if (adding) {
+      toRemove[id] = false;
+      toAdd[id] = !toAdd[id];
+    } else {
+      toAdd[id] = false;
+      toRemove[id] = !toRemove[id];
+    }
+    this.setState({ toAdd, toRemove });
+  }
+  handleSwitch = () => this.setState({ adding: !this.state.adding })
+  handleUpdate = () => {
+    const { toAdd, toRemove } = this.state;
+    this.props.modifyTrackLabels({ toAdd, toRemove });
+  }
   render() {
-    const { labels, addOrRemoveLabels, postChanges, loadingFinished } = this.props;
-
+    const { labels, loadingFinished } = this.props;
+    const { toAdd, toRemove } = this.state;
     if (!loadingFinished) return <Container>Loading</Container>;
+    
     return (
       <Container>
         <p>Genres</p>
         {labels.genres.map(id => (
           <React.Fragment key={id}>
-            <LabelSelectorButton
+            <SelectorButton
               key={id}
-              label={labels.map[id]}
-              checked={labels.selected[id] ? true : false}
-              onChange={this.handleChange}
-            >
-              {labels.map[id].name}
-            </LabelSelectorButton>
+              id={id}
+              name={labels.map[id].name}
+              color={labels.map[id].color}
+              checked={(toAdd[id] || toRemove[id]) ? true : false}
+              adding={toAdd[id]}
+              onChange={this.handleSelect}
+            />
             {labels.subgenres[id]
               ? labels.subgenres[id].map(id => (
-                <LabelSelectorButton
+                <SelectorButton
                   key={id}
-                  label={labels.map[id]}
-                  checked={labels.selected[id] ? true : false}
-                  onChange={this.handleChange}
-                >
-                  {labels.map[id].name}
-                </LabelSelectorButton>
+                  id={id}
+                  name={labels.map[id].name}
+                  color={labels.map[id].color}
+                  checked={(toAdd[id] || toRemove[id]) ? true : false}
+                  adding={toAdd[id]}
+                  onChange={this.handleSelect}
+                />
               ))
               : null
             }
@@ -46,19 +71,20 @@ class LabelSelector extends Component {
 
         <p>Moods</p>
         {labels.moods.map(id => (
-          <LabelSelectorButton
+          <SelectorButton
             key={id}
-            label={labels.map[id]}
-            checked={labels.selected[id] ? true : false}
-            onChange={this.handleChange}
-          >
-            {labels.map[id].name}
-          </LabelSelectorButton>
+            id={id}
+            name={labels.map[id].name}
+            color={labels.map[id].color}
+            checked={(toAdd[id] || toRemove[id]) ? true : false}
+            adding={toAdd[id]}
+            onChange={this.handleSelect}
+          />
         ))}
-
-        <button onClick={() => addOrRemoveLabels()}>Add Labels</button>
-        <button onClick={() => addOrRemoveLabels(false)}>Remove Labels</button>
-        <button onClick={() => postChanges()}>Submit Changes</button>
+        <button onClick={this.handleSwitch}
+          style={{backgroundColor: this.state.adding ? 'green' : 'red'}}
+        >Add/Remove</button>
+        <button onClick={this.handleUpdate}>Done</button>
       </Container>
     );
   }
@@ -70,7 +96,7 @@ const mapStateToProps = state => ({
 });
 
 export default connect(mapStateToProps, {
-  addOrRemoveLabels, postChanges, modifyLabelSelection,
+  modifyTrackLabels,
 })(LabelSelector);
 
 const Container = styled.div`

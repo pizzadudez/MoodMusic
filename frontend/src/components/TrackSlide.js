@@ -2,7 +2,7 @@ import React, { Component } from 'react';
 import { connect } from 'react-redux';
 import styled from 'styled-components';
 
-import { modifyTrackSelection } from '../actions/actions';
+import { modifyTrackSelection } from '../actions/trackActions';
 import { playTrack } from '../actions/playerActions';
 import Label from './Label';
 

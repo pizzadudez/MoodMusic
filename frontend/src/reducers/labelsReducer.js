@@ -1,7 +1,5 @@
 import {
   FETCH_LABELS,
-  MODIFY_LABEL_SELECTION,
-  DESELECT_ALL_LABELS,
   CREATE_LABEL,
 } from "../actions/types";
 
@@ -11,7 +9,6 @@ const initialState = {
   genres: [],
   moods: [],
   subgenres: {},
-  selected: {},
 }
 
 export default (state = initialState, action) => {
@@ -42,19 +39,6 @@ export default (state = initialState, action) => {
             ]
           }
           : [...state[action.label.type + 's'], action.label.id]
-      }
-    case MODIFY_LABEL_SELECTION:
-      return {
-        ...state,
-        selected: {
-          ...state.selected,
-          [action.id]: !state.selected[action.id]
-        }
-      }
-    case DESELECT_ALL_LABELS:
-      return {
-        ...state,
-        selected: {}
       }
     default:
       return state;

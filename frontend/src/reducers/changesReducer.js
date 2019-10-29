@@ -2,7 +2,7 @@ import {
   SET_LABEL_CHANGES,
   CLEAR_LABEL_CHANGES,
   SET_TRACK_CHANGES,
-  MODIFY_PLAYLIST_FIELD,
+  CLEAR_TRACK_CHANGES,
   CLEAR_PLAYLIST_CHANGES,
 } from '../actions/types';
 
@@ -19,22 +19,14 @@ export default (state = initialState, action) => {
     case SET_LABEL_CHANGES:
       return {
         ...state,
-        labelsToAdd: action.addLabels 
-          ? setLabelChanges(state.labelsToAdd, action) 
-          : state.labelsToAdd,
-        labelsToRemove: !action.addLabels
-          ? setLabelChanges(state.labelsToRemove, action) 
-          : state.labelsToRemove,
+        labelsToAdd: setLabelChanges(state.labelsToAdd, action),
+        labelsToRemove: setLabelChanges(state.labelsToRemove, action, false),
       }
     case SET_TRACK_CHANGES:
       return {
         ...state,
-        tracksToAdd: action.addTracks
-          ? setTrackChanges(state.tracksToAdd, action)
-          : state.tracksToAdd,
-        tracksToRemove: !action.addTracks
-          ? setTrackChanges(state.tracksToRemove, action)
-          : state.tracksToRemove,
+        tracksToAdd: setTrackChanges(state.tracksToAdd, action),
+        tracksToRemove: setTrackChanges(state.tracksToRemove, action, false),
       }
     case CLEAR_LABEL_CHANGES:
       return {
@@ -42,17 +34,12 @@ export default (state = initialState, action) => {
         labelsToAdd: {},
         labelsToRemove: {},
       }
-    case MODIFY_PLAYLIST_FIELD:
-      return {
-        ...state,
-        playlists: {
-          ...state.playlists,
-          [action.id]: {
-            ...state.playlists[action.id],
-            [action.field]: action.value,
-          }
-        }
-      }
+    case CLEAR_TRACK_CHANGES:
+        return {
+          ...state,
+          tracksToAdd: {},
+          tracksToRemove: {},
+        }  
     case CLEAR_PLAYLIST_CHANGES:
       return {
         ...state,
@@ -63,7 +50,7 @@ export default (state = initialState, action) => {
   }
 }
 
-const setLabelChanges = (state, action) => {
+const setLabelChanges = (state, action, addLabels = true) => {
   switch (action.type) {
     case SET_LABEL_CHANGES:
       return {
@@ -72,30 +59,30 @@ const setLabelChanges = (state, action) => {
           ...obj,
           [trackId]: [
             ...state[trackId] ? state[trackId] : [],
-            ...action.labelIds.filter(id =>
-              action.addLabels !== action.tracks[trackId].label_ids.includes(id)
-            )
+            ...action[addLabels ? 'toAdd' : 'toRemove'].filter(id =>
+              addLabels !== action.trackMap[trackId].label_ids.includes(id))
+          ]
+        }), {})
+      }  
+    default:
+      return state;
+  }
+};
+const setTrackChanges = (state, action, addTracks = true) => {
+  switch (action.type) {
+    case SET_TRACK_CHANGES:
+      return {
+        ...state,
+        ...action[addTracks ? 'toAdd' : 'toRemove'].reduce((obj, playlistId) => ({
+          ...obj,
+          [playlistId] : [
+            ...state[playlistId] ? state[playlistId] : [],
+            ...action.trackIds.filter(id => 
+              addTracks !== action.trackMap[id].playlist_ids.includes(playlistId))
           ]
         }), {})
       }
     default:
       return state;
-  }
-};
-const setTrackChanges = (state, action) => {
-  switch (action.type) {
-    case SET_TRACK_CHANGES:
-      return {
-        ...state,
-        ...action.playlistIds.reduce((obj, playlistId) => ({
-          ...obj,
-          [playlistId]: [
-            ...state[playlistId] ? state[playlistId] : [],
-            ...action.trackIds.filter(id =>
-              action.addTracks !== action.tracks[id].playlist_ids.includes(playlistId)  
-            )
-          ]
-        }), {})
-      }
   }
 }

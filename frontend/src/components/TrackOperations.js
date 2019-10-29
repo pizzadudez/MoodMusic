@@ -5,7 +5,7 @@ import styled from 'styled-components';
 import {
   selectAllTracks,
   deselectAllTracks,
-} from '../actions/actions';
+} from '../actions/trackActions';
 import SearchBar from './SearchBar';
 import LabelSelector from './LabelSelector';
 import PlaylistSelector from './PlaylistSelector';

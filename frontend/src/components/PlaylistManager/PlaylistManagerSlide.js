@@ -3,7 +3,6 @@ import { connect } from 'react-redux';
 import styled from 'styled-components';
 import _ from 'lodash';
 
-import { modifyPlaylistField } from '../../actions/playlistActions';
 import DropDown from './DropDown';
 import Switch from './Switch';
 
@@ -18,25 +17,16 @@ class PlaylistManagerSlide extends Component {
     }
   }
   handleGenre = event => {
-    const { modifyPlaylistField, playlist } = this.props;
-    const value = event.target.value;
-    this.setState({ genre_id: value});
-    modifyPlaylistField(playlist.id, 'genre_id', value);
+    this.setState({ genre_id: event.target.value});
   }
   handleMoodPlaylist = event => {
-    const { modifyPlaylistField, playlist } = this.props;
-    const value = +event.target.checked;
-    this.setState({ mood_playlist: value});
-    modifyPlaylistField(playlist.id, 'mood_playlist', value);
+    this.setState({ mood_playlist: +event.target.checked});
   }
   handleTracking = event => {
-    const { modifyPlaylistField, playlist } = this.props;
-    const value = +event.target.checked;
-    this.setState({ tracking: value});
-    modifyPlaylistField(playlist.id, 'tracking', value);
+    this.setState({ tracking: +event.target.checked});
   }
   render() {
-    const { playlist, labels, modifyPlaylistField } = this.props;
+    const { playlist, labels } = this.props;
     return (
       <Container>
         <span>{playlist.name}</span>
@@ -65,7 +55,7 @@ const mapStateToProps = state => ({
 });
 
 export default connect(mapStateToProps, {
-  modifyPlaylistField,
+  
 })(PlaylistManagerSlide)
 
 const Container = styled.div`

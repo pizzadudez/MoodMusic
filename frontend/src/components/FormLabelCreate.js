@@ -3,7 +3,7 @@ import { connect } from 'react-redux';
 import { Formik, Field, Form, ErrorMessage } from 'formik';
 import styled from 'styled-components';
 
-import { createLabel } from '../actions/actions';
+import { createLabel } from '../actions/labelActions';
 
 class FormLabelCreate extends Component {
   render() {
