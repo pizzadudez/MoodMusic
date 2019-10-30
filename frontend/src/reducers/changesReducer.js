@@ -17,16 +17,26 @@ const initialState = {
 export default (state = initialState, action) => {
   switch (action.type) {
     case SET_LABEL_CHANGES:
-      return {
-        ...state,
-        labelsToAdd: setLabelChanges(state.labelsToAdd, action),
-        labelsToRemove: setLabelChanges(state.labelsToRemove, action, false),
-      }
+      return setLabelChanges(state, action)
     case SET_TRACK_CHANGES:
+      // return {
+      //   ...state,
+      //   tracksToAdd: {
+      //     ...state.tracksToAdd,
+      //     ...action.toAdd.reduce((obj, playlistId) => ({
+      //       ...obj,
+      //       [playlistId]: [
+      //         ...!state.tracksToAdd[playlistId] ? [] : state.tracksToAdd[playlistId].filter(id =>
+      //           !action.toRemove.includes(id))
+      //         ...action.track
+      //       ]
+      //     }), {})
+      //   }
+      // }
       return {
         ...state,
-        tracksToAdd: setTrackChanges(state.tracksToAdd, action),
-        tracksToRemove: setTrackChanges(state.tracksToRemove, action, false),
+        tracksToAdd: setTrackChangesOld(state.tracksToAdd, action),
+        tracksToRemove: setTrackChangesOld(state.tracksToRemove, action, false),
       }
     case CLEAR_LABEL_CHANGES:
       return {
@@ -50,7 +60,105 @@ export default (state = initialState, action) => {
   }
 }
 
-const setLabelChanges = (state, action, addLabels = true) => {
+// WORKING!
+const setLabelChanges = (state, action) => {
+  const { labelsToAdd, labelsToRemove } = state;
+  const newLabelsToAdd = {
+    ...labelsToAdd,
+    ...action.trackIds.reduce((obj, trackId) => ({
+      ...obj,
+      [trackId]: {
+        ...labelsToAdd[trackId],
+        ...action.toAdd.reduce((obj, labelId) => {
+          const labelIds = action.trackMap[trackId].label_ids;
+          const firstOperation = !labelsToRemove[trackId]
+            || labelsToRemove[trackId][labelId] === undefined;
+          if (!labelIds.includes(labelId) && firstOperation) {
+            obj[labelId] = true;
+          } else if (labelsToRemove[trackId][labelId]) {
+            labelsToRemove[trackId][labelId] = false;
+          }
+          return obj;
+        }, {})
+      }
+    }), {})
+  };
+  const newLabelsToRemove = {
+    ...labelsToRemove,
+    ...action.trackIds.reduce((obj, trackId) => ({
+      ...obj,
+      [trackId]: {
+        ...labelsToRemove[trackId],
+        ...action.toRemove.reduce((obj, labelId) => {
+          const labelIds = action.trackMap[trackId].label_ids;
+          const firstOperation = labelsToAdd[trackId][labelId] === undefined;
+          if (labelIds.includes(labelId) && firstOperation) {
+            obj[labelId] = true;
+          } else if (labelsToAdd[trackId][labelId]) {
+            newLabelsToAdd[trackId][labelId] = false;
+          }
+          return obj;
+        }, {})
+      }
+    }), {})
+  };
+  return {
+    ...state,
+    labelsToAdd: newLabelsToAdd,
+    labelsToRemove: newLabelsToRemove
+  }
+};
+
+
+
+
+// First try (works)
+const setLabelChangesFirst = (state, action) => {
+  const { labelsToAdd, labelsToRemove } = state;
+  const newLabelsToAdd = {
+    ...labelsToAdd,
+    ...action.trackIds.reduce((obj, trackId) => ({
+      ...obj,
+      [trackId]: {
+        ...labelsToAdd[trackId],
+        ...action.toAdd.reduce((obj, labelId) => {
+          if (labelsToRemove[trackId] && labelsToRemove[trackId][labelId]) {
+            labelsToRemove[trackId][labelId] = false;
+          } else if (!action.trackMap[trackId].label_ids.includes(labelId)
+           && (!labelsToRemove[trackId] || labelsToRemove[trackId][labelId] === undefined)) {
+            obj[labelId] = true;
+          }
+          return obj;
+        }, {})
+      }
+    }), {})
+  }
+  const newLabelsToRemove = {
+    ...labelsToRemove,
+    ...action.trackIds.reduce((obj, trackId) => ({
+      ...obj,
+      [trackId]: {
+        ...labelsToRemove[trackId],
+        ...action.toRemove.reduce((obj, labelId) => {
+          if (labelsToAdd[trackId] && labelsToAdd[trackId][labelId]) {
+            newLabelsToAdd[trackId][labelId] = false;
+          } else if (action.trackMap[trackId].label_ids.includes(labelId)
+           && (!labelsToAdd[trackId] || labelsToAdd[trackId][labelId] === undefined)) {
+            obj[labelId] = true;
+          }
+          return obj;
+        }, {})
+      }
+    }), {})
+  }
+  return {
+    ...state,
+    labelsToAdd: newLabelsToAdd,
+    labelsToRemove: newLabelsToRemove,
+  };
+};
+// Doesnt work with multiple add/remove operations
+const setLabelChangesOld = (state, action, addLabels = true) => {
   switch (action.type) {
     case SET_LABEL_CHANGES:
       return {
@@ -68,14 +176,14 @@ const setLabelChanges = (state, action, addLabels = true) => {
       return state;
   }
 };
-const setTrackChanges = (state, action, addTracks = true) => {
+const setTrackChangesOld = (state, action, addTracks = true) => {
   switch (action.type) {
     case SET_TRACK_CHANGES:
       return {
         ...state,
         ...action[addTracks ? 'toAdd' : 'toRemove'].reduce((obj, playlistId) => ({
           ...obj,
-          [playlistId] : [
+          [playlistId]: [
             ...state[playlistId] ? state[playlistId] : [],
             ...action.trackIds.filter(id => 
               addTracks !== action.trackMap[id].playlist_ids.includes(playlistId))

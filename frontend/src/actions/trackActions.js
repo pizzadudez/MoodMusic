@@ -31,7 +31,7 @@ export const deselectAllTracks = () => dispatch => dispatch({
   type: DESELECT_ALL_TRACKS,
 });
 
-//
+// Update locally and change reduce
 export const modifyTrackLabels = selectorState => (dispatch, getState) => {
   const trackIds = Object.keys(_.pickBy(getState().tracks.selected));
   dispatch({
@@ -41,12 +41,11 @@ export const modifyTrackLabels = selectorState => (dispatch, getState) => {
     toAdd: Object.keys(_.pickBy(selectorState.toAdd)).map(id => parseInt(id)),
     toRemove: Object.keys(_.pickBy(selectorState.toRemove)).map(id => parseInt(id)),
   });
-  const changes = getState().changes;
   dispatch({
     type: UPDATE_TRACKS_LABELS,
     trackIds,
-    toAdd: changes.labelsToAdd,
-    toRemove: changes.labelsToRemove,
+    toAdd: Object.keys(_.pickBy(selectorState.toAdd)).map(id => parseInt(id)),
+    toRemove: Object.keys(_.pickBy(selectorState.toRemove)).map(id => parseInt(id)),
   });
 };
 export const modifyPlaylistTracks = selectorState => (dispatch, getState) => {
@@ -65,9 +64,31 @@ export const modifyPlaylistTracks = selectorState => (dispatch, getState) => {
     toAdd: changes.tracksToAdd,
     toRemove: changes.tracksToRemove,
   });
-}
+};
+// Submit Updates Remotelly
+export const updateTrackLabels = () => async (dispatch, getState) => {
+  const { labelsToAdd, labelsToRemove } = getState().changes
+  const addBody = Object.keys(labelsToAdd).map(trackId => ({
+    track_id: trackId,
+    label_ids: Object.keys(_.pickBy(labelsToAdd[trackId])),
+  }));
+  const removeBody = Object.keys(labelsToRemove).map(trackId => ({
+    track_id: trackId,
+    label_ids: Object.keys(_.pickBy(labelsToRemove[trackId]))
+  }));
+  await axios.post('api/labels/add', addBody)
+    .then(res => console.log(res))
+    .catch(err => console.log(err))
+  await axios.post('api/labels/remove', removeBody)
+    .then(res => console.log(res))
+    .catch(err => console.log(err))
+  dispatch({ type: CLEAR_LABEL_CHANGES });
+};
 
-// TO track ACTIONS
+
+
+
+// OOOOLD
 export const addOrRemoveLabels = (addLabels = true) => (dispatch, getState) => {
   const tracksSelectedMap = getState().tracks.selected;
   const tracksSelected = Object.keys(tracksSelectedMap)

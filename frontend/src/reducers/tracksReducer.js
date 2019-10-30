@@ -50,9 +50,9 @@ export default function(state = initialState, action) {
               ...state.map[trackId],
               label_ids: [
                 ...state.map[trackId].label_ids.filter(id => 
-                  !action.toRemove[trackId].includes(id)
-                  && !action.toAdd[trackId].includes(id)),
-                ...action.toAdd[trackId]
+                  !action.toRemove.includes(id)
+                  && !action.toAdd.includes(id)),
+                ...action.toAdd
               ]
             }
           }), {})
