@@ -33,7 +33,8 @@ export const deselectAllTracks = () => dispatch => dispatch({
 
 // Update locally and change reduce
 export const modifyTrackLabels = selectorState => (dispatch, getState) => {
-  const trackIds = Object.keys(_.pickBy(getState().tracks.selected));
+  const trackIds = selectorState.trackId ? [selectorState.trackId]
+    : Object.keys(_.pickBy(getState().tracks.selected));
   dispatch({
     type: SET_LABEL_CHANGES,
     trackMap: getState().tracks.map,
@@ -49,7 +50,8 @@ export const modifyTrackLabels = selectorState => (dispatch, getState) => {
   });
 };
 export const modifyPlaylistTracks = selectorState => (dispatch, getState) => {
-  const trackIds = Object.keys(_.pickBy(getState().tracks.selected));
+  const trackIds = selectorState.trackId ? [selectorState.trackId]
+    : Object.keys(_.pickBy(getState().tracks.selected));
   dispatch({
     type: SET_TRACK_CHANGES,
     trackMap: getState().tracks.map,
