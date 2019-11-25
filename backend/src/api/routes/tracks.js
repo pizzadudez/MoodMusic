@@ -37,6 +37,7 @@ router.post('/add', validator('addTracks'), async (req, res, next) => {
     await TrackModel.addTracks(req.body);
     res.send('Tracks added to their coresponding playlists.')
   } catch (err) {
+    console.log(err);
     res.send(err);
   }
 });
@@ -52,6 +53,7 @@ router.post('/remove', validator('addTracks'), async (req, res, next) => {
     await TrackModel.removeTracks(req.body);
     res.send('Tracks removed from their coresponding playlists.')
   } catch (err) {
+    console.log(err);
     res.send(err);
   }
 });

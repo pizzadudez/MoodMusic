@@ -147,7 +147,7 @@ exports.addTracks = async playlistsTracks => {
     const token = (await UserModel.userData()).access_token;
     const requests = playlistsTracks.map(pl => {
       return new Promise(async (resolve, reject) => {
-        let uris = pl.tracks.map(id => "spotify:track:" + id);
+        let uris = pl.track_ids.map(id => "spotify:track:" + id);
         // Up to 100 tracks in one request
         while (uris.length) {
           const uriSegment = uris.splice(0, 100);
@@ -179,7 +179,7 @@ exports.removeTracks = async playlistsTracks => {
     const token = (await UserModel.userData()).access_token;
     const requests = playlistsTracks.map(pl => {
       return new Promise((resolve, reject) => {
-        const uris = pl.tracks.map(id => "spotify:track:" + id);
+        const uris = pl.track_ids.map(id => "spotify:track:" + id);
         // Up to 100 tracks in one request
         while (uris.length) {
           const uriSegment = uris.splice(0, 100);

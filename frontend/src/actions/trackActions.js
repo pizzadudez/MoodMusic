@@ -57,17 +57,17 @@ export const modifyPlaylistTracks = selectorState => (dispatch, getState) => {
     toAdd: Object.keys(_.pickBy(selectorState.toAdd)),
     toRemove: Object.keys(_.pickBy(selectorState.toRemove)),
   });
-  const changes = getState().changes;
+  // const changes = getState().changes;
   dispatch({
     type: UPDATE_TRACKS_PLAYLISTS,
     trackIds,
-    toAdd: changes.tracksToAdd,
-    toRemove: changes.tracksToRemove,
+    toAdd: Object.keys(_.pickBy(selectorState.toAdd)),
+    toRemove: Object.keys(_.pickBy(selectorState.toRemove)),
   });
 };
 // Submit Updates Remotelly
 export const updateTrackLabels = () => async (dispatch, getState) => {
-  const { labelsToAdd, labelsToRemove } = getState().changes
+  const { labelsToAdd, labelsToRemove } = getState().changes;
   const addBody = Object.keys(labelsToAdd).map(trackId => ({
     track_id: trackId,
     label_ids: Object.keys(_.pickBy(labelsToAdd[trackId])),
@@ -76,13 +76,39 @@ export const updateTrackLabels = () => async (dispatch, getState) => {
     track_id: trackId,
     label_ids: Object.keys(_.pickBy(labelsToRemove[trackId]))
   }));
-  await axios.post('api/labels/add', addBody)
-    .then(res => console.log(res))
-    .catch(err => console.log(err))
-  await axios.post('api/labels/remove', removeBody)
-    .then(res => console.log(res))
-    .catch(err => console.log(err))
+  if (addBody.length) {
+    await axios.post('api/labels/add', addBody)
+      .then(res => console.log(res))
+      .catch(err => console.log(err));
+  }
+  if (removeBody.length) {
+    await axios.post('api/labels/remove', removeBody)
+      .then(res => console.log(res))
+      .catch(err => console.log(err));
+  }
   dispatch({ type: CLEAR_LABEL_CHANGES });
+};
+export const updatePlaylistTracks = () => async (dispatch, getState) => {
+  const { tracksToAdd, tracksToRemove } = getState().changes;
+  const addBody = Object.keys(tracksToAdd).map(playlistId => ({
+    playlist_id: playlistId,
+    track_ids: Object.keys(_.pickBy(tracksToAdd[playlistId]))
+  }));
+  const removeBody = Object.keys(tracksToRemove).map(playlistId => ({
+    playlist_id: playlistId,
+    track_ids: Object.keys(_.pickBy(tracksToRemove[playlistId]))
+  }));
+  if (addBody.length) {
+    await axios.post('api/tracks/add', addBody)
+      .then(res => console.log(res))
+      .catch(err => console.log(err));
+  }
+  if (removeBody.length) {
+    await axios.post('api/tracks/remove', removeBody)
+      .then(res => console.log(res))
+      .catch(err => console.log(err));
+  }
+  dispatch({ type: CLEAR_TRACK_CHANGES });
 };
 
 

@@ -4,7 +4,7 @@ import { NavLink } from "react-router-dom";
 import styled from 'styled-components';
 
 import { fetchUpdates } from '../actions/dataActions';
-import { updateTrackLabels } from '../actions/trackActions';
+import { updateTrackLabels, updatePlaylistTracks } from '../actions/trackActions';
 import Button from './Button';
 
 class Navbar extends Component {
@@ -18,7 +18,10 @@ class Navbar extends Component {
         </Links>
         <Button
           text={'Submit Changes'}
-          onClick={() => this.props.updateTrackLabels()}
+          onClick={() => {
+            this.props.updateTrackLabels();
+            this.props.updatePlaylistTracks();
+          }}
         />
         <Button 
           text={'Check for Updates'}
@@ -37,7 +40,9 @@ const mapStateToProps = state => ({
   }),
 });
 
-export default connect(mapStateToProps, { fetchUpdates, updateTrackLabels })(Navbar);
+export default connect(mapStateToProps, {
+  fetchUpdates, updateTrackLabels, updatePlaylistTracks
+})(Navbar);
 
 const Nav = styled.nav`
   height: 50px;

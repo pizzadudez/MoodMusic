@@ -109,7 +109,7 @@ exports.addTracks = async playlistTracks => {
     db.serialize(() => {
       db.run("BEGIN TRANSACTION");
       playlistTracks.forEach(pl => {
-        pl.tracks.forEach((track, idx) => {
+        pl.track_ids.forEach((track, idx) => {
           // TracksObj or just TrackIds
           const track_id = typeof(track) === 'object' ? track.id : track;
           const added_at = typeof(track) === 'object' 
@@ -139,7 +139,7 @@ exports.removeTracks = playlistTracks => {
     db.serialize(() => {
       db.run("BEGIN TRANSACTION");
       playlistTracks.forEach(pl => {
-        pl.tracks.forEach(track => {
+        pl.track_ids.forEach(track => {
           // TracksObj or just TrackIds
           const track_id = typeof(track) === 'object' ? track.id : track;
           const values = [track_id, pl.playlist_id];

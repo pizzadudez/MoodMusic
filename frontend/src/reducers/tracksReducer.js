@@ -69,11 +69,9 @@ export default function(state = initialState, action) {
               ...state.map[trackId],
               playlist_ids: [
                 ...state.map[trackId].playlist_ids.filter(id =>
-                  !(action.toRemove[id] && action.toRemove[id].includes(trackId))
-                  && !(action.toAdd[id] && action.toAdd[id].includes(trackId))),
-                ...Object.keys(action.toAdd).filter(id => 
-                  action.toAdd[id].includes(trackId)
-                  && !(action.toRemove[id] && action.toRemove[id].includes(trackId)))
+                  !action.toRemove.includes(id)
+                  && !action.toAdd.includes(id)),
+                ...action.toAdd
               ]
             }
           }), {})

@@ -19,6 +19,7 @@ export default (state = initialState, action) => {
     case SET_LABEL_CHANGES:
       return setLabelChanges(state, action)
     case SET_TRACK_CHANGES:
+      return setTrackChanges(state, action)
       // return {
       //   ...state,
       //   tracksToAdd: {
@@ -33,11 +34,12 @@ export default (state = initialState, action) => {
       //     }), {})
       //   }
       // }
-      return {
-        ...state,
-        tracksToAdd: setTrackChangesOld(state.tracksToAdd, action),
-        tracksToRemove: setTrackChangesOld(state.tracksToRemove, action, false),
-      }
+
+      // return {
+      //   ...state,
+      //   tracksToAdd: setTrackChangesOld(state.tracksToAdd, action),
+      //   tracksToRemove: setTrackChangesOld(state.tracksToRemove, action, false),
+      // }
     case CLEAR_LABEL_CHANGES:
       return {
         ...state,
@@ -73,9 +75,10 @@ const setLabelChanges = (state, action) => {
           const labelIds = action.trackMap[trackId].label_ids;
           const firstOperation = !labelsToRemove[trackId]
             || labelsToRemove[trackId][labelId] === undefined;
+          // Only add if not previously marked for removal
           if (!labelIds.includes(labelId) && firstOperation) {
             obj[labelId] = true;
-          } else if (labelsToRemove[trackId][labelId]) {
+          } else if (!firstOperation) {
             labelsToRemove[trackId][labelId] = false;
           }
           return obj;
@@ -91,10 +94,12 @@ const setLabelChanges = (state, action) => {
         ...labelsToRemove[trackId],
         ...action.toRemove.reduce((obj, labelId) => {
           const labelIds = action.trackMap[trackId].label_ids;
-          const firstOperation = labelsToAdd[trackId][labelId] === undefined;
+          const firstOperation = !labelsToAdd[trackId]
+            || labelsToAdd[trackId][labelId] === undefined;
+          // Only remove if not previously marked for adding
           if (labelIds.includes(labelId) && firstOperation) {
             obj[labelId] = true;
-          } else if (labelsToAdd[trackId][labelId]) {
+          } else if (!firstOperation) {
             newLabelsToAdd[trackId][labelId] = false;
           }
           return obj;
@@ -108,7 +113,56 @@ const setLabelChanges = (state, action) => {
     labelsToRemove: newLabelsToRemove
   }
 };
-
+const setTrackChanges = (state, action) => {
+  const { tracksToAdd, tracksToRemove } = state;
+  const newTracksToAdd = {
+    ...tracksToAdd,
+    ...action.toAdd.reduce((obj, playlistId) => ({
+      ...obj,
+      [playlistId]: {
+        ...tracksToAdd[playlistId],
+        ...action.trackIds.reduce((obj, trackId) => {
+          const playlistIds = action.trackMap[trackId].playlist_ids;
+          const firstOperation = !tracksToRemove[playlistId]
+            || tracksToRemove[playlistId][trackId] === undefined;
+          // Only add track if not previously marked for removal
+          if (!playlistIds.includes(playlistId) && firstOperation) {
+            obj[trackId] = true;
+          } else if (!firstOperation) {
+            tracksToRemove[playlistId][trackId] = false;
+          }
+          return obj;
+        }, {})
+      }
+    }), {})
+  };
+  const newTracksToRemove = {
+    ...tracksToRemove,
+    ...action.toRemove.reduce((obj, playlistId) => ({
+      ...obj,
+      [playlistId]: {
+        ...tracksToRemove[playlistId],
+        ...action.trackIds.reduce((obj, trackId) => {
+          const playlistIds = action.trackMap[trackId].playlist_ids;
+          const firstOperation = !tracksToAdd[playlistId]
+            || tracksToAdd[playlistId][trackId] === undefined;
+          // Only remove track if not previously marked for adding
+          if (playlistIds.includes(playlistId) && firstOperation) {
+            obj[trackId] = true;
+          } else if (!firstOperation) {
+            newTracksToAdd[playlistId][trackId] = false;
+          }
+          return obj;
+        }, {})
+      }
+    }), {})
+  };
+  return {
+    ...state,
+    tracksToAdd: newTracksToAdd,
+    tracksToRemove: newTracksToRemove,
+  }
+};
 
 
 
