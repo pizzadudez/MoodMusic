@@ -4,6 +4,17 @@ const validator = require('../../services/validator');
 const SpotifyService = require('../../services/spotify');
 const TrackModel = require('../../models/Track');
 
+// Test Liked Tracks
+router.get('/liked', async (req, res, next) => {
+  try {
+    await SpotifyService.refreshLikedTracks();
+    res.status(200).json({ message: 'Success!' });
+  } catch (err) {
+    console.log(err);
+    res.status(500).json({ message: 'Internal server error' });
+  }
+});
+
 // Get all track objects (full)
 router.get('/', async (req, res, next) => {
   const message = await TrackModel.getAll();

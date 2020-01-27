@@ -1,9 +1,8 @@
-const request = require('request');
+const request = require('request-promise-native');
 const UserModel = require('../models/User');
 const PlaylistModel = require('../models/Playlist');
 const TrackModel = require('../models/Track');
 const LabelModel = require('../models/Label');
-const AlbumModel = require('../models/Album');
 
 // Request up to date playlist data from Spotify
 exports.refreshPlaylists = async () => {
@@ -34,18 +33,6 @@ exports.refreshTracks = async () => {
     const playlistPromises = playlistIds.map(id => getPlaylistTracks(id, token));
     const playlistTracks = await Promise.all(playlistPromises);
 
-    // albums
-    const allAlbums = playlistTracks.reduce((map, pl) => {
-      pl.tracks.forEach(track => {
-        map[track.album_id] = map[track.album_id] || {
-          'id': track.album_id,
-          'name': track.album_name,
-          'images': track.album_images
-        };
-      });
-      return map;
-    }, {})
-    await AlbumModel.newAlbums(allAlbums);
     // tracks
     const allTracks = playlistTracks.reduce((arr, pl) => [...arr, ...pl.tracks], []);
     await TrackModel.newTracks(allTracks);
@@ -80,6 +67,34 @@ exports.refreshTracks = async () => {
     return Promise.reject(err);
   }
 };
+// Get new Liked Tracks (from <Liked Songs> 'playlist')
+const refreshLikedTracks = async ({token, nextUrl, tracks = []} = {}) => {
+  token = token ? token : (await UserModel.userData()).access_token;
+  const response = await request.get({
+    url: nextUrl
+      ? nextUrl
+      : 'https://api.spotify.com/v1/me/tracks?limit=50',
+    headers: { 'Authorization': 'Bearer ' + token },
+    json: true
+  });
+  const pageTracks = response.items.map(obj => ({
+    id: obj.track.id,
+    name: obj.track.name,
+    artist: obj.track.artists[0].name,
+    album_id: obj.track.album.id,
+    added_at: obj.added_at,
+    album_name: obj.track.album.name,
+    album_images: obj.track.album.images
+  }));
+  tracks = [...tracks, ...pageTracks]
+
+  if (response.next) {
+    return refreshLikedTracks({ token, nextUrl: response.next, tracks });
+  } else {
+    await TrackModel.newTracks(tracks);
+  }
+};
+exports.refreshLikedTracks = refreshLikedTracks;
 
 // Create Playlist
 exports.createPlaylist = async name => {
@@ -303,4 +318,4 @@ const getPlaylists = (userId, token, nextUrl, allPlaylists=[]) => {
         : resolve(allPlaylists);
     });
   });
-};
+}; 

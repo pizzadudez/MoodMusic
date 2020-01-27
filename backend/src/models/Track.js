@@ -1,23 +1,50 @@
 const db = require('./db').conn();
 
 // Add new Tracks
-exports.newTracks = tracks => {
-  if (!tracks) return;
-  const sql = `INSERT OR IGNORE INTO tracks (
-               id, name, artist, album_id, added_at)
-               VALUES(?, ?, ?, ?, ?)`;
-  return new Promise((resolve, reject) => {
-    db.serialize(() => {
-      db.run('BEGIN TRANSACTION');
-      tracks.forEach(t => {
-        const values = [t.id, t.name, t.artist, t.album_id, t.added_at];
-        db.run(sql, values, err => {
-          if (err) reject(err);
+exports.newTracks = async tracks => {
+  try {
+    if (!tracks) return
+    const albums = tracks.reduce((obj, track) => {
+      obj[track.album_id] = obj[track.album_id] || {
+        id: track.album_id,
+        name: track.album_name,
+        images: track.album_images.map(obj => obj.url) // widest first
+      };
+      return obj;
+    }, {});
+    const albumsSql = `INSERT OR IGNORE INTO albums (
+                       id, name, large, medium, small)
+                       VALUES(?, ?, ?, ?, ?)`; 
+    await new Promise((resolve, reject) => {
+      db.serialize(() => {
+        db.run('BEGIN TRANSACTION');
+        Object.values(albums).forEach(a => {
+          const values = [a.id, a.name, ...a.images];
+          db.run(albumsSql, values, err => {
+            if (err) reject(err);
+          });
         });
+        db.run('COMMIT TRANSACTION', err => err ? reject(err) : resolve());
       });
-      db.run('COMMIT TRANSACTION', err => err ? reject(err) : resolve());
     });
-  });
+    const tracksSql = `INSERT OR IGNORE INTO tracks (
+                       id, name, artist, album_id, added_at)
+                       VALUES(?, ?, ?, ?, ?)`;
+    await new Promise((resolve, reject) => {
+      db.serialize(() => {
+        db.run('BEGIN TRANSACTION');
+        tracks.forEach(t => {
+          const values = [t.id, t.name, t.artist, t.album_id, t.added_at];
+          db.run(tracksSql, values, err => {
+            if (err) reject(err);
+          });
+        });
+        db.run('COMMIT TRANSACTION', err => err ? reject(err) : resolve());
+      });
+    })
+  } catch (err) {
+    throw new Error(err.message);
+  }                   
 };
 // List of all track objects (full)
 exports.getAll = async () => {
