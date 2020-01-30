@@ -1,7 +1,7 @@
 const db = require('./db').conn();
 
 // Add new Tracks
-exports.newTracks = async tracks => {
+exports.newTracks = async (tracks, liked = false) => {
   try {
     if (!tracks) return
     const albums = tracks.reduce((obj, track) => {
@@ -28,13 +28,13 @@ exports.newTracks = async tracks => {
       });
     });
     const tracksSql = `INSERT OR IGNORE INTO tracks (
-                       id, name, artist, album_id, added_at)
-                       VALUES(?, ?, ?, ?, ?)`;
+                       id, name, artist, album_id, added_at, liked)
+                       VALUES(?, ?, ?, ?, ?, ?)`;
     await new Promise((resolve, reject) => {
       db.serialize(() => {
         db.run('BEGIN TRANSACTION');
         tracks.forEach(t => {
-          const values = [t.id, t.name, t.artist, t.album_id, t.added_at];
+          const values = [t.id, t.name, t.artist, t.album_id, t.added_at, + liked];
           db.run(tracksSql, values, err => {
             if (err) reject(err);
           });
@@ -107,6 +107,43 @@ exports.getPlaylistTracks = id => {
       resolve(list);
     });
   });
+};
+// Sync Liked Songs
+exports.syncLikedSongs = async hashMap => {
+  try {
+    const likedIds = await new Promise((resolve, reject) => {
+      const sql = `SELECT id FROM tracks WHERE liked=1`;
+      db.all(sql, (err, rows) => {
+        if (err) reject(err);
+        else resolve(rows.map(row => row.id));
+      });
+    });
+    const idsToUnlike = likedIds.filter(id => !hashMap[id]);
+    await new Promise((resolve, reject) => {
+      const unlikeSql = `UPDATE tracks SET liked=0
+                         WHERE id=?`;
+      const likeSql = `UPDATE tracks SET liked=1
+                       WHERE id=? AND liked=0`;
+      db.serialize(() => {
+        db.run('BEGIN TRANSACTION');
+        // Unlike liked tracks not in hashMap
+        idsToUnlike.forEach(id => {
+          db.run(unlikeSql, [id], err => {
+            if (err) reject(err);
+          });
+        });
+        // Like unliked tracks from hashMap
+        Object.keys(hashMap).forEach(id => {
+          db.run(likeSql, [id], err => {
+            if (err) reject(err);
+          });
+        });
+        db.run('COMMIT TRANSACTION', err => err ? reject(err) : resolve());
+      });
+    });
+  } catch (err) {
+    throw new Error(err.message);
+  }
 };
 
 // Add track-playlist relationships

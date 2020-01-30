@@ -2,12 +2,13 @@ const router = require('express').Router();
 const { validationResult } = require('express-validator');
 const validator = require('../../services/validator');
 const SpotifyService = require('../../services/spotify');
+const TracksService = require('../../services/tracks');
 const TrackModel = require('../../models/Track');
 
 // Test Liked Tracks
 router.get('/liked', async (req, res, next) => {
   try {
-    await SpotifyService.refreshLikedTracks();
+    await TracksService.syncLikedSongs();
     res.status(200).json({ message: 'Success!' });
   } catch (err) {
     console.log(err);
@@ -23,6 +24,7 @@ router.get('/', async (req, res, next) => {
 // Add new tracks or playlist tracks relations
 router.get('/check', async (req, res, next) => {
   try {
+    await TracksService.syncLikedSongs();
     await SpotifyService.refreshPlaylists();
     const response = await SpotifyService.refreshTracks();
     res.status(200).json(response);

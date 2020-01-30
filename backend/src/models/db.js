@@ -29,6 +29,7 @@ exports.init = () => {
             album_id TEXT,
             added_at TEXT,
             rating INTEGER DEFAULT 0,
+            liked INTEGER DEFAULT 0,
             FOREIGN KEY (album_id) REFERENCES albums (id))`);
     db.run(`CREATE TABLE IF NOT EXISTS albums (
             id TEXT NOT NULL PRIMARY KEY,

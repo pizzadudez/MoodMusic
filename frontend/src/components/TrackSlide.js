@@ -27,7 +27,7 @@ class TrackSlide extends Component {
         <Section>{track.name}</Section>
         <Section>{track.artist}</Section>
         <Section>{track.album.name}</Section>
-        <Section>{track.rating}</Section>
+        <Section>{track.liked ? '<3' : ''}</Section>
         <button onClick={onClick}>+</button>
         <LabelsSection>
           {labels.all.length ?
