@@ -31,8 +31,8 @@ const validate = method => {
     case 'addTracks': {
       return [
         body('*.playlist_id').exists(),
-        body('*.track_ids').custom(list => isArray(list)),
-        body('*.track_ids.*').isAlphanumeric(),
+        body('*.tracks').custom(list => isArray(list)),
+        body('*.tracks.*').isAlphanumeric(),
       ];
     }
     case 'createPlaylist': {

@@ -94,11 +94,11 @@ export const updatePlaylistTracks = () => async (dispatch, getState) => {
   const { tracksToAdd, tracksToRemove } = getState().changes;
   const addBody = Object.keys(tracksToAdd).map(playlistId => ({
     playlist_id: playlistId,
-    track_ids: Object.keys(_.pickBy(tracksToAdd[playlistId]))
+    tracks: Object.keys(_.pickBy(tracksToAdd[playlistId]))
   }));
   const removeBody = Object.keys(tracksToRemove).map(playlistId => ({
     playlist_id: playlistId,
-    track_ids: Object.keys(_.pickBy(tracksToRemove[playlistId]))
+    tracks: Object.keys(_.pickBy(tracksToRemove[playlistId]))
   }));
   if (addBody.length) {
     await axios.post('api/tracks/add', addBody)
