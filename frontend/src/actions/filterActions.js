@@ -9,6 +9,8 @@ import {
   FILTER_BY_SEARCH,
   MODIFY_SEARCH_FILTER,
   REMOVE_SEARCH_FILTER,
+  PLAYLIST_FILTER_ALL,
+  PLAYLIST_FILTER_LIKED,
 } from './types';
 
 // Playlist
@@ -25,15 +27,13 @@ export const filterByPlaylist = id => (dispatch, getState) => {
     }
   });
 };
-export const selectAllPlaylistFilters = () => (dispatch, getState) => {
+export const showAll = () => (dispatch, getState) => {
   dispatch({
-    type: SELECT_ALL_PLAYLIST_FILTERS,
-    ids: getState().playlists.all,
+    type: PLAYLIST_FILTER_ALL,
     tracks: {
-      all: getState().tracks.all,
+      all: getState().tracks.all
     }
   });
-  // No playlist filter required => filter next
   dispatch({
     type: FILTER_BY_LABEL,
     tracks: {
@@ -42,12 +42,44 @@ export const selectAllPlaylistFilters = () => (dispatch, getState) => {
     }
   });
 };
-export const deselectAllPlaylistFilters = () => dispatch => {
-  // No filtering required since we have no tracks
+export const showLiked = () => (dispatch, getState) => {
   dispatch({
-    type: DESELECT_ALL_PLAYLIST_FILTERS,
+    type: PLAYLIST_FILTER_LIKED,
+    tracks: {
+      liked: getState().tracks.liked
+    }
+  });
+  dispatch({
+    type: FILTER_BY_LABEL,
+    tracks: {
+      map: getState().tracks.map,
+      all: getState().tracks.all,
+    }
   });
 };
+// export const selectAllPlaylistFilters = () => (dispatch, getState) => {
+//   dispatch({
+//     type: SELECT_ALL_PLAYLIST_FILTERS,
+//     ids: getState().playlists.all,
+//     tracks: {
+//       all: getState().tracks.all,
+//     }
+//   });
+//   // No playlist filter required => filter next
+//   dispatch({
+//     type: FILTER_BY_LABEL,
+//     tracks: {
+//       map: getState().tracks.map,
+//       all: getState().tracks.all,
+//     }
+//   });
+// };
+// export const deselectAllPlaylistFilters = () => dispatch => {
+//   // No filtering required since we have no tracks
+//   dispatch({
+//     type: DESELECT_ALL_PLAYLIST_FILTERS,
+//   });
+// };
 // Label
 export const filterByLabel = id => (dispatch, getState) => {
   const subgenres = getState().labels.subgenres;

@@ -1,51 +1,69 @@
-import React, { Component } from 'react';
-import { connect } from 'react-redux';
+import React, { memo, useCallback } from 'react';
+import { useSelector, useDispatch } from 'react-redux';
+import { createSelector } from 'reselect';
 import styled from 'styled-components';
 
 import {
   filterByPlaylist,
-  selectAllPlaylistFilters,
-  deselectAllPlaylistFilters,
+  showAll,
+  showLiked,
 } from '../actions/filterActions';
 import PlaylistFilterButton from './PlaylistFilterButton';
 
-class PlaylistFilter extends Component {
-  handleChange = event => this.props.filterByPlaylist(event.target.value)
-  render() {
-    const { playlists, filters, selectAllPlaylistFilters, 
-      deselectAllPlaylistFilters } = this.props;
-    return (
-      <Container>
-        <p>Default Playlists</p>
-        <button onClick={() => selectAllPlaylistFilters()}>All</button>
-        <button onClick={() => deselectAllPlaylistFilters()}>None</button>
-        {playlists.default.map(id => (
-          <PlaylistFilterButton
-            key={id}
-            playlist={playlists.map[id]}
-            onChange={this.handleChange}
-            checked={filters[id] ? true : false}
-          />
-        ))}
-        <p>Custom Playlists</p>
-      </Container>
-    );
-  }
-}
+const stateSelector = createSelector(
+  state => state.playlists,
+  state => state.filter,
+  (playlists, filter) => ({
+    playlistsById: playlists.map,
+    playlists: playlists.all,
+    filtered: filter.playlists,
+    filterType: filter.filterType
+  })
+);
 
-const mapStateToProps = state => ({
-  playlists: {
-    map: state.playlists.map,
-    default: state.playlists.default,
-    custom: state.playlists.custom,
-    filter: state.playlists.filter,
-  },
-  filters: state.filter.playlists,
+export default memo(() => {
+  const dispatch = useDispatch();
+  const { playlistsById, playlists, filtered, filterType } = useSelector(stateSelector);
+
+  const filter = useCallback(e => {
+    dispatch(filterByPlaylist(e.target.value));
+  }, [dispatch]);
+  const filterAll = useCallback(e => {
+    dispatch(showAll());
+  }, [dispatch]);
+  const filterLiked = useCallback(e => {
+    console.log('liked')
+    dispatch(showLiked());
+  }, [dispatch]);
+
+  return (
+    <Container>
+      <PlaylistFilterButton
+        key={'showAll'}
+        onChange={filterAll}
+        text='All Songs'
+        checked={filterType === 'all' ? true : false}
+        playlist={null}
+      />
+      <PlaylistFilterButton
+        key={'showLiked'}
+        onChange={filterLiked}
+        text='Liked Songs'
+        checked={filterType === 'liked' ? true : false}
+        playlist={null}
+      />
+      <p>Filter by playlist</p>
+      {playlists.map(id => (
+        <PlaylistFilterButton
+          key={id}
+          playlist={playlistsById[id]}
+          onChange={filter}
+          checked={filtered[id] ? true : false}
+        />
+      ))}
+    </Container>
+  );
 });
-
-export default connect(mapStateToProps, {
-  filterByPlaylist, selectAllPlaylistFilters, deselectAllPlaylistFilters,
-})(PlaylistFilter);
 
 const Container = styled.div`
   height: 300px;

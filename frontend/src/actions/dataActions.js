@@ -18,14 +18,14 @@ export const fetchData = () => async dispatch => {
   if (!authorized) return;
   
   // update playlists
-  await axios.get('/api/playlists/check');
+  await axios.get('/api/tracks/check');
   const fetchPlaylists = axios.get('/api/playlists').then(res => {
     const { map, ids, types } = parsePlaylists(res.data);
     dispatch({ type: FETCH_PLAYLISTS, map, ids, types });
   });
   const fetchTracks = axios.get('/api/tracks').then(res => {
-    const { map, ids } = parseTracks(res.data);
-    dispatch({ type: FETCH_TRACKS, map, ids });
+    const { map, ids, liked } = parseTracks(res.data);
+    dispatch({ type: FETCH_TRACKS, map, ids, liked });
   });
   const fetchLabels = axios.get('/api/labels').then(res => {
     const { map, ids, types } = parseLabels(res.data);
@@ -42,8 +42,8 @@ export const fetchUpdates = () => dispatch => {
       dispatch({ type: FETCH_PLAYLISTS, map, ids, types });
     }
     if (res.data.tracks) {
-      const { map, ids } = parseTracks(res.data.tracks);
-      dispatch({ type: FETCH_TRACKS, map, ids });
+      const { map, ids, liked } = parseTracks(res.data.tracks);
+      dispatch({ type: FETCH_TRACKS, map, ids, liked });
     }
   })
 };
@@ -56,6 +56,7 @@ const arrayToMap = arr => arr.reduce((obj, item) => ({
 export const parseTracks = tracks => ({
   map: arrayToMap(tracks),
   ids: tracks.map(obj => obj.id),
+  liked: tracks.filter(obj => obj.liked).map(obj => obj.id)
 });
 export const parsePlaylists = playlists => {
   const map = arrayToMap(playlists);

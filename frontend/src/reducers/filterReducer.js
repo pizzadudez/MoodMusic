@@ -11,6 +11,8 @@ import {
   FILTER_BY_SEARCH,
   FETCH_TRACKS,
   FETCH_PLAYLISTS,
+  PLAYLIST_FILTER_ALL,
+  PLAYLIST_FILTER_LIKED,
 } from '../actions/types';
 import { isEmpty } from 'lodash';
 
@@ -21,6 +23,7 @@ const initialState = {
   playlists: {},
   labels: {},
   searchFilter: '',
+  filterType: 'all'
 };
 
 export default (state = initialState, action) => {
@@ -33,29 +36,37 @@ export default (state = initialState, action) => {
         byPlaylists: action.ids,
         byLabels: action.ids,
       }
-    case FETCH_PLAYLISTS:
-      return {
-        ...state,
-        playlists: action.ids.reduce((obj, id) => ({ ...obj, [id]: true, }), {})
-      }
+    // case FETCH_PLAYLISTS:
+    //   return {
+    //     ...state,
+    //     playlists: action.ids.reduce((obj, id) => ({ ...obj, [id]: true, }), {})
+    //   }
     // Playlist changes
     case MODIFY_PLAYLIST_FILTER:
       return modifyPlaylistFilter(state, action);
-    case SELECT_ALL_PLAYLIST_FILTERS:
+    case PLAYLIST_FILTER_LIKED:
+      return {
+        ...state,
+        tracks: action.tracks.liked,
+        byPlaylists: action.tracks.liked,
+        filterType: 'liked',
+        playlists: {}
+      }
+    case PLAYLIST_FILTER_ALL:
       return {
         ...state,
         tracks: action.tracks.all,
         byPlaylists: action.tracks.all,
-        playlists: action.ids.reduce((obj, id) => ({ ...obj, [id]: true, }), {})
-      }
-    case DESELECT_ALL_PLAYLIST_FILTERS:
-      return {
-        ...state,
-        tracks: [],
-        byPlaylists: [],
-        byLabels: [],
+        filterType: 'all',
         playlists: {}
       }
+    // case SELECT_ALL_PLAYLIST_FILTERS:
+    //   return {
+    //     ...state,
+    //     tracks: action.tracks.all,
+    //     byPlaylists: action.tracks.all,
+    //     playlists: action.ids.reduce((obj, id) => ({ ...obj, [id]: true, }), {})
+    //   }
     // Label Changes
     case MODIFY_LABEL_FILTER:
       return modifyLabelFilter(state, action);
@@ -91,6 +102,7 @@ const modifyPlaylistFilter = (state, action) => {
   const { [action.id]: value, ...rest } = state.playlists;
   return {
     ...state,
+    filterType: 'playlist',
     playlists: {
       ...rest,
       ...!value && { [action.id]: true },

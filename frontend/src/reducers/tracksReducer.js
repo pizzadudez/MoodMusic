@@ -10,6 +10,7 @@ import {
 const initialState = {
   map: {},
   all: [],
+  liked: [],
   selected: {},
 };
 
@@ -20,6 +21,7 @@ export default function(state = initialState, action) {
         ...state,
         map: action.map,
         all: action.ids,
+        liked: action.liked
       }
     case MODIFY_TRACK_SELECTION:
       return {

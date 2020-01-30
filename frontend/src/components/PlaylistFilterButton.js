@@ -3,20 +3,20 @@ import styled from 'styled-components';
 
 export default class PlaylistFilterButton extends Component {
   render() {
-    const { playlist, checked, onChange } = this.props;
+    const { playlist, checked, onChange, text } = this.props;
     return (
       <Container>
         <Input 
-          id={'filter' + playlist.id}
-          value={playlist.id}
+          id={'filter' + ((playlist && playlist.id) || text)}
+          value={((playlist && playlist.id) || text)}
           type="checkbox"
           checked={checked}
           onChange={onChange}
         />
         <Label 
-          htmlFor={'filter' + playlist.id}
+          htmlFor={'filter' + ((playlist && playlist.id) || text)}
         >
-          <span>{playlist.name}</span>
+          <span>{((playlist && playlist.name) || text)}</span>
         </Label>
       </Container>
     );
