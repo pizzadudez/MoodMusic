@@ -1,5 +1,6 @@
-import React, { Component } from 'react';
-import { connect } from 'react-redux';
+import React, { memo, useCallback } from 'react';
+import { useSelector, useDispatch } from 'react-redux';
+import { createSelector } from 'reselect';
 import { NavLink } from "react-router-dom";
 import styled from 'styled-components';
 
@@ -7,42 +8,45 @@ import { fetchUpdates } from '../actions/dataActions';
 import { updateTrackLabels, updatePlaylistTracks } from '../actions/trackActions';
 import Button from './Button';
 
-class Navbar extends Component {
-  render() {
-    return (
-      <Nav>
-        <Links>
-          <li><NavLink to="/"><button>Filter</button></NavLink></li>
-          <li><NavLink to="/playlists"><button>Manage Playlists</button></NavLink></li>
-          <li><NavLink to="/labels"><button>Manage Labels</button></NavLink></li>
-        </Links>
-        <Button
-          text={'Submit Changes'}
-          onClick={() => {
-            this.props.updateTrackLabels();
-            this.props.updatePlaylistTracks();
-          }}
-        />
-        <Button 
-          text={'Check for Updates'}
-          highlight={this.props.changes}
-          onClick={() => this.props.fetchUpdates()}
-        />
-      </Nav>
-    );
-  }
-}
+const stateSelector = createSelector(
+  state => state.playlists,
+  ({ playlistsById, ids }) => ids.some(id => 
+    playlistsById[id].changes
+    && playlistsById[id].tracking
+  )
+);
 
-const mapStateToProps = state => ({
-  changes: state.playlists.all.some(id => {
-    const { mood_playlist, changes, tracking } = state.playlists.map[id];
-    return !mood_playlist && changes && tracking
-  }),
+export default memo(() => {
+  const dispatch = useDispatch();
+  const { changes } = useSelector(stateSelector);
+  
+  const submitChanges = useCallback(() => {
+    dispatch(updateTrackLabels());
+    dispatch(updatePlaylistTracks());
+  }, [dispatch]);
+  const checkForUpdates = useCallback(() => {
+    dispatch(fetchUpdates());
+  }, [dispatch]);
+
+  return (
+    <Nav>
+      <Links>
+        <li><NavLink to="/"><button>Filter</button></NavLink></li>
+        <li><NavLink to="/playlists"><button>Manage Playlists</button></NavLink></li>
+        <li><NavLink to="/labels"><button>Manage Labels</button></NavLink></li>
+      </Links>
+      <Button
+        text={'Submit Changes'}
+        onClick={submitChanges}
+      />
+      <Button 
+        text={'Check for Updates'}
+        highlight={changes}
+        onClick={checkForUpdates}
+      />
+    </Nav>
+  );
 });
-
-export default connect(mapStateToProps, {
-  fetchUpdates, updateTrackLabels, updatePlaylistTracks
-})(Navbar);
 
 const Nav = styled.nav`
   height: 50px;

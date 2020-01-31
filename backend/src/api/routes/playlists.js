@@ -9,8 +9,13 @@ const PlaylistService = require('../../services/playlists');
 
 // Get all playlists (array of objects)
 router.get('/', async (req, res, next) => {
-  const all = await PlaylistModel.getAll();
-  res.send(all);
+  try {
+    const playlistsById = await PlaylistModel.getAll();
+    res.status(200).json(playlistsById);
+  } catch (err) {
+    console.log(err);
+    res.status(500).send('Internal Server Error.');
+  }
 });
 // Update playlist data
 router.get('/check', async (req, res, next) => {

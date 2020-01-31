@@ -5,21 +5,15 @@ const SpotifyService = require('../../services/spotify');
 const TracksService = require('../../services/tracks');
 const TrackModel = require('../../models/Track');
 
-// Test Liked Tracks
-router.get('/liked', async (req, res, next) => {
-  try {
-    await TracksService.syncLikedSongs();
-    res.status(200).json({ message: 'Success!' });
-  } catch (err) {
-    console.log(err);
-    res.status(500).json({ message: 'Internal server error' });
-  }
-});
-
 // Get all track objects (full)
 router.get('/', async (req, res, next) => {
-  const message = await TrackModel.getAll();
-  res.send(message);
+  try {
+    const tracksById = await TrackModel.getAll();
+    res.status(200).json(tracksById);
+  } catch (err) {
+    console.log(err);
+    res.status(500).send('Internal Server Error.')
+  }
 });
 // Add new tracks or playlist tracks relations
 router.get('/check', async (req, res, next) => {

@@ -4,21 +4,17 @@ import {
 } from '../actions/types';
 
 const initialState = {
-  map: {},
-  all: [],
-  default: [],
-  custom: [],
-}
+  playlistsById: {},
+  ids: [],
+};
 
 export default function(state = initialState, action) {
   switch (action.type) {
     case FETCH_PLAYLISTS:
       return {
         ...state,
-        map: action.map,
-        all: action.ids,
-        default: action.types.default,
-        custom: action.types.custom,
+        playlistsById: action.payload,
+        ids: Object.keys(action.payload)
       }
     case CREATE_PLAYLIST:
       return {

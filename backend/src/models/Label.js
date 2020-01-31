@@ -134,18 +134,50 @@ exports.get = id => {
     });
   });
 };
-// Get all label separated by type
-exports.getAll = () => {
-  return new Promise((resolve, reject) => {
-    const sql = `SELECT * FROM labels ORDER BY id`;
-    db.all(sql, (err, rows) => {
-      if (err) {
-        reject(err);
-      } else {
-        resolve(rows);
-      }
+// Get all labels (with subgenre-genre assoc)
+exports.getAll = async () => {
+  try {
+    // Get all labels by id
+    const labelsById = await new Promise((resolve, reject) => {
+      db.all('SELECT * FROM labels ORDER BY id', (err, rows) => {
+        if (err) {
+          reject(err);
+        } else {
+          const byId = rows.reduce((obj, row) => ({
+            ...obj,
+            [row.id]: row
+          }), {});
+          resolve(byId);
+        }
+      });
     });
-  });
+    // Add subgenre ids to parent genre labels
+    await new Promise((resolve, reject) => {
+      const sql = 'SELECT id FROM labels WHERE parent_id=?';
+      db.serialize(() => {
+        db.run('BEGIN TRANSACTION');
+          Object.keys(labelsById).forEach(id => {
+            if (labelsById[id].type === 'genre') {
+              db.all(sql, [id], (err, rows) => {
+                if (err) {
+                  reject(err);
+                } else if (rows.length) {
+                  labelsById[id].subgenres = rows.map(row => row.id); 
+                }
+              });
+            }
+          });
+        db.run('COMMIT TRANSACTION', err => {
+          if (err) reject(err);
+          else resolve();
+        })
+      });
+    });
+
+    return labelsById;
+  } catch(err) {
+    throw new Error(err.message);
+  }
 };
 
 // Add track-label relationships

@@ -1,36 +1,25 @@
-import React, { Component } from 'react';
+import React, { memo } from 'react';
 import styled from 'styled-components';
+import Switch from '@material-ui/core/Switch';
 
-export default class Switch extends Component {
-  render() {
-    const { checked, onChange } = this.props;
-    return (
-      <Label checked={checked}>
-        <Input
-          type="checkbox"
-          checked={checked}
-          onChange={onChange}
-        />
-      </Label>
-    );
-  }
-}
+export default memo(({
+  checked,
+  onChange
+}) => {
 
-const Label = styled.label`
-  width: 100px;
-  height: 50px;
-  position: relative;
-  background-color: magenta;
-  &::before {
-    content: '';
-    height: 50px;
-    width: 20px;
-    background-color: black;
-    position: absolute;
-    top: 0;
-    left: ${props => props.checked ? 0 : 'calc(100% - 20px)'}
+  return (
+    <StyledSwitch
+      checked={checked}
+      onChange={onChange}
+    />
+  );
+});
+
+const StyledSwitch = styled(Switch)`
+  & .MuiSwitch-colorSecondary.Mui-checked {
+    color: #fafafa;
   }
-`;
-const Input = styled.input`
-  position: absolute
+  & .MuiSwitch-colorSecondary.Mui-checked + .MuiSwitch-track {
+    background-color: #04ff00;
+  }
 `;

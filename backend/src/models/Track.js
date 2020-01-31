@@ -48,6 +48,66 @@ exports.newTracks = async (tracks, liked = false) => {
 };
 // List of all track objects (full)
 exports.getAll = async () => {
+  try {
+    return new Promise((resolve, reject) => {
+      const sql = `SELECT t.id, t.name, t.artist, t.added_at, t.rating, t.liked, 
+                    a.id AS album,
+                    GROUP_CONCAT(DISTINCT tp.playlist_id) AS playlist_ids,
+                    GROUP_CONCAT(DISTINCT tl.label_id) as label_ids
+                   FROM tracks t
+                   LEFT JOIN tracks_playlists tp
+                     ON t.id = tp.track_id
+                   LEFT JOIN tracks_labels tl
+                     ON t.id = tl.track_id
+                   LEFT JOIN albums a
+                     ON t.album_id = a.id
+                   GROUP BY t.name
+                   ORDER BY t.added_at DESC`;
+      db.all(sql, (err, tracks) => {
+        if (err) {
+          reject(err);
+        } else {
+          db.all('SELECT * FROM albums', (err, albums) => {
+            if (err) {
+              reject(err);
+            } else {
+              const albumsById = albums.reduce((obj, a) => ({
+                ...obj,
+                [a.id] : {
+                  id: a.id,
+                  name: a.name,
+                  images: {
+                    small: a.small,
+                    medium: a.medium,
+                    large: a.large
+                  }
+                }
+              }), {});
+              const formatedTracks = tracks.map(t => ({
+                ...t,
+                album: albumsById[t.album],
+                playlist_ids: t.playlist_ids
+                  ? t.playlist_ids.split(',')
+                  : undefined,
+                label_ids: t.label_ids
+                  ? t.label_ids.split(',').map(Number)
+                  : undefined,
+              }));
+              const tracksById = formatedTracks.reduce((obj, t) => ({
+                ...obj,
+                [t.id]: t
+              }), {});
+              resolve(tracksById);
+            }
+          });
+        }
+      });
+    });
+  } catch (err) {
+    throw new Error(err.message);
+  }
+};
+exports.getAllOld = async () => {
   const sql = "SELECT * FROM tracks";
   const sqlAlbum = `SELECT * FROM albums WHERE id=?`;
   const sqlLabels = `SELECT tl.label_id FROM tracks_labels tl

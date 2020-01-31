@@ -158,11 +158,24 @@ exports.setChanges = (id, bool) => {
 };
 
 // Get all playlists
-exports.getAll = () => {
-  return new Promise((resolve, reject) => {
-    const sql = "SELECT * FROM playlists";
-    db.all(sql, (err, rows) => err ? reject(err) : resolve(rows));
-  });
+exports.getAll = async () => {
+  try {
+    return new Promise((resolve, reject) => {
+      db.all('SELECT * FROM playlists', (err, rows) => {
+        if (err) {
+          reject(err);
+        } else {
+          const byId = rows.reduce((obj, row) => ({
+            ...obj,
+            [row.id]: row
+          }), {});
+          resolve(byId);
+        }
+      });
+    });
+  } catch (err) {
+    throw new Error(err.message);
+  }
 };
 // Get playlist by id
 exports.get = id => {

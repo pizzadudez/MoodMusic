@@ -22,10 +22,13 @@ exports.refreshPlaylists = async () => {
 // Get new Tracks from tracked playlists with changes
 exports.refreshTracks = async () => {
   try {
-    const playlists = await PlaylistModel.getAll();
-    const playlistIds = playlists
-      .filter(pl => pl.tracking && pl.changes && !pl.mood_playlist)
-      .map(pl => pl.id);
+    const playlistsById = await PlaylistModel.getAll();
+    const playlistIds = Object.keys(playlistsById)
+      .filter(id =>
+        playlistsById[id].tracking
+        && playlistsById[id].changes
+        && !playlistsById[id].mood_playlist
+      );
     if (!playlistIds.length) return {
       message: 'No tracked playlists have changes.',
     };

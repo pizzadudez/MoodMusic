@@ -1,74 +1,14 @@
-import React, { Component } from 'react';
-import { connect } from 'react-redux';
+import React, { memo } from 'react';
+import { useSelector, useDispatch } from 'redux';
+import { createSelector } from 'reselect';
 import styled from 'styled-components';
 
-import { modifyTrackSelection } from '../actions/trackActions';
-import { playTrack } from '../actions/playerActions';
-import Label from './Label';
+export default memo(() => {
 
-class TrackSlide extends Component {
-  shouldComponentUpdate(nextProps) {
-    const { track, tracks } = this.props;
-    if (tracks.selected[track.id] !== nextProps.tracks.selected[track.id]) return true;
-    if (track !== nextProps.track) return true;
-    return false;
-  }
-  playTrackHandler = () => this.props.playTrack(this.props.track.id)
-  render() {
-    const { track, tracks, labels, playlists, modifyTrackSelection, onClick } = this.props;
-    return (
-      <Container>
-        <button onClick={this.playTrackHandler}>></button>
-        <input
-          type="checkbox"
-          checked={tracks.selected[track.id] ? true : false}
-          onChange={() => modifyTrackSelection(track.id)}
-        />
-        <Section>{track.name}</Section>
-        <Section>{track.artist}</Section>
-        <Section>{track.album.name}</Section>
-        <Section>{track.liked ? '<3' : ''}</Section>
-        <button onClick={onClick}>+</button>
-        <LabelsSection>
-          {labels.all.length ?
-            track.label_ids.map(id => (
-              <Label
-                key={id} 
-                label={labels.map[id]}
-              />
-            ))
-            : null
-          }
-          {playlists.map[track.playlist_ids[0]] ?
-            track.playlist_ids.map(id => (
-              <Label
-                key={id}
-                playlist={playlists.map[id]}
-              />
-            ))
-            : null
-          }
-        </LabelsSection>
-      </Container>
-    );
-  }
-}
-
-const mapStateToProps = state => ({
-  tracks: { selected: state.tracks.selected },
-  labels: { 
-    map: state.labels.map,
-    all: state.labels.all,
-  }, 
-  playlists: {
-    map: state.playlists.map,
-    all: state.playlists.all,
-  },
+  return (
+    <div>slide</div>
+  );
 });
-
-export default connect(mapStateToProps,{
-  modifyTrackSelection, playTrack, 
-})(TrackSlide);
 
 const Container = styled.div`
   background-color: #333333;

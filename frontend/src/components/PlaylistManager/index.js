@@ -11,7 +11,7 @@ class PlaylistManager extends Component {
     return (
       <Container>
         <button onClick={() => submitPlaylistChanges()}>Submit Changes</button>
-        {playlists.all.map(id => (
+        {playlists.ids.map(id => (
           <PlaylistManagerSlide
             key={id}
             playlist={playlists.map[id]}

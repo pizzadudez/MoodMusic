@@ -14,8 +14,8 @@ const stateSelector = createSelector(
   state => state.playlists,
   state => state.filter,
   (playlists, filter) => ({
-    playlistsById: playlists.map,
-    playlists: playlists.all,
+    playlistsById: playlists.playlistsById,
+    playlists: playlists.ids,
     filtered: filter.playlists,
     filterType: filter.filterType
   })

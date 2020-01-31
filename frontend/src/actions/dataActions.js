@@ -20,16 +20,13 @@ export const fetchData = () => async dispatch => {
   // update playlists
   await axios.get('/api/tracks/check');
   const fetchPlaylists = axios.get('/api/playlists').then(res => {
-    const { map, ids, types } = parsePlaylists(res.data);
-    dispatch({ type: FETCH_PLAYLISTS, map, ids, types });
+    dispatch({ type: FETCH_PLAYLISTS, payload: res.data });
   });
   const fetchTracks = axios.get('/api/tracks').then(res => {
-    const { map, ids, liked } = parseTracks(res.data);
-    dispatch({ type: FETCH_TRACKS, map, ids, liked });
+    dispatch({ type: FETCH_TRACKS, payload: res.data });
   });
   const fetchLabels = axios.get('/api/labels').then(res => {
-    const { map, ids, types } = parseLabels(res.data);
-    dispatch({ type: FETCH_LABELS, map, ids, types });
+    dispatch({ type: FETCH_LABELS, payload: res.data });
   });
   await Promise.all([fetchPlaylists, fetchTracks, fetchLabels, ]);
   // done fetching data
@@ -68,7 +65,7 @@ export const parsePlaylists = playlists => {
   }, { 'default': [], 'custom': [] });
   return { map, ids, types };
 };
-const parseLabels = labels => {
+const parseLabelsOld = labels => {
   const map = arrayToMap(labels);
   const ids = labels.map(obj => obj.id);
   const types = ids.reduce((obj, id) => {

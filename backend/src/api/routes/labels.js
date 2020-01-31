@@ -6,8 +6,13 @@ const LabelsService = require('../../services/labels');
 
 // Get all labels (array of objects)
 router.get('/labels', async (req, res, next) => {
-  const all = await LabelModel.getAll();
-  res.send(all);
+  try {
+    const labelsById = await LabelModel.getAll();
+    res.status(200).json(labelsById);
+  } catch (err) {
+    console.log(err);
+    res.status(500).send('Internal Server Error.');
+  }
 });
 // Create new label
 router.post('/labels', validator('createLabel'), async (req, res, next) => {

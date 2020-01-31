@@ -1,6 +1,7 @@
 import React, { Component } from 'react';
 import { connect } from 'react-redux';
 import { BrowserRouter as Router, Switch, Route } from "react-router-dom";
+import { StylesProvider } from '@material-ui/core/styles';
 
 import { fetchData } from './actions/dataActions';
 import Page from './components/Page';
@@ -27,28 +28,30 @@ class App extends Component {
       </a>
     );
     return (
-      <Router>
-        <Switch>
-          <Route path="/playlists">
-            <Page
-              Sidebar={<FormPlaylistCreate />}
-              Content={<PlaylistManager />}
-            />    
-          </Route>
-          <Route path="/labels">
-            <Page
-              Sidebar={<FormLabelCreate />}
-              Content={<TracksContainer />}
-            />    
-          </Route>
-          <Route path="/">
-            <Page 
-              Sidebar={<div><PlaylistFilter /> <LabelFilter /> </div>}
-              Content={<TracksContainer />}
-            />
-          </Route>
-        </Switch>
-      </Router>
+      <StylesProvider injectFirst>
+        <Router>
+          <Switch>
+            <Route path="/playlists">
+              <Page
+                Sidebar={<FormPlaylistCreate />}
+                Content={<PlaylistManager />}
+              />    
+            </Route>
+            <Route path="/labels">
+              <Page
+                Sidebar={<FormLabelCreate />}
+                Content={<TracksContainer />}
+              />    
+            </Route>
+            <Route path="/">
+              <Page 
+                // Sidebar={<div><PlaylistFilter /> <LabelFilter /> </div>}
+                Content={<TracksContainer />}
+              />
+            </Route>
+          </Switch>
+        </Router>
+      </StylesProvider>
     );
   }
 };

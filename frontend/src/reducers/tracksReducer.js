@@ -8,10 +8,9 @@ import {
 } from '../actions/types';
 
 const initialState = {
-  map: {},
-  all: [],
-  liked: [],
-  selected: {},
+  tracksById: {},
+  ids: [],
+  selected: []
 };
 
 export default function(state = initialState, action) {
@@ -19,9 +18,10 @@ export default function(state = initialState, action) {
     case FETCH_TRACKS:
       return {
         ...state,
-        map: action.map,
-        all: action.ids,
-        liked: action.liked
+        tracksById: action.payload,
+        ids: Object.keys(action.payload),
+        likedIds: Object.keys(action.payload).filter(id => 
+          action.payload[id].liked)
       }
     case MODIFY_TRACK_SELECTION:
       return {
