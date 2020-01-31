@@ -10,7 +10,8 @@ import {
 const initialState = {
   tracksById: {},
   ids: [],
-  selected: []
+  likedIds: [],
+  selected: {}
 };
 
 export default function(state = initialState, action) {
@@ -41,44 +42,44 @@ export default function(state = initialState, action) {
         ...state,
         selected: {}
       }
-    case UPDATE_TRACKS_LABELS:
-      return {
-        ...state,
-        map: {
-          ...state.map,
-          ...action.trackIds.reduce((obj, trackId) => ({
-            ...obj,
-            [trackId]: {
-              ...state.map[trackId],
-              label_ids: [
-                ...state.map[trackId].label_ids.filter(id => 
-                  !action.toRemove.includes(id)
-                  && !action.toAdd.includes(id)),
-                ...action.toAdd
-              ]
-            }
-          }), {})
-        }
-      }
-    case UPDATE_TRACKS_PLAYLISTS:
-      return {
-        ...state,
-        map: {
-          ...state.map,
-          ...action.trackIds.reduce((obj, trackId) => ({
-            ...obj,
-            [trackId]: {
-              ...state.map[trackId],
-              playlist_ids: [
-                ...state.map[trackId].playlist_ids.filter(id =>
-                  !action.toRemove.includes(id)
-                  && !action.toAdd.includes(id)),
-                ...action.toAdd
-              ]
-            }
-          }), {})
-        }
-      }
+    // case UPDATE_TRACKS_LABELS:
+    //   return {
+    //     ...state,
+    //     map: {
+    //       ...state.map,
+    //       ...action.trackIds.reduce((obj, trackId) => ({
+    //         ...obj,
+    //         [trackId]: {
+    //           ...state.map[trackId],
+    //           label_ids: [
+    //             ...state.map[trackId].label_ids.filter(id => 
+    //               !action.toRemove.includes(id)
+    //               && !action.toAdd.includes(id)),
+    //             ...action.toAdd
+    //           ]
+    //         }
+    //       }), {})
+    //     }
+    //   }
+    // case UPDATE_TRACKS_PLAYLISTS:
+    //   return {
+    //     ...state,
+    //     map: {
+    //       ...state.map,
+    //       ...action.trackIds.reduce((obj, trackId) => ({
+    //         ...obj,
+    //         [trackId]: {
+    //           ...state.map[trackId],
+    //           playlist_ids: [
+    //             ...state.map[trackId].playlist_ids.filter(id =>
+    //               !action.toRemove.includes(id)
+    //               && !action.toAdd.includes(id)),
+    //             ...action.toAdd
+    //           ]
+    //         }
+    //       }), {})
+    //     }
+    //   }
     default:
       return state;
   }

@@ -1,12 +1,8 @@
-import {
-  LOADING_FINISHED,
-  LOADING_STARTED,
-  SET_AUTHORIZED,
-} from "../actions/types";
+import { LOADING_FINISHED, SET_AUTHORIZED } from "../actions/types";
 
 const initialState = {
   authorized: false,
-  loadingFinished: false,
+  loadingData: true,
 }
 
 export default (state = initialState, action) => {
@@ -16,16 +12,12 @@ export default (state = initialState, action) => {
         ...state,
         authorized: action.payload
       }
-    case LOADING_FINISHED:
+    case LOADING_FINISHED: {
       return {
         ...state,
-        loadingFinished: true,
+        loadingData: false
       }
-    case LOADING_STARTED:
-      return {
-        ...state,
-        loadingFinished: false,
-      }
+    }
     default:
       return state;
   }
