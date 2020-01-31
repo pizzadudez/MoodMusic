@@ -5,6 +5,7 @@ import { useSelector, useDispatch } from 'react-redux';
 import { createSelector } from 'reselect';
 
 import { fetchData } from './actions/dataActions';
+import Main from './views/Main';
 
 const stateSelector = createSelector(
   state => state.app.authorized,
@@ -25,7 +26,7 @@ export default memo(() => {
         <Router>
           <Switch>
             <Route path="/">
-              <div>authorized</div>
+              <Main />
             </Route>
           </Switch>
         </Router>
