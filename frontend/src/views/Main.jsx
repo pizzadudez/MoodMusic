@@ -2,16 +2,21 @@ import React, { memo } from 'react';
 import styled from 'styled-components';
 
 import Navbar from '../components/Navbar';
+import Container from '../components/common/Container';
+import TrackManager from '../components/TrackManager';
 
 export default memo(() => {
   return (
     <PageContainer>
       <Navbar />
       <Content>
-        <div style={{background: 'green', height: '100%'}}>
-          <div style={{minHeight: '500px'}}>lol</div>
-        </div>
-        <div>Content</div>
+        <Container>
+          <div>Sidebar1</div>
+          <div>Sidebar2</div>
+        </Container>
+        <Container>
+          <TrackManager />
+        </Container>
       </Content>
     </PageContainer>
   );
@@ -19,12 +24,14 @@ export default memo(() => {
 
 const PageContainer = styled.div`
   display: grid;
-  grid-template-rows: 50px 1fr;
+  grid-template-rows: 50px minmax(500px, calc(100vh - 66px));
   grid-row-gap: 6px;
+  max-height: 100vh;
+  overflow: hidden;
 `;
 const Content = styled.div`
   display: grid;
-  grid-template-columns: 1fr 2fr;
+  grid-template-columns: minmax(300px, 360px) minmax(70%, 65%);
   grid-column-gap: 10px;
-  height: 100%;
+  margin: 0 4px;
 `;

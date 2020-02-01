@@ -21,7 +21,7 @@ export default memo(() => {
   }, [])
 
   return (
-    <>
+    <StylesProvider injectFirst>
       {authorized && (
         <Router>
           <Switch>
@@ -39,6 +39,6 @@ export default memo(() => {
         />
       </a>
       )}
-    </>
+    </StylesProvider>
   );
 });

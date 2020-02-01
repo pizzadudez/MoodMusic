@@ -31,7 +31,7 @@ export default memo(() => {
   return (
     <Nav>
       <Links>
-        <li><NavLink to="/"><button>Main View</button></NavLink></li>
+        <li><NavLink to="/"><Button text="Main View" /></NavLink></li>
         {/* <li><NavLink to="/playlists"><button>Manage Playlists</button></NavLink></li>
         <li><NavLink to="/labels"><button>Manage Labels</button></NavLink></li> */}
       </Links>
@@ -60,5 +60,8 @@ const Links = styled.ul`
   list-style-type: none;
   li {
     padding: 0 5px;
+  }
+  a {
+    text-decoration: none;
   }
 `;

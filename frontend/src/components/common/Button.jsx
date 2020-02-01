@@ -1,19 +1,29 @@
 import React, { memo } from 'react';
 import styled from 'styled-components';
+import Button from '@material-ui/core/Button';
 
 export default memo(({
   text, onClick, highlight
 }) => (
-  <Button
+  <StyledButton
     onClick={onClick}
-    highlight
+    highlight={highlight}
+    variant="contained"
   >
-    <span>{text}</span>
-  </Button>
+    {text}
+  </StyledButton>
 ));
 
-const Button = styled.button`
-  ${props => props.highlight ? 'background-color: yellow' : ''};
-  height: 36px;
-  cursor: pointer;
+const StyledButton = styled(Button)`
+  color: #000;
+  margin: 0 4px;
+  font-size: 1em;
+  letter-spacing: normal;
+  text-transform: none;
+  &.MuiButton-contained {
+    background-color: ${props => props.highlight ? '#94ff5d' : '#5dff5d'}
+  }
+  &.MuiButton-contained:hover {
+    background-color: ${props => props.highlight ? '#67e824' : '#34d434'}
+  }
 `;

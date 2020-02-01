@@ -32,3 +32,13 @@ export const fetchData = () => async dispatch => {
   // done fetching data
   dispatch({ type: LOADING_FINISHED });
 };
+export const fetchUpdates = () => dispatch => {
+  axios.get('/api/tracks/check').then(res => {
+    if (res.data.playlists) {
+      dispatch({ type: FETCH_PLAYLISTS, payload: res.data.playlists });
+    }
+    if (res.data.tracks) {
+      dispatch({ type: FETCH_TRACKS, payload: res.data.tracks });
+    }
+  })
+};
