@@ -2,14 +2,8 @@ import React, { memo } from 'react';
 import styled from 'styled-components';
 import Button from '@material-ui/core/Button';
 
-export default memo(({
-  text, onClick, highlight
-}) => (
-  <StyledButton
-    onClick={onClick}
-    highlight={highlight}
-    variant="contained"
-  >
+export default memo(({ text, onClick, highlight }) => (
+  <StyledButton onClick={onClick} highlight={highlight} variant="contained">
     {text}
   </StyledButton>
 ));
@@ -21,9 +15,9 @@ const StyledButton = styled(Button)`
   letter-spacing: normal;
   text-transform: none;
   &.MuiButton-contained {
-    background-color: ${props => props.highlight ? '#94ff5d' : '#5dff5d'}
+    background-color: ${props => (props.highlight ? '#94ff5d' : '#5dff5d')};
   }
   &.MuiButton-contained:hover {
-    background-color: ${props => props.highlight ? '#67e824' : '#34d434'}
+    background-color: ${props => (props.highlight ? '#67e824' : '#34d434')};
   }
 `;

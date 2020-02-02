@@ -4,19 +4,19 @@ import {
   FETCH_PLAYLISTS,
   FETCH_TRACKS,
   FETCH_LABELS,
-  LOADING_FINISHED,
+  LOADING_FINISHED
 } from './types';
 
 export const fetchData = () => async dispatch => {
   const authorized = await axios.get('/auth/check').then(res => {
     dispatch({
       type: SET_AUTHORIZED,
-      payload: res.data.authorized,
+      payload: res.data.authorized
     });
     return res.data.authorized;
   });
   if (!authorized) return;
-  
+
   // update playlists
   await axios.get('/api/tracks/check');
   const fetchPlaylists = axios.get('/api/playlists').then(res => {
@@ -28,7 +28,7 @@ export const fetchData = () => async dispatch => {
   const fetchLabels = axios.get('/api/labels').then(res => {
     dispatch({ type: FETCH_LABELS, payload: res.data });
   });
-  await Promise.all([fetchPlaylists, fetchTracks, fetchLabels, ]);
+  await Promise.all([fetchPlaylists, fetchTracks, fetchLabels]);
   // done fetching data
   dispatch({ type: LOADING_FINISHED });
 };
@@ -40,5 +40,5 @@ export const fetchUpdates = () => dispatch => {
     if (res.data.tracks) {
       dispatch({ type: FETCH_TRACKS, payload: res.data.tracks });
     }
-  })
+  });
 };

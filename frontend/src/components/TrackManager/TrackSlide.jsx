@@ -9,30 +9,27 @@ import { modifyTrackSelection } from '../../actions/trackActions';
 const stateSelector = createSelector(
   state => state.playlists.playlistsById,
   state => state.labels.labelsById,
-  ( playlistsById, labelsById) => ({
-    playlistsById, labelsById
+  (playlistsById, labelsById) => ({
+    playlistsById,
+    labelsById
   })
 );
 
-
 export default memo(({ track, checked }) => {
-  console.log('TrackSlide')
+  console.log('TrackSlide');
   const dispatch = useDispatch();
-  const {
-     playlistsById, labelsById
-  } = useSelector(stateSelector);
+  const { playlistsById, labelsById } = useSelector(stateSelector);
 
-  const handleSelect = useCallback(e => {
-    dispatch(modifyTrackSelection(e.target.value))
-  }, [dispatch]);
+  const handleSelect = useCallback(
+    e => {
+      dispatch(modifyTrackSelection(e.target.value));
+    },
+    [dispatch]
+  );
 
   return (
     <Slide>
-      <Checkbox
-        checked={checked}
-        onChange={handleSelect}
-        value={track.id}
-      />
+      <Checkbox checked={checked} onChange={handleSelect} value={track.id} />
       {track.name}
     </Slide>
   );

@@ -6,9 +6,7 @@ import Paper from '@material-ui/core/paper';
 export default memo(({ children }) => (
   <Container>
     {React.Children.map(children || null, (child, idx) => (
-      <StyledPaper>
-        {child}
-      </StyledPaper>
+      <StyledPaper>{child}</StyledPaper>
     ))}
   </Container>
 ));

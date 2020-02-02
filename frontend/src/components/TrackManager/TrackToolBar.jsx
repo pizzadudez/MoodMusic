@@ -1,6 +1,6 @@
 import React, { memo, useCallback } from 'react';
 import { useDispatch } from 'react-redux';
-import styled from 'styled-components'
+import styled from 'styled-components';
 import { selectAllTracks, deselectAllTracks } from '../../actions/trackActions';
 
 import Button from '../common/Button';

@@ -15,10 +15,10 @@ const stateSelector = createSelector(
 export default memo(() => {
   const dispatch = useDispatch();
   const { authorized } = useSelector(stateSelector);
-  
+
   useEffect(() => {
     dispatch(fetchData());
-  }, [])
+  }, []);
 
   return (
     <StylesProvider injectFirst>
@@ -33,11 +33,8 @@ export default memo(() => {
       )}
       {!authorized && (
         <a href="http://localhost:8888/auth">
-        <button 
-          text={'Authorize'}
-          onClick={() => console.log('authTest')}
-        />
-      </a>
+          <button text={'Authorize'} onClick={() => console.log('authTest')} />
+        </a>
       )}
     </StylesProvider>
   );

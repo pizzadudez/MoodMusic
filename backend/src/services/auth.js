@@ -14,6 +14,7 @@ exports.authUri = () => {
     'user-modify-playback-state',
     'user-read-playback-state',
     'user-read-currently-playing',
+    'user-read-recently-played',
   ].join(' ');
   const uri = 'https://accounts.spotify.com/authorize?' +
     'client_id=' + config.clientId + '&response_type=code' +

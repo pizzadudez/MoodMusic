@@ -10,11 +10,11 @@ const stateSelector = createSelector(
   state => state.tracks.tracksById,
   state => state.tracks.ids,
   state => state.tracks.selected,
-  (tracksById, tracks, selected) => ({ tracksById, tracks, selected})
+  (tracksById, tracks, selected) => ({ tracksById, tracks, selected })
 );
 
 export default memo(() => {
-  console.log('TrackManager')
+  console.log('TrackManager');
   const dispatch = useDispatch();
   const { tracksById, tracks, selected } = useSelector(stateSelector);
 
