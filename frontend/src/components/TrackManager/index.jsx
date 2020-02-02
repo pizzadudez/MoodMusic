@@ -2,6 +2,7 @@ import React, { memo } from 'react';
 import { createSelector } from 'reselect';
 import { useSelector, useDispatch } from 'react-redux';
 import styled from 'styled-components';
+import { AutoSizer, List } from 'react-virtualized';
 
 import TrackSlide from './TrackSlide';
 import TrackToolBar from './TrackToolBar';
@@ -18,18 +19,32 @@ export default memo(() => {
   const dispatch = useDispatch();
   const { tracksById, tracks, selected } = useSelector(stateSelector);
 
+  const rowRenderer = ({ key, index, isScrolling, isVisible, style }) => {
+    return (
+      <div key={key} style={style}>
+        <TrackSlide
+          track={tracksById[tracks[index]]}
+          checked={selected[tracks[index]] || false}
+        />
+      </div>
+    );
+  };
   return (
     <Wrapper>
       <TrackToolBar />
-      <TrackList style={{ height: '100%' }}>
-        {tracks.map(id => (
-          <TrackSlide
-            key={id}
-            track={tracksById[id]}
-            checked={selected[id] || false}
-          />
-        ))}
-      </TrackList>
+      <div>
+        <AutoSizer>
+          {({ height, width }) => (
+            <List
+              height={height}
+              width={width}
+              rowCount={tracks.length}
+              rowHeight={58}
+              rowRenderer={rowRenderer}
+            />
+          )}
+        </AutoSizer>
+      </div>
     </Wrapper>
   );
 });

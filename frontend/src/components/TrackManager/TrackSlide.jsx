@@ -36,7 +36,7 @@ export default memo(({ track, checked }) => {
 });
 
 const Slide = styled.div`
-  height: 30px;
+  height: 50px;
   width: 100%;
   outline: 1px solid black;
   padding: 4px 8px;
