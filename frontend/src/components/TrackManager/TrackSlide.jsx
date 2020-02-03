@@ -15,7 +15,7 @@ const stateSelector = createSelector(
   })
 );
 
-export default memo(({ track, checked }) => {
+export default memo(({ track, checked, widthRestriction }) => {
   console.log('TrackSlide');
   const dispatch = useDispatch();
   const { playlistsById, labelsById } = useSelector(stateSelector);
@@ -30,7 +30,7 @@ export default memo(({ track, checked }) => {
   return (
     <Slide>
       <Checkbox checked={checked} onChange={handleSelect} value={track.id} />
-      {track.name}
+      {widthRestriction ? 'smol' : track.name}
     </Slide>
   );
 });

@@ -1,8 +1,9 @@
-import React, { memo } from 'react';
+import React, { memo, useRef, useEffect, useState, useCallback } from 'react';
 import { createSelector } from 'reselect';
 import { useSelector, useDispatch } from 'react-redux';
 import styled from 'styled-components';
 import { AutoSizer, List } from 'react-virtualized';
+import _ from 'lodash';
 
 import TrackSlide from './TrackSlide';
 import TrackToolBar from './TrackToolBar';
@@ -18,6 +19,20 @@ export default memo(() => {
   console.log('TrackManager');
   const dispatch = useDispatch();
   const { tracksById, tracks, selected } = useSelector(stateSelector);
+  const [widthRestriction, setWidthRestriction] = useState(false);
+  const sizeRef = useRef(null);
+
+  const handleWidthChange = useCallback(() => {
+    if (sizeRef.current) {
+      const width = sizeRef.current.getBoundingClientRect().width;
+      width >= 900 ? setWidthRestriction(false) : setWidthRestriction(true);
+    }
+  }, []);
+  useEffect(() => {
+    if (sizeRef.current) {
+      window.addEventListener('resize', _.throttle(handleWidthChange, 500));
+    }
+  }, [sizeRef.current, handleWidthChange]);
 
   const rowRenderer = ({ key, index, isScrolling, isVisible, style }) => {
     return (
@@ -25,14 +40,16 @@ export default memo(() => {
         <TrackSlide
           track={tracksById[tracks[index]]}
           checked={selected[tracks[index]] || false}
+          widthRestriction={widthRestriction}
         />
       </div>
     );
   };
+
   return (
     <Wrapper>
       <TrackToolBar />
-      <div>
+      <div ref={sizeRef}>
         <AutoSizer>
           {({ height, width }) => (
             <List
@@ -48,12 +65,6 @@ export default memo(() => {
     </Wrapper>
   );
 });
-
-const TrackList = styled.div`
-  overflow-y: scroll;
-  overflow-x: hidden;
-  padding-right: 18px;
-`;
 
 const Wrapper = styled.div`
   display: grid;
