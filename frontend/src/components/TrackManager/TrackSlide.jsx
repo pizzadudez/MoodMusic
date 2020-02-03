@@ -11,7 +11,7 @@ const stateSelector = createSelector(
   state => state.labels.labelsById,
   (playlistsById, labelsById) => ({
     playlistsById,
-    labelsById
+    labelsById,
   })
 );
 

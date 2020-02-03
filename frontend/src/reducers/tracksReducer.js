@@ -11,7 +11,7 @@ const initialState = {
   tracksById: {},
   ids: [],
   likedIds: [],
-  selected: {}
+  selected: {},
 };
 
 export default function(state = initialState, action) {
@@ -21,27 +21,28 @@ export default function(state = initialState, action) {
         ...state,
         tracksById: action.payload,
         ids: Object.keys(action.payload),
-        likedIds: Object.keys(action.payload).filter(id => 
-          action.payload[id].liked)
-      }
+        likedIds: Object.keys(action.payload).filter(
+          id => action.payload[id].liked
+        ),
+      };
     case MODIFY_TRACK_SELECTION:
       return {
         ...state,
         selected: {
           ...state.selected,
-          [action.payload]: !state.selected[action.payload]
-        }
-      }
+          [action.payload]: !state.selected[action.payload],
+        },
+      };
     case SELECT_ALL_TRACKS:
       return {
         ...state,
-        selected: action.selected
-      }    
+        selected: action.selected,
+      };
     case DESELECT_ALL_TRACKS:
       return {
         ...state,
-        selected: {}
-      }
+        selected: {},
+      };
     // case UPDATE_TRACKS_LABELS:
     //   return {
     //     ...state,
@@ -52,7 +53,7 @@ export default function(state = initialState, action) {
     //         [trackId]: {
     //           ...state.map[trackId],
     //           label_ids: [
-    //             ...state.map[trackId].label_ids.filter(id => 
+    //             ...state.map[trackId].label_ids.filter(id =>
     //               !action.toRemove.includes(id)
     //               && !action.toAdd.includes(id)),
     //             ...action.toAdd

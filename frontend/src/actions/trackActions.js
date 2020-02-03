@@ -9,14 +9,14 @@ import {
   UPDATE_TRACKS_LABELS,
   SET_TRACK_CHANGES,
   CLEAR_TRACK_CHANGES,
-  UPDATE_TRACKS_PLAYLISTS
+  UPDATE_TRACKS_PLAYLISTS,
 } from './types';
 
 // Track Selecting
 export const modifyTrackSelection = id => dispatch =>
   dispatch({
     type: MODIFY_TRACK_SELECTION,
-    payload: id
+    payload: id,
   });
 export const selectAllTracks = () => (dispatch, getState) => {
   const selected = getState().filter.ids.reduce(
@@ -25,7 +25,7 @@ export const selectAllTracks = () => (dispatch, getState) => {
   );
   dispatch({
     type: SELECT_ALL_TRACKS,
-    selected
+    selected,
   });
 };
 export const deselectAllTracks = () => dispatch => {

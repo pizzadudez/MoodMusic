@@ -1,6 +1,4 @@
-import {
-  FETCH_LABELS,
-} from "../actions/types";
+import { FETCH_LABELS } from '../actions/types';
 
 const initialState = {
   labelsById: {},
@@ -13,9 +11,9 @@ export default (state = initialState, action) => {
       return {
         ...state,
         labelsById: action.payload,
-        ids: Object.keys(action.payload)
-      }
+        ids: Object.keys(action.payload),
+      };
     default:
       return state;
   }
-}
+};

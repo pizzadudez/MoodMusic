@@ -1,6 +1,4 @@
-import {
-  FETCH_PLAYLISTS,
-} from '../actions/types';
+import { FETCH_PLAYLISTS } from '../actions/types';
 
 const initialState = {
   playlistsById: {},
@@ -13,9 +11,9 @@ export default function(state = initialState, action) {
       return {
         ...state,
         playlistsById: action.payload,
-        ids: Object.keys(action.payload)
-      }
-    default: 
+        ids: Object.keys(action.payload),
+      };
+    default:
       return state;
   }
 }
