@@ -6,15 +6,17 @@ import { createSelector } from 'reselect';
 
 import { fetchData } from './actions/dataActions';
 import Main from './views/Main';
+import LoadingSpinner from './components/LoadingSpinner';
 
 const stateSelector = createSelector(
   state => state.app.authorized,
-  authorized => ({ authorized })
+  state => state.app.loadingData,
+  (authorized, loadingData) => ({ authorized, loadingData })
 );
 
 export default memo(() => {
   const dispatch = useDispatch();
-  const { authorized } = useSelector(stateSelector);
+  const { authorized, loadingData } = useSelector(stateSelector);
 
   useEffect(() => {
     dispatch(fetchData());
@@ -22,7 +24,7 @@ export default memo(() => {
 
   return (
     <StylesProvider injectFirst>
-      {authorized && (
+      {authorized && !loadingData && (
         <Router>
           <Switch>
             <Route path="/">
@@ -31,6 +33,7 @@ export default memo(() => {
           </Switch>
         </Router>
       )}
+      {authorized && loadingData && <LoadingSpinner />}
       {!authorized && (
         <a href="http://localhost:8888/auth">
           <button text={'Authorize'} onClick={() => console.log('authTest')} />

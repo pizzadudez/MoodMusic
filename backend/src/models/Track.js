@@ -184,7 +184,6 @@ exports.getAll_ = async () => {
         if (err) {
           reject(err);
         } else {
-          console.log(tracks);
           db.all('SELECT * FROM albums', (err, albums) => {
             if (err) {
               reject(err);
