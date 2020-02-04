@@ -10,7 +10,7 @@ import {
 const initialState = {
   tracksById: {},
   ids: [],
-  likedIds: [],
+  liked: {},
   selected: {},
 };
 
@@ -21,8 +21,12 @@ export default function(state = initialState, action) {
         ...state,
         tracksById: action.payload,
         ids: Object.keys(action.payload),
-        likedIds: Object.keys(action.payload).filter(
-          id => action.payload[id].liked
+        liked: Object.keys(action.payload).reduce(
+          (obj, id) => ({
+            ...obj,
+            [id]: action.payload[id].liked ? true : undefined,
+          }),
+          {}
         ),
       };
     case MODIFY_TRACK_SELECTION:

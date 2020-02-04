@@ -4,6 +4,7 @@ import styled from 'styled-components';
 import Navbar from '../components/Navbar';
 import Container from '../components/common/Container';
 import TrackManager from '../components/TrackManager';
+import PlaylistFilter from '../components/PlaylistFilter';
 
 export default memo(() => {
   return (
@@ -11,7 +12,7 @@ export default memo(() => {
       <Navbar />
       <Content>
         <Container>
-          <div>Sidebar1</div>
+          <PlaylistFilter />
           <div>Sidebar2</div>
         </Container>
         <Container>

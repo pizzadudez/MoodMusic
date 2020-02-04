@@ -10,7 +10,7 @@ import TrackToolBar from './TrackToolBar';
 
 const stateSelector = createSelector(
   state => state.tracks.tracksById,
-  state => state.tracks.ids,
+  state => state.filter.ids,
   state => state.tracks.selected,
   (tracksById, tracks, selected) => ({ tracksById, tracks, selected })
 );

@@ -35,10 +35,10 @@ export default memo(({ track, checked, widthRestriction }) => {
       <Column>
         <Checkbox checked={checked} onChange={handleSelect} value={track.id} />
       </Column>
-      <Column>{track.liked ? <FavoriteIcon /> : <FavoriteBorderIcon />}</Column>
       <Column>
         <span>{track.name}</span>
       </Column>
+      <Column>{track.liked ? <FavoriteIcon /> : <FavoriteBorderIcon />}</Column>
       <Column>
         <span>{track.artist}</span>
       </Column>
@@ -51,7 +51,14 @@ export default memo(({ track, checked, widthRestriction }) => {
       )}
       <ChipColumn>
         {track.playlist_ids.map(id => (
-          <Chip label={playlistsById[id].name} />
+          <Chip key={'playlist_' + id} label={playlistsById[id].name} />
+        ))}
+        {track.label_ids.map(id => (
+          <Chip
+            key={'label' + id}
+            label={labelsById[id].name}
+            style={{ backgroundColor: 'tomato' }}
+          />
         ))}
         {/* <div
           style={{ background: '#353535', width: '100%', height: '100%' }}
@@ -66,13 +73,13 @@ const Slide = styled.div`
   grid-template-columns: ${props =>
     props.widthRestriction
       ? `min-content
-         30px
-         minmax(180px, 200px)
+        minmax(180px, 200px)
+        30px
          minmax(100px, 120px)
          minmax(300px, 1fr)`
       : `min-content
-         30px
-         minmax(200px, 300px)
+        minmax(200px, 300px)
+        30px
          minmax(150px, 200px)
          minmax(150px, 300px)
          minmax(300px, 1fr)`};
