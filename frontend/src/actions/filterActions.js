@@ -5,6 +5,8 @@ import {
   FILTER_BY_LABEL,
   PLAYLIST_FILTER_LIKED,
   FILTER_BY_PLAYLIST,
+  MODIFY_LABEL_FILTER,
+  REMOVE_LABEL_FILTER,
 } from './types';
 
 // Playlist Filter
@@ -39,5 +41,23 @@ export const showLiked = () => (dispatch, getState) => {
     type: FILTER_BY_LABEL,
     tracksById: getState().tracks.tracksById,
     tracks: getState().tracks.ids,
+  });
+};
+// Label Filter
+export const filterByLabel = id => (dispatch, getState) => {
+  dispatch({
+    type: MODIFY_LABEL_FILTER,
+    id: parseInt(id),
+    subgenreIds: getState().labels.labelsById[id].subgenres || [],
+  });
+  dispatch({
+    type: FILTER_BY_LABEL,
+    tracksById: getState().tracks.tracksById,
+    // tracks: getState().tracks.ids,
+  });
+};
+export const removeLabelFilter = () => dispatch => {
+  dispatch({
+    type: REMOVE_LABEL_FILTER,
   });
 };

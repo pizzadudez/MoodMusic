@@ -5,6 +5,7 @@ import Navbar from '../components/Navbar';
 import Container from '../components/common/Container';
 import TrackManager from '../components/TrackManager';
 import PlaylistFilter from '../components/PlaylistFilter';
+import LabelFilter from '../components/LabelFilter';
 
 export default memo(() => {
   return (
@@ -13,7 +14,7 @@ export default memo(() => {
       <Content>
         <Container>
           <PlaylistFilter />
-          <div>Sidebar2</div>
+          <LabelFilter />
         </Container>
         <Container>
           <TrackManager />

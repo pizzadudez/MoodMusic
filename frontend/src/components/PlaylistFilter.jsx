@@ -3,7 +3,7 @@ import { createSelector } from 'reselect';
 import { useDispatch, useSelector } from 'react-redux';
 import styled from 'styled-components';
 
-import SelectFilter from './common/SelectFilter';
+import FilterInput from './common/FilterInput';
 import { Divider } from '@material-ui/core';
 import { showAll, showLiked, filterByPlaylist } from '../actions/filterActions';
 
@@ -45,14 +45,14 @@ export default memo(() => {
 
   return (
     <Wrapper>
-      <SelectFilter
+      <FilterInput
         key="showAll"
         value="showAll"
         text="All Tracks"
         onChange={filterAll}
         checked={filterType === 'all' ? true : false}
       />
-      <SelectFilter
+      <FilterInput
         key="showLiked"
         value="showLiked"
         text="Liked Tracks"
@@ -61,7 +61,7 @@ export default memo(() => {
       />
       <StyledDivider />
       {playlists.map(id => (
-        <SelectFilter
+        <FilterInput
           key={id}
           value={id}
           text={playlistsById[id].name}
