@@ -55,9 +55,119 @@ exports.newTracks = async (tracks, liked = false) => {
 };
 // List of all track objects (full)
 exports.getAll = async () => {
+  const trackSQL = `SELECT id, name, artist, added_at, 
+                    rating, liked, album_id as album
+                    FROM tracks ORDER BY added_at DESC`;
+  const playlistSQL = `SELECT DISTINCT track_id, 
+                       group_concat(playlist_id) OVER (
+                         PARTITION BY track_id 
+                         ORDER BY added_at ASC 
+                         ROWS BETWEEN UNBOUNDED PRECEDING 
+                         AND UNBOUNDED FOLLOWING
+                       ) as playlists
+                       FROM tracks_playlists`;
+  const labelSQL = `SELECT DISTINCT track_id, 
+                    group_concat(label_id) OVER (
+                      PARTITION BY track_id 
+                      ORDER BY added_at ASC 
+                      ROWS BETWEEN UNBOUNDED PRECEDING 
+                      AND UNBOUNDED FOLLOWING
+                    ) as labels
+                    FROM tracks_labels`;
+  try {
+    const tracks = new Promise((resolve, reject) => {
+      db.all(trackSQL, (err, rows) => {
+        if (err) {
+          reject(err);
+        } else {
+          resolve(rows);
+        }
+      });
+    });
+    const albums = new Promise((resolve, reject) => {
+      db.all('SELECT * FROM albums', (err, rows) => {
+        if (err) {
+          reject(err);
+        } else {
+          const albumsById = rows.reduce(
+            (obj, a) => ({
+              ...obj,
+              [a.id]: {
+                id: a.id,
+                name: a.name,
+                images: {
+                  small: a.small,
+                  medium: a.medium,
+                  large: a.large,
+                },
+              },
+            }),
+            {}
+          );
+          resolve(albumsById);
+        }
+      });
+    });
+    const playlists = new Promise((resolve, reject) => {
+      db.all(playlistSQL, (err, rows) => {
+        if (err) {
+          reject(err);
+        } else {
+          const trackPlaylists = rows.reduce(
+            (obj, row) => ({
+              ...obj,
+              [row.track_id]: row.playlists.split(','),
+            }),
+            {}
+          );
+          resolve(trackPlaylists);
+        }
+      });
+    });
+    const labels = new Promise((resolve, reject) => {
+      db.all(labelSQL, (err, rows) => {
+        if (err) {
+          reject(err);
+        } else {
+          const trackLabels = rows.reduce(
+            (obj, row) => ({
+              ...obj,
+              [row.track_id]: row.labels.split(',').map(Number),
+            }),
+            {}
+          );
+          resolve(trackLabels);
+        }
+      });
+    });
+    const [
+      trackList,
+      albumsById,
+      trackPlaylists,
+      trackLabels,
+    ] = await Promise.all([tracks, albums, playlists, labels]);
+    const tracksById = trackList.reduce(
+      (obj, t) => ({
+        ...obj,
+        [t.id]: {
+          ...t,
+          album: albumsById[t.album],
+          playlist_ids: trackPlaylists[t.id] || [],
+          label_ids: trackLabels[t.id] || [],
+        },
+      }),
+      {}
+    );
+    return tracksById;
+  } catch (err) {
+    throw new Error(err);
+  }
+};
+// Old method using joins (can't sort pl/lb by added_at)
+exports.getAll_ = async () => {
   try {
     return new Promise((resolve, reject) => {
-      const sql = `SELECT t.id, t.name, t.artist, t.added_at, t.rating, t.liked, 
+      const sql = `SELECT t.id, t.name, t.artist, t.added_at, t.rating, t.liked,
                     a.id AS album,
                     GROUP_CONCAT(DISTINCT tp.playlist_id) AS playlist_ids,
                     GROUP_CONCAT(DISTINCT tl.label_id) as label_ids
@@ -74,6 +184,7 @@ exports.getAll = async () => {
         if (err) {
           reject(err);
         } else {
+          console.log(tracks);
           db.all('SELECT * FROM albums', (err, albums) => {
             if (err) {
               reject(err);
@@ -118,7 +229,8 @@ exports.getAll = async () => {
     throw new Error(err.message);
   }
 };
-exports.getAllOld = async () => {
+// Oldest (200+ ms)
+exports.getAll__ = async () => {
   const sql = 'SELECT * FROM tracks';
   const sqlAlbum = `SELECT * FROM albums WHERE id=?`;
   const sqlLabels = `SELECT tl.label_id FROM tracks_labels tl
