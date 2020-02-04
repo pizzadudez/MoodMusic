@@ -19,15 +19,16 @@ export default memo(() => {
   console.log('TrackManager');
   const dispatch = useDispatch();
   const { tracksById, tracks, selected } = useSelector(stateSelector);
+
   const [widthRestriction, setWidthRestriction] = useState(false);
   const sizeRef = useRef(null);
-
   const handleWidthChange = useCallback(() => {
     if (sizeRef.current) {
       const width = sizeRef.current.getBoundingClientRect().width;
       width >= 900 ? setWidthRestriction(false) : setWidthRestriction(true);
     }
-  }, []);
+  }, [setWidthRestriction]);
+
   useEffect(() => {
     if (sizeRef.current) {
       window.addEventListener('resize', _.throttle(handleWidthChange, 500));
@@ -56,7 +57,7 @@ export default memo(() => {
               height={height}
               width={width}
               rowCount={tracks.length}
-              rowHeight={58}
+              rowHeight={48}
               rowRenderer={rowRenderer}
             />
           )}

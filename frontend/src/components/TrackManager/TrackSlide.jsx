@@ -4,6 +4,9 @@ import { useSelector, useDispatch } from 'react-redux';
 import styled from 'styled-components';
 
 import Checkbox from '@material-ui/core/Checkbox';
+import Chip from '@material-ui/core/Chip';
+import FavoriteIcon from '@material-ui/icons/Favorite';
+import FavoriteBorderIcon from '@material-ui/icons/FavoriteBorder';
 import { modifyTrackSelection } from '../../actions/trackActions';
 
 const stateSelector = createSelector(
@@ -28,16 +31,74 @@ export default memo(({ track, checked, widthRestriction }) => {
   );
 
   return (
-    <Slide>
-      <Checkbox checked={checked} onChange={handleSelect} value={track.id} />
-      {widthRestriction ? 'smol' : track.name}
+    <Slide widthRestriction={widthRestriction}>
+      <Column>
+        <Checkbox checked={checked} onChange={handleSelect} value={track.id} />
+      </Column>
+      <Column>{track.liked ? <FavoriteIcon /> : <FavoriteBorderIcon />}</Column>
+      <Column>
+        <span>{track.name}</span>
+      </Column>
+      <Column>
+        <span>{track.artist}</span>
+      </Column>
+      {widthRestriction ? (
+        undefined
+      ) : (
+        <Column>
+          <span>{track.album.name}</span>
+        </Column>
+      )}
+      <ChipColumn>
+        {track.playlist_ids.map(id => (
+          <Chip label={playlistsById[id].name} />
+        ))}
+        {/* <div
+          style={{ background: '#353535', width: '100%', height: '100%' }}
+        ></div> */}
+      </ChipColumn>
     </Slide>
   );
 });
 
 const Slide = styled.div`
-  height: 50px;
+  display: grid;
+  grid-template-columns: ${props =>
+    props.widthRestriction
+      ? `min-content
+         30px
+         minmax(180px, 200px)
+         minmax(100px, 120px)
+         minmax(300px, 1fr)`
+      : `min-content
+         30px
+         minmax(200px, 300px)
+         minmax(150px, 200px)
+         minmax(150px, 300px)
+         minmax(300px, 1fr)`};
+  justify-content: start;
+  align-items: center;
+  height: 40px;
   width: 100%;
-  outline: 1px solid black;
-  padding: 4px 8px;
+  outline: 1px solid #7777771f;
+  padding: 4px 0;
+  padding-right: 15px;
+`;
+const Column = styled.div`
+  display: grid;
+  align-items: center;
+  height: 100%;
+  text-shadow: 0.7px 0.9px #00000099;
+  color: #6aff6a;
+  & span:not(.MuiButtonBase-root) {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+`;
+const ChipColumn = styled.div`
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(70px, auto));
+  align-items: center;
+  height: 100%;
 `;

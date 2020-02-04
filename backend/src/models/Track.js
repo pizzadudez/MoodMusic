@@ -3,18 +3,18 @@ const db = require('./db').conn();
 // Add new Tracks
 exports.newTracks = async (tracks, liked = false) => {
   try {
-    if (!tracks) return
+    if (!tracks) return;
     const albums = tracks.reduce((obj, track) => {
       obj[track.album_id] = obj[track.album_id] || {
         id: track.album_id,
         name: track.album_name,
-        images: track.album_images.map(obj => obj.url) // widest first
+        images: track.album_images.map(obj => obj.url), // widest first
       };
       return obj;
     }, {});
     const albumsSql = `INSERT OR IGNORE INTO albums (
                        id, name, large, medium, small)
-                       VALUES(?, ?, ?, ?, ?)`; 
+                       VALUES(?, ?, ?, ?, ?)`;
     await new Promise((resolve, reject) => {
       db.serialize(() => {
         db.run('BEGIN TRANSACTION');
@@ -24,7 +24,7 @@ exports.newTracks = async (tracks, liked = false) => {
             if (err) reject(err);
           });
         });
-        db.run('COMMIT TRANSACTION', err => err ? reject(err) : resolve());
+        db.run('COMMIT TRANSACTION', err => (err ? reject(err) : resolve()));
       });
     });
     const tracksSql = `INSERT OR IGNORE INTO tracks (
@@ -34,17 +34,24 @@ exports.newTracks = async (tracks, liked = false) => {
       db.serialize(() => {
         db.run('BEGIN TRANSACTION');
         tracks.forEach(t => {
-          const values = [t.id, t.name, t.artist, t.album_id, t.added_at, + liked];
+          const values = [
+            t.id,
+            t.name,
+            t.artist,
+            t.album_id,
+            t.added_at,
+            +liked,
+          ];
           db.run(tracksSql, values, err => {
             if (err) reject(err);
           });
         });
-        db.run('COMMIT TRANSACTION', err => err ? reject(err) : resolve());
+        db.run('COMMIT TRANSACTION', err => (err ? reject(err) : resolve()));
       });
-    })
+    });
   } catch (err) {
     throw new Error(err.message);
-  }                   
+  }
 };
 // List of all track objects (full)
 exports.getAll = async () => {
@@ -71,32 +78,36 @@ exports.getAll = async () => {
             if (err) {
               reject(err);
             } else {
-              const albumsById = albums.reduce((obj, a) => ({
-                ...obj,
-                [a.id] : {
-                  id: a.id,
-                  name: a.name,
-                  images: {
-                    small: a.small,
-                    medium: a.medium,
-                    large: a.large
-                  }
-                }
-              }), {});
+              const albumsById = albums.reduce(
+                (obj, a) => ({
+                  ...obj,
+                  [a.id]: {
+                    id: a.id,
+                    name: a.name,
+                    images: {
+                      small: a.small,
+                      medium: a.medium,
+                      large: a.large,
+                    },
+                  },
+                }),
+                {}
+              );
               const formatedTracks = tracks.map(t => ({
                 ...t,
                 album: albumsById[t.album],
-                playlist_ids: t.playlist_ids
-                  ? t.playlist_ids.split(',')
-                  : undefined,
+                playlist_ids: t.playlist_ids ? t.playlist_ids.split(',') : [],
                 label_ids: t.label_ids
                   ? t.label_ids.split(',').map(Number)
-                  : undefined,
+                  : [],
               }));
-              const tracksById = formatedTracks.reduce((obj, t) => ({
-                ...obj,
-                [t.id]: t
-              }), {});
+              const tracksById = formatedTracks.reduce(
+                (obj, t) => ({
+                  ...obj,
+                  [t.id]: t,
+                }),
+                {}
+              );
               resolve(tracksById);
             }
           });
@@ -108,7 +119,7 @@ exports.getAll = async () => {
   }
 };
 exports.getAllOld = async () => {
-  const sql = "SELECT * FROM tracks";
+  const sql = 'SELECT * FROM tracks';
   const sqlAlbum = `SELECT * FROM albums WHERE id=?`;
   const sqlLabels = `SELECT tl.label_id FROM tracks_labels tl
                      LEFT JOIN tracks t ON t.id = tl.track_id
@@ -119,41 +130,45 @@ exports.getAllOld = async () => {
   let tracks = [];
   let promises = [];
   return new Promise((resolve, reject) => {
-    db.each(sql, (err, row) => {
-      if (err) {
-        reject(err);
-      } else {
-        const promise = new Promise((res, rej) => {
-          db.serialize(() => {
-            db.get(sqlAlbum, row.album_id, (err, albumRow) => {
-              if (err) reject(err);
-              row.album = {
-                'name': albumRow.name,
-                'images': {
-                  'small': albumRow.small,
-                  'medium': albumRow.medium,
-                  'large': albumRow.large
-                }
-              };
-            });
-            db.all(sqlPlaylists, row.id, (err, rows) => {
-              if (err) reject(err);
-              row.playlist_ids = rows.map(row => row.playlist_id);
-            });
-            db.all(sqlLabels, row.id, (err, rows) => {
-              if (err) reject(err);
-              row.label_ids = rows.map(row => row.label_id);
-              tracks.push(row);
-              res();
+    db.each(
+      sql,
+      (err, row) => {
+        if (err) {
+          reject(err);
+        } else {
+          const promise = new Promise((res, rej) => {
+            db.serialize(() => {
+              db.get(sqlAlbum, row.album_id, (err, albumRow) => {
+                if (err) reject(err);
+                row.album = {
+                  name: albumRow.name,
+                  images: {
+                    small: albumRow.small,
+                    medium: albumRow.medium,
+                    large: albumRow.large,
+                  },
+                };
+              });
+              db.all(sqlPlaylists, row.id, (err, rows) => {
+                if (err) reject(err);
+                row.playlist_ids = rows.map(row => row.playlist_id);
+              });
+              db.all(sqlLabels, row.id, (err, rows) => {
+                if (err) reject(err);
+                row.label_ids = rows.map(row => row.label_id);
+                tracks.push(row);
+                res();
+              });
             });
           });
-        });
-        promises.push(promise);
+          promises.push(promise);
+        }
+      },
+      async (err, numRows) => {
+        await Promise.all(promises);
+        resolve(tracks);
       }
-    }, async (err, numRows) => {
-      await Promise.all(promises);
-      resolve(tracks);
-    });
+    );
   });
 };
 // List of Playlist's track ids
@@ -198,7 +213,7 @@ exports.syncLikedSongs = async hashMap => {
             if (err) reject(err);
           });
         });
-        db.run('COMMIT TRANSACTION', err => err ? reject(err) : resolve());
+        db.run('COMMIT TRANSACTION', err => (err ? reject(err) : resolve()));
       });
     });
   } catch (err) {
@@ -208,7 +223,7 @@ exports.syncLikedSongs = async hashMap => {
 
 // Add track-playlist relationships
 exports.addTracks = async playlistTracks => {
-  if(!playlistTracks) return;
+  if (!playlistTracks) return;
   const sql = `INSERT OR IGNORE INTO tracks_playlists (
                track_id, playlist_id, added_at, position)
                VALUES(?, ?, ?, ?)`;
@@ -231,23 +246,27 @@ exports.addTracks = async playlistTracks => {
   await Promise.all(getLastPositions);
   return new Promise((resolve, reject) => {
     db.serialize(() => {
-      db.run("BEGIN TRANSACTION");
+      db.run('BEGIN TRANSACTION');
       playlistTracks.forEach(pl => {
         pl.tracks.forEach((track, idx) => {
           // TracksObj or just TrackIds
-          const track_id = typeof(track) === 'object' ? track.id : track;
-          const added_at = typeof(track) === 'object' 
-            ? track.added_at : (new Date).toISOString();
+          const track_id = typeof track === 'object' ? track.id : track;
+          const added_at =
+            typeof track === 'object'
+              ? track.added_at
+              : new Date().toISOString();
           const values = [
             track_id,
             pl.playlist_id,
             added_at,
-            lastPositions[pl.playlist_id] + idx + 1
+            lastPositions[pl.playlist_id] + idx + 1,
           ];
-          db.run(sql, values, err => { if (err) reject(err); });
+          db.run(sql, values, err => {
+            if (err) reject(err);
+          });
         });
       });
-      db.run("COMMIT TRANSACTION", err => {
+      db.run('COMMIT TRANSACTION', err => {
         const message = 'Successfully added tracks to playlists!';
         err ? reject(err) : resolve(message);
       });
@@ -256,23 +275,23 @@ exports.addTracks = async playlistTracks => {
 };
 // Remove track-playlist relationships
 exports.removeTracks = playlistTracks => {
-  if(!playlistTracks) return;
+  if (!playlistTracks) return;
   const sql = `DELETE FROM tracks_playlists WHERE
                track_id=? AND playlist_id=?`;
   return new Promise((resolve, reject) => {
     db.serialize(() => {
-      db.run("BEGIN TRANSACTION");
+      db.run('BEGIN TRANSACTION');
       playlistTracks.forEach(pl => {
         pl.tracks.forEach(track => {
           // TracksObj or just TrackIds
-          const track_id = typeof(track) === 'object' ? track.id : track;
+          const track_id = typeof track === 'object' ? track.id : track;
           const values = [track_id, pl.playlist_id];
           db.run(sql, values, err => {
             if (err) reject(err);
           });
         });
       });
-      db.run("COMMIT TRANSACTION", err => {
+      db.run('COMMIT TRANSACTION', err => {
         const message = 'Successfully removed tracks from playlists!';
         err ? reject(err) : resolve(message);
       });
@@ -285,22 +304,22 @@ exports.updatePositions = (id, tracks) => {
     const sql = `UPDATE tracks_playlists SET position=?
                  WHERE track_id=? AND playlist_id=?`;
     db.serialize(() => {
-      db.run("BEGIN TRANSACTION");
+      db.run('BEGIN TRANSACTION');
       tracks.forEach((track, idx) => {
         db.run(sql, [idx, track, id], err => {
           if (err) reject(err);
         });
       });
-      db.run("COMMIT TRANSACTION", err => {
+      db.run('COMMIT TRANSACTION', err => {
         err ? reject(err) : resolve();
-      })
+      });
     });
   });
 };
 
 // Change a single track's rating field
 exports.rateTrack = (id, rating) => {
-  const sql = "UPDATE tracks SET rating=? WHERE id=?";
+  const sql = 'UPDATE tracks SET rating=? WHERE id=?';
   return new Promise((resolve, reject) => {
     db.run(sql, [rating, id], function(err) {
       if (err) {

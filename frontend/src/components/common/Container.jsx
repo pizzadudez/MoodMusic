@@ -17,7 +17,8 @@ const Container = styled.div`
 `;
 
 const StyledPaper = styled(Paper)`
-  background-color: #444;
+  background-color: #272727;
+  color: #ceded1;
   min-height: 400px;
   padding: 8px;
   margin-bottom: 10px;
