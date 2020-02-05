@@ -3,7 +3,7 @@ import Button from '@material-ui/core/Button';
 import styled from 'styled-components';
 
 export default memo(({ text, onClick, id, filter }) => {
-  console.log('FilterButton');
+  // console.log('FilterButton');
 
   return (
     <FilterButton variant="contained" filter={filter} onClick={onClick(id)}>

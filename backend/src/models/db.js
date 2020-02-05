@@ -4,7 +4,9 @@ const db = new sqlite3.Database('./db.sqlite3', err => {
   err ? console.log(err) : console.log('Database connected');
 });
 // Import this into models
-exports.conn = () => { return db; } 
+exports.conn = () => {
+  return db;
+};
 // Init database on server start
 exports.init = () => {
   db.serialize(() => {
@@ -41,6 +43,8 @@ exports.init = () => {
             id INTEGER NOT NULL PRIMARY KEY,
             type TEXT NOT NULL,
             name TEXT NOT NULL UNIQUE,
+            verbose TEXT UNIQUE DEFAULT NULL,
+            suffix TEXT DEFAULT NULL,
             color TEXT,
             parent_id INTEGER DEFAULT NULL)`);
     db.run(`CREATE TABLE IF NOT EXISTS tracks_playlists (

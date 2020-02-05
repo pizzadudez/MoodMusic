@@ -2,9 +2,9 @@ import React, { memo } from 'react';
 import styled from 'styled-components';
 import Button from '@material-ui/core/Button';
 
-export default memo(({ text, onClick, highlight }) => (
+export default memo(({ onClick, highlight, children }) => (
   <StyledButton onClick={onClick} highlight={highlight} variant="contained">
-    {text}
+    {children}
   </StyledButton>
 ));
 

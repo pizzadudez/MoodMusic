@@ -31,21 +31,27 @@ export default memo(() => {
       <Links>
         <li>
           <NavLink to="/">
-            <Button text="Main View" />
+            <Button>Main View</Button>
           </NavLink>
         </li>
-        {/* <li><NavLink to="/playlists"><button>Manage Playlists</button></NavLink></li>
-        <li><NavLink to="/labels"><button>Manage Labels</button></NavLink></li> */}
+        <li>
+          <NavLink to="/labels">
+            <Button>Manage Labels</Button>
+          </NavLink>
+        </li>
+        {/* <li><NavLink to="/playlists"><button>Manage Playlists</button></NavLink></li> */}
       </Links>
       <Button
-        text={'Submit Changes'}
-        // onClick={submitChanges}
-      />
+      // onClick={submitChanges}
+      >
+        Submit Changes
+      </Button>
       <Button
-        text={'Check for Updates'}
         highlight={changes}
         // onClick={checkForUpdates}
-      />
+      >
+        Check for Updates
+      </Button>
     </Nav>
   );
 });

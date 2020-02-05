@@ -18,7 +18,7 @@ const stateSelector = createSelector(
 );
 
 export default memo(() => {
-  console.log('LabelFilter');
+  // console.log('LabelFilter');
   const dispatch = useDispatch();
   const { labelsById, filtered, genreIds, moodIds } = useSelector(
     stateSelector

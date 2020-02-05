@@ -57,7 +57,7 @@ export default memo(() => {
         value="showLiked"
         text="Liked Tracks"
         onChange={filterLiked}
-        checked={filterType == 'liked' ? true : false}
+        checked={filterType === 'liked' ? true : false}
       />
       <StyledDivider />
       {playlists.map(id => (

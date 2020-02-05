@@ -6,7 +6,7 @@ import { selectAllTracks, deselectAllTracks } from '../../actions/trackActions';
 import Button from '../common/Button';
 
 export default memo(({ searchFilter }) => {
-  console.log('TrackToolBox');
+  // console.log('TrackToolBox');
   const dispatch = useDispatch();
   const selectAll = useCallback(() => {
     dispatch(selectAllTracks());

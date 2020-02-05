@@ -23,7 +23,7 @@ const stateSelector = createSelector(
 );
 
 export default memo(() => {
-  console.log('TrackManager');
+  // console.log('TrackManager');
   const dispatch = useDispatch();
   const { tracksById, tracks, selected } = useSelector(stateSelector);
   const [widthRestriction, setWidthRestriction] = useState(false);

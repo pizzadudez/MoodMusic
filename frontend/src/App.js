@@ -7,6 +7,7 @@ import { createSelector } from 'reselect';
 import { fetchData } from './actions/dataActions';
 import Main from './views/Main';
 import LoadingSpinner from './components/LoadingSpinner';
+import Labels from './views/Labels';
 
 const stateSelector = createSelector(
   state => state.app.authorized,
@@ -27,6 +28,9 @@ export default memo(() => {
       {authorized && !loadingData && (
         <Router>
           <Switch>
+            <Route path="/labels">
+              <Labels />
+            </Route>
             <Route path="/">
               <Main />
             </Route>
@@ -36,7 +40,7 @@ export default memo(() => {
       {authorized && loadingData && <LoadingSpinner />}
       {!authorized && (
         <a href="http://localhost:8888/auth">
-          <button text={'Authorize'} onClick={() => console.log('authTest')} />
+          <button onClick={() => console.log('authTest')}>Authorize</button>
         </a>
       )}
     </StylesProvider>
