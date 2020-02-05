@@ -5,7 +5,7 @@ import { selectAllTracks, deselectAllTracks } from '../../actions/trackActions';
 
 import Button from '../common/Button';
 
-export default memo(() => {
+export default memo(({ searchFilter }) => {
   console.log('TrackToolBox');
   const dispatch = useDispatch();
   const selectAll = useCallback(() => {
@@ -19,6 +19,7 @@ export default memo(() => {
     <Wrapper>
       <Button text="Select All" onClick={selectAll} />
       <Button text="Deselect All" onClick={deselectAll} />
+      <input type="text" onChange={searchFilter} />
     </Wrapper>
   );
 });

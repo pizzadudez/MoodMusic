@@ -1,4 +1,11 @@
-import React, { memo, useRef, useEffect, useState, useCallback } from 'react';
+import React, {
+  memo,
+  useRef,
+  useEffect,
+  useState,
+  useCallback,
+  useMemo,
+} from 'react';
 import { createSelector } from 'reselect';
 import { useSelector, useDispatch } from 'react-redux';
 import styled from 'styled-components';
@@ -19,15 +26,32 @@ export default memo(() => {
   console.log('TrackManager');
   const dispatch = useDispatch();
   const { tracksById, tracks, selected } = useSelector(stateSelector);
-
   const [widthRestriction, setWidthRestriction] = useState(false);
+  const [filter, setFilter] = useState('');
   const sizeRef = useRef(null);
+
+  const filtered = useMemo(
+    () =>
+      tracks.filter(id => {
+        const { name, artist, album } = tracksById[id];
+        return [name, artist, album.name].some(field =>
+          field.toLowerCase().includes(filter)
+        );
+      }),
+    [filter, tracks]
+  );
   const handleWidthChange = useCallback(() => {
     if (sizeRef.current) {
       const width = sizeRef.current.getBoundingClientRect().width;
       width >= 900 ? setWidthRestriction(false) : setWidthRestriction(true);
     }
   }, [setWidthRestriction]);
+  const searchFilter = useCallback(
+    e => {
+      setFilter(e.target.value.toLowerCase());
+    },
+    [setFilter]
+  );
 
   useEffect(() => {
     if (sizeRef.current) {
@@ -39,8 +63,8 @@ export default memo(() => {
     return (
       <div key={key} style={style}>
         <TrackSlide
-          track={tracksById[tracks[index]]}
-          checked={selected[tracks[index]] || false}
+          track={tracksById[filtered[index]]}
+          checked={selected[filtered[index]] || false}
           widthRestriction={widthRestriction}
         />
       </div>
@@ -49,14 +73,14 @@ export default memo(() => {
 
   return (
     <Wrapper>
-      <TrackToolBar />
+      <TrackToolBar searchFilter={searchFilter} />
       <div ref={sizeRef}>
         <AutoSizer>
           {({ height, width }) => (
             <List
               height={height}
               width={width}
-              rowCount={tracks.length}
+              rowCount={filtered.length}
               rowHeight={48}
               rowRenderer={rowRenderer}
             />
