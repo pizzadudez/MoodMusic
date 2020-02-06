@@ -3,11 +3,14 @@ import { BrowserRouter as Router, Switch, Route } from 'react-router-dom';
 import { StylesProvider } from '@material-ui/core/styles';
 import { useSelector, useDispatch } from 'react-redux';
 import { createSelector } from 'reselect';
+import styled from 'styled-components';
 
-import { fetchData } from './actions/dataActions';
-import Main from './views/Main';
 import LoadingSpinner from './components/LoadingSpinner';
+import Navbar from './components/Navbar';
+import Footer from './components/Footer';
+import Main from './views/Main';
 import Labels from './views/Labels';
+import { fetchData } from './actions/dataActions';
 
 const stateSelector = createSelector(
   state => state.app.authorized,
@@ -26,16 +29,20 @@ export default memo(() => {
   return (
     <StylesProvider injectFirst>
       {authorized && !loadingData && (
-        <Router>
-          <Switch>
-            <Route path="/labels">
-              <Labels />
-            </Route>
-            <Route path="/">
-              <Main />
-            </Route>
-          </Switch>
-        </Router>
+        <Page>
+          <Router>
+            <Navbar />
+            <Switch>
+              <Route path="/labels">
+                <Labels />
+              </Route>
+              <Route path="/">
+                <Main />
+              </Route>
+            </Switch>
+            <Footer />
+          </Router>
+        </Page>
       )}
       {authorized && loadingData && <LoadingSpinner />}
       {!authorized && (
@@ -46,3 +53,10 @@ export default memo(() => {
     </StylesProvider>
   );
 });
+
+const Page = styled.div`
+  height: 100vh;
+  display: grid;
+  grid-template-rows: 60px 1fr 30px;
+  grid-row-gap: 8px;
+`;

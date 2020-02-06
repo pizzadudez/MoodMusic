@@ -57,7 +57,8 @@ export default memo(() => {
 });
 
 const Nav = styled.nav`
-  height: 50px;
+  background-color: #212121;
+  /* height: 100%; */
   width: 100%;
   display: flex;
   align-items: center;

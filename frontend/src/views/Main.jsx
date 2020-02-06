@@ -1,7 +1,7 @@
 import React, { memo } from 'react';
 import styled from 'styled-components';
 
-import Navbar from '../components/Navbar';
+import ContainerColumn from '../components/common/ContainerColumn';
 import Container from '../components/common/Container';
 import TrackManager from '../components/TrackManager';
 import PlaylistFilter from '../components/PlaylistFilter';
@@ -9,29 +9,20 @@ import LabelFilter from '../components/LabelFilter';
 
 export default memo(() => {
   return (
-    <PageContainer>
-      <Navbar />
-      <Content>
-        <Container>
-          <PlaylistFilter />
-          <LabelFilter />
-        </Container>
-        <Container>
-          <TrackManager />
-        </Container>
-      </Content>
-    </PageContainer>
+    <Content>
+      <ContainerColumn>
+        <PlaylistFilter />
+        <LabelFilter />
+      </ContainerColumn>
+      <Container>
+        <TrackManager />
+      </Container>
+    </Content>
   );
 });
 
-const PageContainer = styled.div`
-  display: grid;
-  grid-template-rows: 50px minmax(500px, calc(100vh - 66px));
-  grid-row-gap: 6px;
-  max-height: 100vh;
-  overflow: hidden;
-`;
 const Content = styled.div`
+  min-height: 0;
   display: grid;
   grid-template-columns: minmax(300px, 360px) minmax(70%, 65%);
   grid-column-gap: 10px;

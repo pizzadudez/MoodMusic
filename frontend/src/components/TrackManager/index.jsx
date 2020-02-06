@@ -92,6 +92,8 @@ export default memo(() => {
 });
 
 const Wrapper = styled.div`
+  height: 100%;
   display: grid;
-  grid-template-rows: auto 844px;
+  grid-template-rows: 50px 1fr;
+  row-gap: 10px;
 `;

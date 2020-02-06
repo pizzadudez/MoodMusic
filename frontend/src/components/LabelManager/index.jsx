@@ -16,19 +16,24 @@ export default memo(() => {
   console.log(labels);
   return (
     <Wrapper>
-      {labels.map(id => (
-        <LabelCard label={labelsById[id]} />
-      ))}
+      <div>Search bar and buttons here</div>
+      <LabelContainer>
+        {labels.map(id => (
+          <LabelCard label={labelsById[id]} />
+        ))}
+      </LabelContainer>
     </Wrapper>
   );
 });
 
 const Wrapper = styled.div`
+  max-height: 100%;
+  display: grid;
+  grid-template-rows: 50px calc(100% - 56px);
+  grid-row-gap: 6px;
+`;
+const LabelContainer = styled.div`
   display: flex;
   flex-wrap: wrap;
   overflow: auto;
-  max-height: 900px;
-  /* display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(auto, 120px));
-  grid-column-gap: 4px; */
 `;

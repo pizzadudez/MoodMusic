@@ -24,6 +24,4 @@ export default memo(({ searchFilter }) => {
   );
 });
 
-const Wrapper = styled.div`
-  margin-bottom: 12px;
-`;
+const Wrapper = styled.div``;

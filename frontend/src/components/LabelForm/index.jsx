@@ -80,10 +80,12 @@ export default memo(() => {
               as={ColorPicker}
               setFieldValue={setFieldValue}
             />
+            <div>
+              <pre>{JSON.stringify(values, null, 2)}</pre>
+            </div>
             <Button type="submit" onClick={handleSubmit}>
               Submit
             </Button>
-            <pre>{JSON.stringify(values, null, 2)}</pre>
           </StyledForm>
         )}
       </Formik>
@@ -96,4 +98,6 @@ const StyledForm = styled(Form)`
   grid-template-rows: repeat(auto-fit, auto);
   grid-row-gap: 12px;
 `;
-const Wrapper = styled.div``;
+const Wrapper = styled.div`
+  height: 100%;
+`;
