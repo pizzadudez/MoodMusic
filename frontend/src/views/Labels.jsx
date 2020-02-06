@@ -34,4 +34,5 @@ const Content = styled.div`
   grid-template-columns: minmax(370px, 430px) minmax(65%, 60%);
   grid-column-gap: 10px;
   margin: 0 4px;
+  min-height: 0;
 `;

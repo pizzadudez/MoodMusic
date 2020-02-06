@@ -29,7 +29,7 @@ const initialValues = {
   name: '',
   verbose: '',
   type: 'genre',
-  color: '',
+  color: '#333',
 };
 
 const stateSelector = createSelector(

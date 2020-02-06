@@ -47,15 +47,16 @@ export default memo(() => {
             onClick={filter}
             filter={filtered[id]}
           />
-          {labelsById[id].subgenre_ids.map(id => (
-            <FilterButton
-              key={id}
-              id={id}
-              text={labelsById[id].name}
-              onClick={filter}
-              filter={filtered[id]}
-            />
-          ))}
+          {labelsById[id].subgenre_ids &&
+            labelsById[id].subgenre_ids.map(id => (
+              <FilterButton
+                key={id}
+                id={id}
+                text={labelsById[id].name}
+                onClick={filter}
+                filter={filtered[id]}
+              />
+            ))}
         </React.Fragment>
       ))}
       Moods
