@@ -22,5 +22,5 @@ const Paper = styled.div`
 `;
 const Test = styled.div`
   width: 300px;
-  height: 350px;
+  height: 250px;
 `;

@@ -8,9 +8,9 @@ import FormControlLabel from '@material-ui/core/FormControlLabel';
 export default memo(({ field, name, options, ...props }) => {
   return (
     <StyledRadioGroup {...field} {...props} name={name}>
-      {options.map(option => (
+      {options.map((option, idx) => (
         <FormControlLabel
-          key={option.id}
+          key={idx}
           value={option.type}
           control={<StyledRadio />}
           label={option.label}

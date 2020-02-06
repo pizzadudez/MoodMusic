@@ -2,8 +2,8 @@ import styled from 'styled-components';
 import Paper from '@material-ui/core/paper';
 
 export default styled(Paper)`
-  height: calc(100% - 16px);
-  margin-bottom: 8px;
+  min-height: 0;
+  margin: 8px 0;
   padding: 8px;
   background-color: #272727;
   color: #ceded1;

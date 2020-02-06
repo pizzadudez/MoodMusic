@@ -13,13 +13,13 @@ const stateSelector = createSelector(
 
 export default memo(() => {
   const { labelsById, labels, tracksById } = useSelector(stateSelector);
-  console.log(labels);
+
   return (
     <Wrapper>
       <div>Search bar and buttons here</div>
       <LabelContainer>
         {labels.map(id => (
-          <LabelCard label={labelsById[id]} />
+          <LabelCard key={id} label={labelsById[id]} />
         ))}
       </LabelContainer>
     </Wrapper>

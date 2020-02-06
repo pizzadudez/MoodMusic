@@ -6,7 +6,7 @@ import Paper from '@material-ui/core/paper';
 export default memo(({ children }) => (
   <Column>
     {React.Children.map(children || null, (child, idx) => (
-      <StyledPaper>{child}</StyledPaper>
+      <StyledPaper key={idx}>{child}</StyledPaper>
     ))}
   </Column>
 ));
@@ -15,10 +15,10 @@ const Column = styled.div`
   min-height: 0; /* Important */
   display: flex;
   flex-direction: column;
+  margin-top: 8px;
 `;
 
 const StyledPaper = styled(Paper)`
-  max-height: calc(100% - 16px);
   min-height: 120px;
   margin-bottom: 8px;
   padding: 8px;

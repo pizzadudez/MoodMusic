@@ -25,6 +25,6 @@ const Content = styled.div`
   min-height: 0;
   display: grid;
   grid-template-columns: minmax(300px, 360px) minmax(70%, 65%);
-  grid-column-gap: 10px;
+  column-gap: 10px;
   margin: 0 4px;
 `;
