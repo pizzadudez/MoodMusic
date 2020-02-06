@@ -11,25 +11,6 @@ import RadioGroup from '../common/RadioGroup';
 import Select from '../common/Select';
 import { createLabel } from '../../actions/labelActions';
 
-//   return (
-//     <div>
-//       <div
-//         style={{
-//           height: 30,
-//           width: 90,
-//           background: value,
-//           borderRadius: 3,
-//           color: 'black',
-//         }}
-//         onClick={handleShow}
-//       >
-//         Pick Color
-//       </div>
-//       {show && <SketchPicker color={value} onChange={changeColor} />}
-//     </div>
-//   );
-// };
-
 const labelTypes = [
   {
     type: 'genre',
@@ -49,7 +30,6 @@ const initialValues = {
   verbose: '',
   type: 'genre',
   color: '',
-  description: '',
 };
 
 const stateSelector = createSelector(
@@ -66,14 +46,6 @@ const stateSelector = createSelector(
 export default memo(() => {
   const dispatch = useDispatch();
   const { labelsById, ids, genres } = useSelector(stateSelector);
-
-  const create = useCallback(
-    (data, { setSubmitting, resetForm }) => {
-      console.log(data);
-      //
-    },
-    [dispatch]
-  );
 
   return (
     <Wrapper>

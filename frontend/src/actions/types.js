@@ -24,6 +24,7 @@ export const FILTER_BY_SEARCH = 'FILTER_BY_SEARCH';
 // Label / Playlist Managing
 // ============================================================================
 export const CREATE_LABEL = 'CREATE_LABEL';
+export const UPDATE_LABEL = 'UPDATE_LABEL';
 export const CREATE_PLAYLIST = 'CREATE_PLAYLIST';
 export const CLEAR_PLAYLIST_CHANGES = 'CLEAR_PLAYLIST_CHANGES';
 

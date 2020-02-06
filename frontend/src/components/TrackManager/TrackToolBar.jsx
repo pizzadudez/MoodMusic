@@ -17,8 +17,8 @@ export default memo(({ searchFilter }) => {
 
   return (
     <Wrapper>
-      <Button text="Select All" onClick={selectAll} />
-      <Button text="Deselect All" onClick={deselectAll} />
+      <Button onClick={selectAll}>Select All</Button>
+      <Button onClick={deselectAll}>Deselect All</Button>
       <input type="text" onChange={searchFilter} />
     </Wrapper>
   );

@@ -43,7 +43,7 @@ exports.init = () => {
             id INTEGER NOT NULL PRIMARY KEY,
             type TEXT NOT NULL,
             name TEXT NOT NULL UNIQUE,
-            verbose TEXT UNIQUE DEFAULT NULL,
+            verbose TEXT DEFAULT NULL,
             suffix TEXT DEFAULT NULL,
             color TEXT,
             parent_id INTEGER DEFAULT NULL)`);

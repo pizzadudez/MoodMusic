@@ -47,7 +47,7 @@ export default memo(() => {
             onClick={filter}
             filter={filtered[id]}
           />
-          {labelsById[id].subgenres.map(id => (
+          {labelsById[id].subgenre_ids.map(id => (
             <FilterButton
               key={id}
               id={id}

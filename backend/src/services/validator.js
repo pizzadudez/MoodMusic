@@ -4,28 +4,37 @@ const validate = method => {
   switch (method) {
     case 'createLabel': {
       return [
-        body('type', 'Types: genre|subgenre|mood.')
-          .isIn(['genre', 'subgenre', 'mood']),
-        body('name', '"name" is mandatory.')
-          .exists(),
+        body('type', 'Types: genre|subgenre|mood.').isIn([
+          'genre',
+          'subgenre',
+          'mood',
+        ]),
+        body('name', '"name" is mandatory.').exists(),
         body('parent_id', 'Value must be a genre id.')
-          .if(body('type').equals('subgenre')).exists().isInt(),
+          .if(body('type').equals('subgenre'))
+          .exists()
+          .isInt(),
         body('color', 'Must be hex color code')
-          .optional().isHexColor()
+          .exists()
+          .isHexColor(),
       ];
     }
     case 'updateLabel': {
       return [
         body('name', '<name> must only contain letters').optional(),
-        body('parent_id', 'Value must be a label id.').optional().isInt(),
-        body('color', 'Must be hex color code').optional().isHexColor()
+        body('parent_id', 'Value must be a label id.')
+          .optional()
+          .isInt(),
+        body('color', 'Must be hex color code')
+          .optional()
+          .isHexColor(),
       ];
     }
     case 'addLabels': {
       return [
         body('*.track_id').exists(),
         body('*.label_ids').custom(list => isArray(list)),
-        body('*.label_ids.*').isNumeric()
+        body('*.label_ids.*').isNumeric(),
       ];
     }
     case 'addTracks': {
@@ -36,42 +45,52 @@ const validate = method => {
       ];
     }
     case 'createPlaylist': {
-      return [
-        body('name').exists()
-      ];
+      return [body('name').exists()];
     }
     case 'modifyPlaylist': {
       return [
-        body('tracking').optional().isBoolean(),
-        body('genre_id').optional().isNumeric(),
-        body('mood_playlist').optional().isBoolean()
-      ]
+        body('tracking')
+          .optional()
+          .isBoolean(),
+        body('genre_id')
+          .optional()
+          .isNumeric(),
+        body('mood_playlist')
+          .optional()
+          .isBoolean(),
+      ];
     }
     case 'modifyPlaylists': {
       return [
-        body('').isArray().exists(),
+        body('')
+          .isArray()
+          .exists(),
         body('*.playlist_id').exists(),
-        body('*.tracking').optional().isBoolean(),
-        body('*.genre_id').optional().isNumeric(),
-        body('*.mood_playlist').optional().isBoolean()
-      ]
+        body('*.tracking')
+          .optional()
+          .isBoolean(),
+        body('*.genre_id')
+          .optional()
+          .isNumeric(),
+        body('*.mood_playlist')
+          .optional()
+          .isBoolean(),
+      ];
     }
     case 'rateTrack': {
-      return [
-        body('rating', 'Rating must be 0|1|2|3').isIn([0, 1, 2, 3])
-      ]
+      return [body('rating', 'Rating must be 0|1|2|3').isIn([0, 1, 2, 3])];
     }
     case 'reorderTracks': {
       return [
-        body('tracks', '<tracks> must be an array of track ids').isArray()
-      ]
+        body('tracks', '<tracks> must be an array of track ids').isArray(),
+      ];
     }
-  } 
+  }
 };
 
 // Check for arrays
 const isArray = array => {
-  if(!Array.isArray(array)) {
+  if (!Array.isArray(array)) {
     throw new Error('label_ids must be of type Array');
   } else {
     return true;
