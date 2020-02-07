@@ -85,12 +85,11 @@ export default memo(() => {
           } else {
             await dispatch(createLabel(data));
           }
-          console.log(data);
           setSubmitting(false);
           resetForm();
         }}
       >
-        {({ values, errors, isSubmitting, handleSubmit }) => (
+        {({ values, isSubmitting, handleSubmit }) => (
           <StyledForm>
             <Field name="name" label="Name" as={TextField} />
             <Field name="verbose" label="Verbose" as={TextField} />
@@ -110,7 +109,7 @@ export default memo(() => {
             )}
             <Field name="color" as={ColorPicker} />
             <Button type="submit" onClick={handleSubmit}>
-              Submit
+              {isSubmitting ? 'Submitting...' : 'Submit'}
             </Button>
             {/* <div>
               <pre>{JSON.stringify(values, null, 2)}</pre>

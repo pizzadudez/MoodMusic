@@ -29,7 +29,6 @@ export const showAll = () => (dispatch, getState) => {
   dispatch({
     type: FILTER_BY_LABEL,
     tracksById: getState().tracks.tracksById,
-    tracks: getState().tracks.ids,
   });
 };
 export const showLiked = () => (dispatch, getState) => {
@@ -40,7 +39,6 @@ export const showLiked = () => (dispatch, getState) => {
   dispatch({
     type: FILTER_BY_LABEL,
     tracksById: getState().tracks.tracksById,
-    tracks: getState().tracks.ids,
   });
 };
 // Label Filter
@@ -48,12 +46,11 @@ export const filterByLabel = id => (dispatch, getState) => {
   dispatch({
     type: MODIFY_LABEL_FILTER,
     id: parseInt(id),
-    subgenreIds: getState().labels.labelsById[id].subgenres || [],
+    subgenreIds: getState().labels.labelsById[id].subgenre_ids || [],
   });
   dispatch({
     type: FILTER_BY_LABEL,
     tracksById: getState().tracks.tracksById,
-    // tracks: getState().tracks.ids,
   });
 };
 export const removeLabelFilter = () => dispatch => {
