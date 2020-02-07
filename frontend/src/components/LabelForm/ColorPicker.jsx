@@ -1,8 +1,12 @@
 import React, { memo, useState, useCallback } from 'react';
 import { SketchPicker } from 'react-color';
 import styled from 'styled-components';
+import { useField } from 'formik';
 
-export default memo(({ name, value, setFieldValue }) => {
+export default memo(props => {
+  const [field, meta, helpers] = useField(props.name);
+  const { value } = meta;
+  const { setValue } = helpers;
   const [isOpen, setIsOpen] = useState();
 
   const togglePicker = useCallback(() => {
@@ -11,9 +15,9 @@ export default memo(({ name, value, setFieldValue }) => {
 
   const changeColor = useCallback(
     (color, e) => {
-      setFieldValue(name, color.hex);
+      setValue(color.hex);
     },
-    [setFieldValue]
+    [setValue]
   );
 
   return (

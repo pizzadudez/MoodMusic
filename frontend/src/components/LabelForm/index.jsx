@@ -3,6 +3,7 @@ import { Formik, Form, Field } from 'formik';
 import styled from 'styled-components';
 import { createSelector } from 'reselect';
 import { useSelector, useDispatch } from 'react-redux';
+import * as yup from 'yup';
 
 import Button from '../common/Button';
 import ColorPicker from './ColorPicker';
@@ -33,26 +34,28 @@ const initialValues = {
   color: '#bdbdbd',
   parent_id: '',
 };
-
+const validationSchema = yup.object().shape({
+  name: yup.string().required('Required field.'),
+  parent_id: yup.string().when('type', {
+    is: 'subgenre',
+    then: yup.string().required('You must select a parent genre.'),
+    otherwise: yup.string().notRequired(),
+  }),
+});
 const stateSelector = createSelector(
+  state => state.labels.labelsById,
   state => state.app.updatingLabelId,
-  state => state.labels,
-  (updatingLabelId, { labelsById, ids }) => ({
-    updatingLabelId,
+  (labelsById, updatingLabelId) => ({
     labelsById,
-    ids: ids,
-    genres: ids
-      .filter(id => labelsById[id].type === 'genre')
-      .map(id => labelsById[id]),
+    genres: Object.values(labelsById).filter(label => label.type === 'genre'),
+    updatingLabelId,
   })
 );
 
 export default memo(() => {
   console.log('LabelForm');
   const dispatch = useDispatch();
-  const { updatingLabelId, labelsById, ids, genres } = useSelector(
-    stateSelector
-  );
+  const { updatingLabelId, labelsById, genres } = useSelector(stateSelector);
 
   const updateInitialValues = useMemo(() => {
     if (updatingLabelId) {
@@ -66,8 +69,7 @@ export default memo(() => {
         color: l.color || '#bdbdbd',
       };
     }
-
-    return labelsById[updatingLabelId];
+    return null;
   }, [updatingLabelId, labelsById]);
 
   return (
@@ -75,6 +77,7 @@ export default memo(() => {
       <Formik
         initialValues={updateInitialValues || initialValues}
         enableReinitialize
+        validationSchema={validationSchema}
         onSubmit={async (data, { setSubmitting, resetForm }) => {
           setSubmitting(true);
           if (updatingLabelId) {
@@ -87,7 +90,7 @@ export default memo(() => {
           resetForm();
         }}
       >
-        {({ values, isSubmitting, setFieldValue, handleSubmit }) => (
+        {({ values, errors, isSubmitting, handleSubmit }) => (
           <StyledForm>
             <Field name="name" label="Name" as={TextField} />
             <Field name="verbose" label="Verbose" as={TextField} />
@@ -105,17 +108,14 @@ export default memo(() => {
                 <Field name="suffix" label="Suffix" as={TextField} />
               </>
             )}
-            <Field
-              name="color"
-              as={ColorPicker}
-              setFieldValue={setFieldValue}
-            />
-            <div>
-              <pre>{JSON.stringify(values, null, 2)}</pre>
-            </div>
+            <Field name="color" as={ColorPicker} />
             <Button type="submit" onClick={handleSubmit}>
               Submit
             </Button>
+            {/* <div>
+              <pre>{JSON.stringify(values, null, 2)}</pre>
+              <pre>{JSON.stringify(errors, null, 2)}</pre>
+            </div> */}
           </StyledForm>
         )}
       </Formik>

@@ -2,12 +2,18 @@ import React, { memo } from 'react';
 import styled from 'styled-components';
 
 import TextField from '@material-ui/core/TextField';
+import { useField } from 'formik';
 
-export default memo(({ label, ...rest }) => {
+export default memo(({ label, ...props }) => {
+  const [field, meta] = useField(props);
+  const errorText = meta.error && meta.touched ? meta.error : '';
+
   return (
     <StyledTextField
-      {...rest}
+      {...props}
       label={label}
+      helperText={errorText}
+      error={!!errorText}
       variant="outlined"
       size="small"
       autoComplete="off"

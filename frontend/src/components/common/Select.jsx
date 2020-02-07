@@ -3,11 +3,17 @@ import styled from 'styled-components';
 
 import TextField from '@material-ui/core/TextField';
 import MenuItem from '@material-ui/core/MenuItem';
+import { useField } from 'formik';
 
-export default memo(({ label, options, ...rest }) => {
+export default memo(({ label, options, ...props }) => {
+  const [field, meta] = useField(props);
+  const errorText = meta.error && meta.touched ? meta.error : '';
+
   return (
     <StyledTextField
-      {...rest}
+      {...props}
+      helperText={errorText}
+      error={!!errorText}
       select
       variant="outlined"
       size="small"
