@@ -10,6 +10,14 @@ const validate = method => {
           'mood',
         ]),
         body('name', '"name" is mandatory.').exists(),
+        body(
+          'verbose',
+          '"verbose" must only contain letters or numbers'
+        ).optional(),
+        body(
+          'suffix',
+          '"suffix" must only contain letters or numbers'
+        ).optional(),
         body('parent_id', 'Value must be a genre id.')
           .if(body('type').equals('subgenre'))
           .exists()
@@ -21,11 +29,19 @@ const validate = method => {
     }
     case 'updateLabel': {
       return [
-        body('name', '<name> must only contain letters').optional(),
-        body('parent_id', 'Value must be a label id.')
+        body('name', '"name" must only contain letters or numbers').optional(),
+        body(
+          'verbose',
+          '"verbose" must only contain letters or numbers'
+        ).optional(),
+        body(
+          'suffix',
+          '"suffix" must only contain letters or numbers'
+        ).optional(),
+        body('parent_id', '"parent_id" must be a valid label_id (integer)')
           .optional()
           .isInt(),
-        body('color', 'Must be hex color code')
+        body('color', '"color" must be hex color code')
           .optional()
           .isHexColor(),
       ];
