@@ -5,10 +5,10 @@ exports.create = data => {
   const values = [
     data.type,
     data.name,
-    data.verbose !== '' ? data.verbose : null,
-    data.suffix !== '' ? data.suffix : null,
+    !!data.verbose ? data.verbose : null,
+    !!data.suffix ? data.suffix : null,
     data.color,
-    data.parent_id !== '' ? data.parent_id : null,
+    data.parent_id ? data.parent_id : null,
   ];
   const sql = `INSERT INTO labels
                (type, name, verbose, suffix, color, parent_id)
@@ -81,12 +81,19 @@ exports.create_ = async label => {
 };
 // Update existing label
 exports.update = (id, data) => {
-  const fields = Object.keys(data)
+  const sanitizedData = {
+    ...(!!data.name && { name: data.name }),
+    ...(!!data.verbose && { verbose: data.verbose }),
+    ...(!!data.suffix && { suffix: data.suffix }),
+    ...(!!data.color && { color: data.color }),
+    ...(!!data.parent_id && { parent_id: data.parent_id }),
+  };
+  const fields = Object.keys(sanitizedData)
     .map(key => key + '=?')
     .join(', ');
   const sql = 'UPDATE labels SET ' + fields + ' WHERE id=?';
-  const values = Object.values(data);
-
+  const values = Object.values(sanitizedData);
+  console.log(values, sql);
   return new Promise((resolve, reject) => {
     db.run(sql, [...values, id], err => {
       if (err) {
