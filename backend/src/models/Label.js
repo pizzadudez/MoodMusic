@@ -8,7 +8,7 @@ exports.create = data => {
     data.verbose !== '' ? data.verbose : null,
     data.suffix !== '' ? data.suffix : null,
     data.color,
-    data.parent_id,
+    data.parent_id !== '' ? data.parent_id : null,
   ];
   const sql = `INSERT INTO labels
                (type, name, verbose, suffix, color, parent_id)

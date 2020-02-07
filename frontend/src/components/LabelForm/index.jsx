@@ -28,8 +28,10 @@ const labelTypes = [
 const initialValues = {
   name: '',
   verbose: '',
+  suffix: '',
   type: 'genre',
   color: '#bdbdbd',
+  parent_id: '',
 };
 
 const stateSelector = createSelector(
