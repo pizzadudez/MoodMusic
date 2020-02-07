@@ -14,6 +14,7 @@ import _ from 'lodash';
 
 import TrackSlide from './TrackSlide';
 import TrackToolBar from './TrackToolBar';
+import TrackModal from './TrackModal';
 
 const stateSelector = createSelector(
   state => state.tracks.tracksById,
@@ -52,6 +53,14 @@ export default memo(() => {
     },
     [setFilter]
   );
+  // Track Modal
+  const [openTrack, setOpenTrack] = useState(false);
+  const close = useCallback(
+    e => {
+      setOpenTrack(false);
+    },
+    [setOpenTrack]
+  );
 
   useEffect(() => {
     if (sizeRef.current) {
@@ -66,6 +75,7 @@ export default memo(() => {
           track={tracksById[filtered[index]]}
           checked={selected[filtered[index]] || false}
           widthRestriction={widthRestriction}
+          setOpenTrack={setOpenTrack}
         />
       </div>
     );
@@ -73,6 +83,7 @@ export default memo(() => {
 
   return (
     <Wrapper>
+      <TrackModal open={openTrack} onClose={close} />
       <TrackToolBar searchFilter={searchFilter} />
       <div ref={sizeRef}>
         <AutoSizer>

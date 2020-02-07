@@ -13,6 +13,7 @@ exports.create = data => {
   const sql = `INSERT INTO labels
                (type, name, verbose, suffix, color, parent_id)
                VALUES(?, ?, ?, ?, ?, ?)`;
+
   return new Promise((resolve, reject) => {
     db.run(sql, values, function(err) {
       if (err) {
@@ -93,7 +94,7 @@ exports.update = (id, data) => {
     .join(', ');
   const sql = 'UPDATE labels SET ' + fields + ' WHERE id=?';
   const values = Object.values(sanitizedData);
-  console.log(values, sql);
+
   return new Promise((resolve, reject) => {
     db.run(sql, [...values, id], err => {
       if (err) {

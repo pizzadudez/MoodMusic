@@ -8,6 +8,7 @@ import Chip from '@material-ui/core/Chip';
 import FavoriteIcon from '@material-ui/icons/Favorite';
 import FavoriteBorderIcon from '@material-ui/icons/FavoriteBorder';
 import { modifyTrackSelection } from '../../actions/trackActions';
+import Button from '../common/Button';
 
 const stateSelector = createSelector(
   state => state.playlists.playlistsById,
@@ -18,7 +19,7 @@ const stateSelector = createSelector(
   })
 );
 
-export default memo(({ track, checked, widthRestriction }) => {
+export default memo(({ track, checked, widthRestriction, setOpenTrack }) => {
   // console.log('TrackSlide');
   const dispatch = useDispatch();
   const { playlistsById, labelsById } = useSelector(stateSelector);
@@ -29,6 +30,9 @@ export default memo(({ track, checked, widthRestriction }) => {
     },
     [dispatch]
   );
+  const openTrackModal = useCallback(() => {
+    setOpenTrack(track.id);
+  }, [setOpenTrack, track]);
 
   return (
     <Slide widthRestriction={widthRestriction}>
@@ -50,6 +54,7 @@ export default memo(({ track, checked, widthRestriction }) => {
         </Column>
       )}
       <ChipColumn>
+        <Button onClick={openTrackModal}>Open</Button>
         {track.playlist_ids.map(id => (
           <Chip key={'playlist_' + id} label={playlistsById[id].name} />
         ))}
