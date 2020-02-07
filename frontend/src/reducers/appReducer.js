@@ -1,8 +1,14 @@
-import { LOADING_FINISHED, SET_AUTHORIZED } from '../actions/types';
+import {
+  LOADING_FINISHED,
+  SET_AUTHORIZED,
+  SELECT_LABEL_TO_UPDATE,
+  UPDATE_LABEL,
+} from '../actions/types';
 
 const initialState = {
   authorized: false,
   loadingData: true,
+  updatingLabelId: null,
 };
 
 export default (state = initialState, action) => {
@@ -12,10 +18,21 @@ export default (state = initialState, action) => {
         ...state,
         authorized: action.payload,
       };
-    case LOADING_FINISHED: {
+    case LOADING_FINISHED:
       return {
         ...state,
         loadingData: false,
+      };
+
+    case SELECT_LABEL_TO_UPDATE:
+      return {
+        ...state,
+        updatingLabelId: action.id,
+      };
+    case UPDATE_LABEL: {
+      return {
+        ...state,
+        updatingLabelId: null,
       };
     }
     default:

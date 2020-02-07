@@ -1,10 +1,17 @@
 import React, { memo } from 'react';
 import styled from 'styled-components';
 
-export default memo(({ label }) => {
+import Button from '../common/Button';
+
+export default memo(({ label, updateLabel }) => {
+  console.log('>LabelCard');
+
   return (
     <Paper>
-      <Test>{label.name}</Test>
+      <Test>
+        <Button onClick={updateLabel(label.id)}>Update</Button>
+        {label.name}
+      </Test>
     </Paper>
   );
 });

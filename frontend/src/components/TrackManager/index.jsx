@@ -92,7 +92,7 @@ export default memo(() => {
 });
 
 const Wrapper = styled.div`
-  /* height: 100%; */
+  height: 100%;
   display: grid;
   grid-template-rows: 50px 1fr;
   row-gap: 10px;

@@ -25,6 +25,7 @@ export const FILTER_BY_SEARCH = 'FILTER_BY_SEARCH';
 // ============================================================================
 export const CREATE_LABEL = 'CREATE_LABEL';
 export const UPDATE_LABEL = 'UPDATE_LABEL';
+export const SELECT_LABEL_TO_UPDATE = 'SELECT_LABEL_TO_UPDATE';
 export const CREATE_PLAYLIST = 'CREATE_PLAYLIST';
 export const CLEAR_PLAYLIST_CHANGES = 'CLEAR_PLAYLIST_CHANGES';
 

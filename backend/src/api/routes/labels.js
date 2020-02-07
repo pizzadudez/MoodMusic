@@ -26,9 +26,7 @@ router.post('/labels', validator('createLabel'), async (req, res, next) => {
     res.status(200).json(response);
   } catch (err) {
     console.log(err);
-    res.status(400).json({
-      error: err,
-    });
+    res.status(500).send('Internal Server Error.');
   }
 });
 // // Update existing label

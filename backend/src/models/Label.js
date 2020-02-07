@@ -1,7 +1,29 @@
 const db = require('./db').conn();
 
 // Create new label with validation
-exports.create = async label => {
+exports.create = data => {
+  const values = [
+    data.type,
+    data.name,
+    data.verbose !== '' ? data.verbose : null,
+    data.suffix !== '' ? data.suffix : null,
+    data.color,
+    data.parent_id,
+  ];
+  const sql = `INSERT INTO labels
+               (type, name, verbose, suffix, color, parent_id)
+               VALUES(?, ?, ?, ?, ?, ?)`;
+  return new Promise((resolve, reject) => {
+    db.run(sql, values, function(err) {
+      if (err) {
+        reject(new Error(err.message));
+      } else {
+        resolve(getOne(this.lastID));
+      }
+    });
+  });
+};
+exports.create_ = async label => {
   try {
     let values = [
       label.type,
@@ -64,13 +86,13 @@ exports.update = (id, data) => {
     .join(', ');
   const sql = 'UPDATE labels SET ' + fields + ' WHERE id=?';
   const values = Object.values(data);
+
   return new Promise((resolve, reject) => {
-    db.run(sql, [...values, id], async err => {
+    db.run(sql, [...values, id], err => {
       if (err) {
         reject(new Error(err.message));
       } else {
-        const updatedLabel = await getOne(id);
-        resolve(updatedLabel);
+        resolve(getOne(id));
       }
     });
   });

@@ -1,4 +1,4 @@
-import React, { memo, useState, useCallback } from 'react';
+import React, { memo, useState, useCallback, useMemo } from 'react';
 import { Formik, Form, Field } from 'formik';
 import styled from 'styled-components';
 import { createSelector } from 'reselect';
@@ -9,7 +9,7 @@ import ColorPicker from './ColorPicker';
 import TextField from '../common/TextField';
 import RadioGroup from '../common/RadioGroup';
 import Select from '../common/Select';
-import { createLabel } from '../../actions/labelActions';
+import { createLabel, updateLabel } from '../../actions/labelActions';
 
 const labelTypes = [
   {
@@ -29,12 +29,14 @@ const initialValues = {
   name: '',
   verbose: '',
   type: 'genre',
-  color: '#333',
+  color: '#bdbdbd',
 };
 
 const stateSelector = createSelector(
+  state => state.app.updatingLabelId,
   state => state.labels,
-  ({ labelsById, ids }) => ({
+  (updatingLabelId, { labelsById, ids }) => ({
+    updatingLabelId,
     labelsById,
     ids: ids,
     genres: ids
@@ -44,16 +46,40 @@ const stateSelector = createSelector(
 );
 
 export default memo(() => {
+  console.log('LabelForm');
   const dispatch = useDispatch();
-  const { labelsById, ids, genres } = useSelector(stateSelector);
+  const { updatingLabelId, labelsById, ids, genres } = useSelector(
+    stateSelector
+  );
+
+  const updateInitialValues = useMemo(() => {
+    if (updatingLabelId) {
+      const l = labelsById[updatingLabelId];
+      return {
+        name: l.name,
+        verbose: l.verbose || '',
+        type: l.type,
+        parent_id: l.parent_id || undefined,
+        suffix: l.suffix || '',
+        color: l.color || '#bdbdbd',
+      };
+    }
+
+    return labelsById[updatingLabelId];
+  }, [updatingLabelId, labelsById]);
 
   return (
     <Wrapper>
       <Formik
-        initialValues={initialValues}
+        initialValues={updateInitialValues || initialValues}
+        enableReinitialize
         onSubmit={async (data, { setSubmitting, resetForm }) => {
           setSubmitting(true);
-          await dispatch(createLabel(data));
+          if (updatingLabelId) {
+            await dispatch(updateLabel(updatingLabelId, data));
+          } else {
+            await dispatch(createLabel(data));
+          }
           console.log(data);
           setSubmitting(false);
           resetForm();
@@ -63,7 +89,9 @@ export default memo(() => {
           <StyledForm>
             <Field name="name" label="Name" as={TextField} />
             <Field name="verbose" label="Verbose" as={TextField} />
-            <Field name="type" options={labelTypes} as={RadioGroup} />
+            {!updatingLabelId && (
+              <Field name="type" options={labelTypes} as={RadioGroup} />
+            )}
             {values.type === 'subgenre' && (
               <>
                 <Field

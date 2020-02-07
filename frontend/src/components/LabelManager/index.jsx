@@ -1,8 +1,10 @@
-import React, { memo } from 'react';
+import React, { memo, useCallback } from 'react';
 import { createSelector } from 'reselect';
-import { useSelector } from 'react-redux';
+import { useSelector, useDispatch } from 'react-redux';
 import styled from 'styled-components';
+
 import LabelCard from './LabelCard';
+import { selectLabelToUpdate } from '../../actions/labelActions';
 
 const stateSelector = createSelector(
   state => state.labels.labelsById,
@@ -12,14 +14,27 @@ const stateSelector = createSelector(
 );
 
 export default memo(() => {
+  console.log('LabelManager');
+  const dispatch = useDispatch();
   const { labelsById, labels, tracksById } = useSelector(stateSelector);
+
+  const updateLabel = useCallback(
+    id => e => {
+      dispatch(selectLabelToUpdate(id));
+    },
+    [dispatch]
+  );
 
   return (
     <Wrapper>
       <div>Search bar and buttons here</div>
       <LabelContainer>
         {labels.map(id => (
-          <LabelCard key={id} label={labelsById[id]} />
+          <LabelCard
+            key={id}
+            label={labelsById[id]}
+            updateLabel={updateLabel}
+          />
         ))}
       </LabelContainer>
     </Wrapper>
