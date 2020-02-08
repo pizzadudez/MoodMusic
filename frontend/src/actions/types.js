@@ -18,7 +18,6 @@ export const REMOVE_LABEL_FILTER = 'REMOVE_LABEL_FILTER';
 // Filtering events
 export const FILTER_BY_PLAYLIST = 'FILTER_BY_PLAYLIST';
 export const FILTER_BY_LABEL = 'FILTER_BY_LABEL';
-export const FILTER_BY_SEARCH = 'FILTER_BY_SEARCH';
 
 // ============================================================================
 // Label / Playlist Managing
@@ -26,6 +25,7 @@ export const FILTER_BY_SEARCH = 'FILTER_BY_SEARCH';
 export const CREATE_LABEL = 'CREATE_LABEL';
 export const UPDATE_LABEL = 'UPDATE_LABEL';
 export const SELECT_LABEL_TO_UPDATE = 'SELECT_LABEL_TO_UPDATE';
+
 export const CREATE_PLAYLIST = 'CREATE_PLAYLIST';
 export const CLEAR_PLAYLIST_CHANGES = 'CLEAR_PLAYLIST_CHANGES';
 

@@ -31,3 +31,15 @@ export const selectAllTracks = () => (dispatch, getState) => {
 export const deselectAllTracks = () => dispatch => {
   dispatch({ type: DESELECT_ALL_TRACKS });
 };
+
+// Local update and set changes for api call
+export const updateTrackLabels = data => (dispatch, getState) => {
+  console.log(data);
+  // dispatch({
+  //   type: SET_LABEL_CHANGES,
+  //   tracksById: getState().tracks.tracksById,
+  //   toAdd:
+  //   toRemove:
+  // })
+};
+export const updateTrackPlaylists = () => (dispatch, getState) => {};

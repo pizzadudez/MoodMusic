@@ -55,8 +55,9 @@ export default memo(() => {
   );
   // Track Modal
   const [openTrack, setOpenTrack] = useState(false);
-  const close = useCallback(
-    e => {
+  const closeTrackModal = useCallback(
+    e => data => {
+      console.log(data);
       setOpenTrack(false);
     },
     [setOpenTrack]
@@ -83,7 +84,7 @@ export default memo(() => {
 
   return (
     <Wrapper>
-      <TrackModal open={openTrack} onClose={close} />
+      <TrackModal open={openTrack} setOpen={setOpenTrack} />
       <TrackToolBar searchFilter={searchFilter} />
       <div ref={sizeRef}>
         <AutoSizer>

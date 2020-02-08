@@ -3,6 +3,7 @@ import Dialog from '@material-ui/core/Dialog';
 import { createSelector } from 'reselect';
 import { useSelector, useDispatch } from 'react-redux';
 import styled from 'styled-components';
+import _ from 'lodash';
 
 import Button from './Button';
 
@@ -20,7 +21,7 @@ const stateSelector = createSelector(
   })
 );
 
-export default memo(({ open: trackId, onClose }) => {
+export default memo(({ open: trackId, setOpen }) => {
   const dispatch = useDispatch();
   const {
     tracksById,
@@ -70,13 +71,44 @@ export default memo(({ open: trackId, onClose }) => {
     },
     [setSelectedPlaylists]
   );
+  // useEffect(() => {
+  // }, [trackId]);
+  // Close / Done selecting
+  const [update, setUpdate] = useState(false);
+  const updateAndClose = useCallback(() => {
+    setUpdate(true);
+  }, [setUpdate]);
   useEffect(() => {
-    setSelectedLabels({});
-    setSelectedPlaylists({});
-  }, [trackId]);
+    if (update) {
+      const labelsToAdd = Object.entries(selectedLabels)
+        .filter(([k, v]) => !trackLabels[k] && v)
+        .map(([k]) => k);
+      const labelsToRemove = Object.entries(selectedLabels)
+        .filter(([k, v]) => trackLabels[k] && v)
+        .map(([k]) => k);
+      const playlistsToAdd = Object.entries(selectedPlaylists)
+        .filter(([k, v]) => !trackPlaylists[k] && v)
+        .map(([k]) => k);
+      const playlistsToRemove = Object.entries(selectedPlaylists)
+        .filter(([k, v]) => trackPlaylists[k] && v)
+        .map(([k]) => k);
+
+      // Reset modal state and close
+      setSelectedLabels({});
+      setSelectedPlaylists({});
+      setUpdate(false);
+      setOpen(false);
+    }
+  }, [update, setOpen]);
+
+  // const onClose = useCallback(() => {
+  //   console.log(selectedLabels);
+
+  //   setOpen(false);
+  // }, [setOpen]);
 
   return (
-    <StyledDialog open={!!track} onClose={onClose}>
+    <StyledDialog open={!!track} onClose={updateAndClose}>
       <Container>
         Genres
         {genreIds.map(id => (
