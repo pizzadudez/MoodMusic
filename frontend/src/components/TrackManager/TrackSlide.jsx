@@ -53,13 +53,15 @@ export default memo(({ track, checked, widthRestriction, setOpenTrack }) => {
           <span>{track.album.name}</span>
         </Column>
       )}
-      <ChipColumn>
-        <Button onClick={openTrackModal}>Open</Button>
+      <ChipColumn onClick={openTrackModal}>
+        {/* <button style={{ width: 20 }} onClick={openTrackModal}>
+          Open
+        </button> */}
         {track.playlist_ids.map(id => (
-          <Chip key={'playlist_' + id} label={playlistsById[id].name} />
+          <StyledChip key={'playlist_' + id} label={playlistsById[id].name} />
         ))}
         {track.label_ids.map(id => (
-          <Chip
+          <StyledChip
             key={'label' + id}
             label={labelsById[id].name}
             style={{ backgroundColor: 'tomato' }}
@@ -78,16 +80,16 @@ const Slide = styled.div`
   grid-template-columns: ${props =>
     props.widthRestriction
       ? `min-content
-        minmax(180px, 200px)
-        30px
+         minmax(180px, 190px)
+         30px
          minmax(100px, 120px)
-         minmax(300px, 1fr)`
+         minmax(300px, 40%)`
       : `min-content
-        minmax(200px, 300px)
-        30px
+         minmax(200px, 280px)
+         30px
          minmax(150px, 200px)
-         minmax(150px, 300px)
-         minmax(300px, 1fr)`};
+         minmax(150px, 250px)
+         minmax(300px, 40%)`};
   justify-content: start;
   align-items: center;
   height: 40px;
@@ -110,7 +112,15 @@ const Column = styled.div`
 `;
 const ChipColumn = styled.div`
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(70px, auto));
+  grid-template-columns: repeat(auto-fill, 64px);
+
   align-items: center;
   height: 100%;
+  cursor: pointer;
+`;
+const StyledChip = styled(Chip)`
+  cursor: pointer;
+  span {
+    padding: 0;
+  }
 `;

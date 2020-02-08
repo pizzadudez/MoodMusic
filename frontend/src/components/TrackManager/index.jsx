@@ -94,6 +94,7 @@ export default memo(() => {
               rowCount={filtered.length}
               rowHeight={48}
               rowRenderer={rowRenderer}
+              style={{ outline: 'none' }}
             />
           )}
         </AutoSizer>
