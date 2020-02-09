@@ -5,10 +5,10 @@ const db = require('./models/db');
 const config = require('./config');
 const AuthServices = require('./services/auth');
 const AuthRouter = require('./auth');
-const ApiRouter = require('./api');
+const ApiRouter = require('./routes');
 
 const app = express();
-app.use(express.urlencoded({ extended: true}));
+app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
 app.set('json spaces', 2);
 // Routers

@@ -1,9 +1,15 @@
 const router = require('express').Router();
 const { validationResult } = require('express-validator');
-const validator = require('../../services/validator');
-const SpotifyService = require('../../services/spotify');
-const TracksService = require('../../services/tracks');
-const TrackModel = require('../../models/Track');
+const validator = require('../services/validator');
+const SpotifyService = require('../services/spotify');
+const TracksService = require('../services/tracks');
+const TrackModel = require('../models/Track');
+
+const validate = require('../middlewares/validate');
+
+router.get('/test', validate('test'), (req, res, next) => {
+  res.status(200).json(req.body);
+});
 
 // Get all track objects (full)
 router.get('/', async (req, res, next) => {
@@ -12,7 +18,7 @@ router.get('/', async (req, res, next) => {
     res.status(200).json(tracksById);
   } catch (err) {
     console.log(err);
-    res.status(500).send('Internal Server Error.')
+    res.status(500).send('Internal Server Error.');
   }
 });
 // Add new tracks or playlist tracks relations
@@ -26,7 +32,7 @@ router.get('/check', async (req, res, next) => {
     console.log(err);
     res.status(500).json({
       message: 'Internal server error',
-      error: err
+      error: err,
     });
   }
 });
@@ -34,7 +40,7 @@ router.get('/check', async (req, res, next) => {
 router.post('/add', validator('addTracks'), async (req, res, next) => {
   const errors = validationResult(req);
   if (!errors.isEmpty()) {
-    res.status(422).json({errors: errors.array()});
+    res.status(422).json({ errors: errors.array() });
     return;
   }
   try {
@@ -42,7 +48,7 @@ router.post('/add', validator('addTracks'), async (req, res, next) => {
     await SpotifyService.addTracks(req.body);
     await TrackModel.removeTracks(req.body);
     await TrackModel.addTracks(req.body);
-    res.send('Tracks added to their coresponding playlists.')
+    res.send('Tracks added to their coresponding playlists.');
   } catch (err) {
     console.log(err);
     res.send(err);
@@ -52,13 +58,13 @@ router.post('/add', validator('addTracks'), async (req, res, next) => {
 router.post('/remove', validator('addTracks'), async (req, res, next) => {
   const errors = validationResult(req);
   if (!errors.isEmpty()) {
-    res.status(422).json({errors: errors.array()});
+    res.status(422).json({ errors: errors.array() });
     return;
   }
   try {
     await SpotifyService.removeTracks(req.body);
     await TrackModel.removeTracks(req.body);
-    res.send('Tracks removed from their coresponding playlists.')
+    res.send('Tracks removed from their coresponding playlists.');
   } catch (err) {
     console.log(err);
     res.send(err);
@@ -68,7 +74,7 @@ router.post('/remove', validator('addTracks'), async (req, res, next) => {
 router.patch('/rate/:id', validator('rateTrack'), async (req, res, next) => {
   const errors = validationResult(req);
   if (!errors.isEmpty()) {
-    res.status(422).json({errors: errors.array()});
+    res.status(422).json({ errors: errors.array() });
     return;
   }
   const message = await TrackModel.rateTrack(req.params.id, req.body.rating);
