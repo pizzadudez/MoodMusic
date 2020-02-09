@@ -6,6 +6,7 @@ import styled from 'styled-components';
 import _ from 'lodash';
 
 import Button from './Button';
+import { updateTracks } from '../../actions/trackActions';
 
 const stateSelector = createSelector(
   state => state.tracks.tracksById,
@@ -71,8 +72,6 @@ export default memo(({ open: trackId, setOpen }) => {
     },
     [setSelectedPlaylists]
   );
-  // useEffect(() => {
-  // }, [trackId]);
   // Close / Done selecting
   const [update, setUpdate] = useState(false);
   const updateAndClose = useCallback(() => {
@@ -92,7 +91,15 @@ export default memo(({ open: trackId, setOpen }) => {
       const playlistsToRemove = Object.entries(selectedPlaylists)
         .filter(([k, v]) => trackPlaylists[k] && v)
         .map(([k]) => k);
-
+      dispatch(
+        updateTracks({
+          tracks: [trackId],
+          labelsToAdd,
+          labelsToRemove,
+          playlistsToAdd,
+          playlistsToRemove,
+        })
+      );
       // Reset modal state and close
       setSelectedLabels({});
       setSelectedPlaylists({});
@@ -100,12 +107,6 @@ export default memo(({ open: trackId, setOpen }) => {
       setOpen(false);
     }
   }, [update, setOpen]);
-
-  // const onClose = useCallback(() => {
-  //   console.log(selectedLabels);
-
-  //   setOpen(false);
-  // }, [setOpen]);
 
   return (
     <StyledDialog open={!!track} onClose={updateAndClose}>
