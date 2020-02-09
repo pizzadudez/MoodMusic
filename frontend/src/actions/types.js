@@ -40,7 +40,9 @@ export const DESELECT_ALL_TRACKS = 'DESELECT_ALL_TRACKS';
 // TrackObj Managing (Changes)
 // ============================================================================
 //New
+export const UPDATE_TRACKS = 'UPDATE_TRACKS';
 export const SET_TRACK_CHANGES = 'SET_TRACK_CHANGES';
+export const CLEAR_TRACK_CHANGES = 'CLEAR_TRACK_CHANGES';
 
 export const UPDATE_TRACKS_LABELS = 'UPDATE_TRACKS_LABELS';
 export const UPDATE_TRACKS_PLAYLISTS = 'UPDATE_TRACKS_PLAYLISTS';
@@ -49,7 +51,7 @@ export const SET_LABEL_CHANGES = 'SET_LABEL_CHANGES';
 export const CLEAR_LABEL_CHANGES = 'CLEAR_LABEL_CHANGES';
 // Playlist-Track diff state
 // export const SET_TRACK_CHANGES = 'SET_TRACK_CHANGES';
-export const CLEAR_TRACK_CHANGES = 'CLEAR_TRACK_CHANGES';
+// export const CLEAR_TRACK_CHANGES = 'CLEAR_TRACK_CHANGES';
 
 // ============================================================================
 // Player
