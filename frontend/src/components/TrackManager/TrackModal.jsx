@@ -94,10 +94,14 @@ export default memo(({ open: trackId, setOpen }) => {
       dispatch(
         updateTracks({
           tracks: [trackId],
-          labelsToAdd,
-          labelsToRemove,
-          playlistsToAdd,
-          playlistsToRemove,
+          labels: {
+            toAdd: labelsToAdd,
+            toRemove: labelsToRemove,
+          },
+          playlists: {
+            toAdd: playlistsToAdd,
+            toRemove: playlistsToRemove,
+          },
         })
       );
       // Reset modal state and close

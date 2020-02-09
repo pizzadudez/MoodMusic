@@ -34,18 +34,18 @@ export const deselectAllTracks = () => dispatch => {
 
 // Local update and set changes for api call
 export const updateTracks = data => (dispatch, getState) => {
-  const sanitizedData = _.pickBy(data, val => val.length);
-  const fieldsNum = Object.keys(sanitizedData).length;
-  if (fieldsNum) {
-    if (!sanitizedData.tracks) {
-      sanitizedData.tracks = Object.keys(_.pickBy(getState().tracks.selected));
-    } else if (fieldsNum < 2) {
-      return;
+  const { tracks, labels, playlists } = data;
+  const labelChanges = Object.values(labels).some(val => val.length);
+  const playlistChanges = Object.values(playlists).some(val => val.length);
+
+  if (labelChanges || playlistChanges) {
+    if (!tracks.length) {
+      data.tracks = Object.keys(_.pickBy(getState().tracks.selected));
     }
     dispatch({
       type: SET_TRACK_CHANGES,
       data: {
-        ...sanitizedData,
+        ...data,
         tracksById: getState().tracks.tracksById,
       },
     });
