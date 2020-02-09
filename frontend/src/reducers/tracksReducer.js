@@ -76,9 +76,11 @@ export default function(state = initialState, action) {
 
 const updateTracks = (state, action) => {
   const { labels, playlists } = action.data;
-  const tracks = action.data.tracks || Object.keys(_.pickBy(state.selected));
+  const tracks = Object.keys(_.pickBy(state.selected)).length
+    ? Object.keys(_.pickBy(state.selected))
+    : action.data.tracks;
   const { tracksById } = state;
-  console.log(labels, playlists);
+
   return {
     ...state,
     tracksById: {
@@ -115,7 +117,9 @@ const updateTracks = (state, action) => {
 
 const setTrackChanges = (state, action) => {
   const { labels, playlists } = action.data;
-  const tracks = action.data.tracks || Object.keys(_.pickBy(state.selected));
+  const tracks = Object.keys(_.pickBy(state.selected)).length
+    ? Object.keys(_.pickBy(state.selected))
+    : action.data.tracks;
   const {
     tracksById,
     changes: { labelsToAdd, labelsToRemove, playlistsToAdd, playlistsToRemove },
