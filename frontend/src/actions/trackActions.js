@@ -52,5 +52,31 @@ export const updateTracks = data => dispatch => {
   }
 };
 // Request backend to implement track changes (label + playlist)
-// TODO
-export const submitChanges = () => dispatch => {};
+export const submitChanges = () => (dispatch, getState) => {
+  const {
+    labelsToAdd,
+    labelsToRemove,
+    playlistsToAdd,
+    playlistsToRemove,
+  } = getState().tracks.changes;
+
+  const addTrackLabels = parseChangeData(labelsToAdd, 'label');
+  const removeTrackLabels = parseChangeData(labelsToRemove, 'label');
+  const addTrackPlaylists = parseChangeData(playlistsToAdd, 'playlist');
+  const removeTrackPlaylists = parseChangeData(playlistsToRemove, 'playlist');
+};
+
+// Helpers
+const parseChangeData = (changeData, fieldName) => {
+  return Object.keys(changeData)
+    .map(id => {
+      const ids = Object.keys(_.pickBy(changeData[id]));
+      if (ids.length) {
+        return Object.fromEntries([
+          ['track_id', id],
+          [fieldName + '_ids', fieldName === 'label' ? ids.map(Number) : ids],
+        ]);
+      }
+    })
+    .filter(el => el);
+};

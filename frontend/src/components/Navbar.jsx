@@ -5,7 +5,7 @@ import { NavLink } from 'react-router-dom';
 import styled from 'styled-components';
 
 // import { fetchUpdates } from '../actions/dataActions';
-// import { updateTrackLabels, updatePlaylistTracks } from '../actions/trackActions';
+import { submitChanges } from '../actions/trackActions';
 import Button from './common/Button';
 
 const stateSelector = createSelector(
@@ -18,10 +18,9 @@ export default memo(() => {
   const dispatch = useDispatch();
   const { changes } = useSelector(stateSelector);
 
-  // const submitChanges = useCallback(() => {
-  //   dispatch(updateTrackLabels());
-  //   dispatch(updatePlaylistTracks());
-  // }, [dispatch]);
+  const submitChangesHandle = useCallback(() => {
+    dispatch(submitChanges());
+  }, [dispatch]);
   // const checkForUpdates = useCallback(() => {
   //   dispatch(fetchUpdates());
   // }, [dispatch]);
@@ -41,11 +40,7 @@ export default memo(() => {
         </li>
         {/* <li><NavLink to="/playlists"><button>Manage Playlists</button></NavLink></li> */}
       </Links>
-      <Button
-      // onClick={submitChanges}
-      >
-        Submit Changes
-      </Button>
+      <Button onClick={submitChangesHandle}>Submit Changes</Button>
       <Button
         highlight={changes}
         // onClick={checkForUpdates}

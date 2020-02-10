@@ -33,3 +33,5 @@ exports.getAll = () => {
     });
   });
 };
+
+exports.addLabels = () => {};
