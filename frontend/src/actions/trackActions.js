@@ -10,11 +10,12 @@ import {
 } from './types';
 
 // Track Selecting
-export const modifyTrackSelection = id => dispatch =>
+export const modifyTrackSelection = id => dispatch => {
   dispatch({
     type: MODIFY_TRACK_SELECTION,
     payload: id,
   });
+};
 export const selectAllTracks = () => (dispatch, getState) => {
   const selected = getState().filter.ids.reduce(
     (obj, id) => ({ ...obj, [id]: true }),
@@ -52,31 +53,44 @@ export const updateTracks = data => dispatch => {
   }
 };
 // Request backend to implement track changes (label + playlist)
-export const submitChanges = () => (dispatch, getState) => {
-  const {
-    labelsToAdd,
-    labelsToRemove,
-    playlistsToAdd,
-    playlistsToRemove,
-  } = getState().tracks.changes;
+export const submitChanges = () => async (dispatch, getState) => {
+  try {
+    const {
+      labelsToAdd,
+      labelsToRemove,
+      playlistsToAdd,
+      playlistsToRemove,
+    } = getState().tracks.changes;
 
-  const addTrackLabels = parseChangeData(labelsToAdd, 'label');
-  const removeTrackLabels = parseChangeData(labelsToRemove, 'label');
-  const addTrackPlaylists = parseChangeData(playlistsToAdd, 'playlist');
-  const removeTrackPlaylists = parseChangeData(playlistsToRemove, 'playlist');
+    await Promise.all([
+      parseAndSubmit(labelsToAdd, 'label', 'add'),
+      parseAndSubmit(labelsToRemove, 'label', 'remove'),
+      parseAndSubmit(playlistsToAdd, 'playlist', 'add'),
+      parseAndSubmit(playlistsToRemove, 'playlist', 'remove'),
+    ]);
+  } catch (err) {
+    console.log(err);
+  }
 };
 
 // Helpers
-const parseChangeData = (changeData, fieldName) => {
-  return Object.keys(changeData)
-    .map(id => {
-      const ids = Object.keys(_.pickBy(changeData[id]));
-      if (ids.length) {
-        return Object.fromEntries([
-          ['track_id', id],
-          [fieldName + '_ids', fieldName === 'label' ? ids.map(Number) : ids],
-        ]);
-      }
-    })
-    .filter(el => el);
+const parseAndSubmit = (changeData, fieldName, operation) => {
+  const transposed = Object.keys(changeData).reduce((obj, trackId) => {
+    Object.keys(_.pickBy(changeData[trackId])).forEach(
+      id => (obj[id] = [...(obj[id] || []), trackId])
+    );
+    return obj;
+  }, {});
+
+  const json = Object.entries(transposed).map(([id, trackIds]) => ({
+    [`${fieldName}_id`]: fieldName === 'label' ? parseInt(id) : id,
+    track_ids: trackIds,
+  }));
+
+  if (json.length) {
+    return axios
+      .post(`/api/v2/${fieldName}s/${operation}`, json)
+      .catch(err => console.log(err));
+  }
+  return Promise.resolve('No data to send.');
 };
