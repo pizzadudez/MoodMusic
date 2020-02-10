@@ -33,5 +33,53 @@ exports.getAll = () => {
     });
   });
 };
+exports.addLabels = data => {
+  const sql = `INSERT OR IGNORE INTO tracks_labels
+    (track_id, label_id, added_at)
+    VALUES(?, ?, ?)`;
+  const added_at = new Date().toISOString();
 
-exports.addLabels = () => {};
+  return new Promise((resolve, reject) => {
+    db.serialize(() => {
+      db.run('BEGIN TRANSACTION');
+      data.forEach(({ label_id, track_ids }) => {
+        track_ids.forEach(id => {
+          db.run(sql, [id, label_id, added_at], err => {
+            if (err) reject(new Error(err.message));
+          });
+        });
+      });
+      db.run('COMMIT TRANSACTION', err => {
+        if (err) {
+          reject(new Error(err.message));
+        } else {
+          resolve();
+        }
+      });
+    });
+  });
+};
+exports.removeLabels = data => {
+  const sql = `DELETE FROM tracks_labels WHERE
+    track_id=? AND label_id=?`;
+
+  return new Promise((resolve, reject) => {
+    db.serialize(() => {
+      db.run('BEGIN TRANSACTION');
+      data.forEach(({ label_id, track_ids }) => {
+        track_ids.forEach(id => {
+          db.run(sql, [id, label_id], err => {
+            if (err) reject(new Error(err.message));
+          });
+        });
+      });
+      db.run('COMMIT TRANSACTION', err => {
+        if (err) {
+          reject(new Error(err.message));
+        } else {
+          resolve();
+        }
+      });
+    });
+  });
+};
