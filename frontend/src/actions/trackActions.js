@@ -52,4 +52,5 @@ export const updateTracks = data => dispatch => {
   }
 };
 // Request backend to implement track changes (label + playlist)
+// TODO
 export const submitChanges = () => dispatch => {};

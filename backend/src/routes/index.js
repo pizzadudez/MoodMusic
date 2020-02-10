@@ -1,12 +1,20 @@
 const router = require('express').Router();
-const PlaylistsRouter = require('./playlists');
 const TracksRouter = require('./tracks');
+const PlaylistsRouter = require('./playlists');
 const LabelsRouter = require('./labels');
-const PlayerRouter = require('./player');
 
-router.use('/playlists', PlaylistsRouter);
-router.use('/tracks', TracksRouter);
-router.use('/', LabelsRouter);
-router.use('/player', PlayerRouter);
+router.use('/v2', TracksRouter);
+router.use('/v2', PlaylistsRouter);
+router.use('/v2', LabelsRouter);
+
+const _PlaylistsRouter = require('./_playlists');
+const _TracksRouter = require('./_tracks');
+const _LabelsRouter = require('./_labels');
+const _PlayerRouter = require('./_player');
+
+router.use('/playlists', _PlaylistsRouter);
+router.use('/tracks', _TracksRouter);
+router.use('/', _LabelsRouter);
+router.use('/player', _PlayerRouter);
 
 module.exports = router;
