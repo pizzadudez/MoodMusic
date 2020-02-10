@@ -1,7 +1,7 @@
 const router = require('express').Router();
 const config = require('../config');
-const AuthService = require('../services/auth');
-const UserModel = require('../models/User');
+const AuthService = require('../_services/auth');
+const UserModel = require('../_models/User');
 
 // Start Authorization Flow
 router.get('/', (req, res, next) => {

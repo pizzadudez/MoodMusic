@@ -1,6 +1,6 @@
 const request = require('request');
 const config = require('../config');
-const UserModel = require('../models/User');
+const UserModel = require('../_models/User');
 
 // Spotify authorization uri
 exports.authUri = () => {
@@ -16,10 +16,14 @@ exports.authUri = () => {
     'user-read-currently-playing',
     'user-read-recently-played',
   ].join(' ');
-  const uri = 'https://accounts.spotify.com/authorize?' +
-    'client_id=' + config.clientId + '&response_type=code' +
+  const uri =
+    'https://accounts.spotify.com/authorize?' +
+    'client_id=' +
+    config.clientId +
+    '&response_type=code' +
     (scope ? '&scope=' + encodeURIComponent(scope) : '') +
-    '&redirect_uri=' + encodeURIComponent(config.redirectUri);
+    '&redirect_uri=' +
+    encodeURIComponent(config.redirectUri);
   return uri;
 };
 // Request access + refresh tokens
@@ -31,10 +35,12 @@ exports.requestTokens = code => {
       redirect_uri: config.redirectUri,
       grant_type: 'authorization_code',
     },
-    headers: { 
-      'Authorization': 'Basic ' + 
-      new Buffer.from(config.clientId + ':' + config.clientSecret)
-        .toString('base64')
+    headers: {
+      Authorization:
+        'Basic ' +
+        new Buffer.from(config.clientId + ':' + config.clientSecret).toString(
+          'base64'
+        ),
     },
     json: true,
   };
@@ -58,7 +64,7 @@ exports.registerUser = async tokensObj => {
     const userId = await new Promise((resolve, reject) => {
       const options = {
         url: 'https://api.spotify.com/v1/me',
-        headers: { 'Authorization': 'Bearer ' + tokensObj.accessToken },
+        headers: { Authorization: 'Bearer ' + tokensObj.accessToken },
         json: true,
       };
       request.get(options, (err, res, body) => {
@@ -67,14 +73,14 @@ exports.registerUser = async tokensObj => {
       });
     });
     const message = await UserModel.createUser(
-      userId, 
-      tokensObj.accessToken, 
+      userId,
+      tokensObj.accessToken,
       tokensObj.refreshToken
     );
     console.log(message);
   } catch (err) {
     console.log(err);
-  };
+  }
 };
 // Refresh accessToken
 exports.refreshToken = async () => {
@@ -86,10 +92,12 @@ exports.refreshToken = async () => {
         grant_type: 'refresh_token',
         refresh_token: userData.refresh_token,
       },
-      headers: { 
-        'Authorization': 'Basic ' + 
-        new Buffer.from(config.clientId + ':' + config.clientSecret)
-          .toString('base64') 
+      headers: {
+        Authorization:
+          'Basic ' +
+          new Buffer.from(config.clientId + ':' + config.clientSecret).toString(
+            'base64'
+          ),
       },
       json: true,
     };

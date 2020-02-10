@@ -1,6 +1,6 @@
-const PlaylistModel = require('../models/Playlist');
+const PlaylistModel = require('../_models/Playlist');
 
-// Playlists map 
+// Playlists map
 exports.map = async () => {
   try {
     const playlists = await PlaylistModel.getAll();

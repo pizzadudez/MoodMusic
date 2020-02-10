@@ -1,11 +1,11 @@
 const router = require('express').Router();
 const { validationResult } = require('express-validator');
-const validator = require('../services/validator');
-const PlaylistModel = require('../models/Playlist');
-const TrackModel = require('../models/Track');
-const SpotifyService = require('../services/spotify');
-const LabelService = require('../services/labels');
-const PlaylistService = require('../services/playlists');
+const validator = require('../_services/validator');
+const PlaylistModel = require('../_models/Playlist');
+const TrackModel = require('../_models/Track');
+const SpotifyService = require('../_services/spotify');
+const LabelService = require('../_services/labels');
+const PlaylistService = require('../_services/playlists');
 
 // Get all playlists (array of objects)
 router.get('/', async (req, res, next) => {

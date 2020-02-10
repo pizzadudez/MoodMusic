@@ -1,7 +1,7 @@
 const router = require('express').Router();
 const { validationResult } = require('express-validator');
-const validator = require('../services/validator');
-const PlayerService = require('../services/player');
+const validator = require('../_services/validator');
+const PlayerService = require('../_services/player');
 
 router.post('/track', async (req, res, next) => {
   try {

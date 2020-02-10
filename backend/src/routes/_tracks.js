@@ -1,9 +1,9 @@
 const router = require('express').Router();
 const { validationResult } = require('express-validator');
-const validator = require('../services/validator');
-const SpotifyService = require('../services/spotify');
-const TracksService = require('../services/tracks');
-const TrackModel = require('../models/Track');
+const validator = require('../_services/validator');
+const SpotifyService = require('../_services/spotify');
+const TracksService = require('../_services/tracks');
+const TrackModel = require('../_models/Track');
 
 const validate = require('../middlewares/validate');
 

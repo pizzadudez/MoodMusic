@@ -1,9 +1,9 @@
 const express = require('express');
 const path = require('path');
 
-const db = require('./models/db');
+const db = require('./_models/db');
 const config = require('./config');
-const AuthServices = require('./services/auth');
+const AuthServices = require('./_services/auth');
 const AuthRouter = require('./auth');
 const ApiRouter = require('./routes');
 

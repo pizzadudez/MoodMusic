@@ -1,8 +1,8 @@
 const router = require('express').Router();
 const { validationResult } = require('express-validator');
-const validator = require('../services/validator');
-const LabelModel = require('../models/Label');
-const LabelsService = require('../services/labels');
+const validator = require('../_services/validator');
+const LabelModel = require('../_models/Label');
+const LabelsService = require('../_services/labels');
 
 // Get all labels (array of objects)
 router.get('/labels', async (req, res, next) => {
