@@ -7,7 +7,6 @@ router.post('/playlists', controller.create);
 router.patch('/playlist/:id', controller.update);
 router.delete('/playlist/:id', controller.delete);
 
-router.post('/playlists/refresh', controller.refreshPlaylists);
 router.post(
   '/playlists/add',
   validate('addPlaylists'),

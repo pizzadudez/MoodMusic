@@ -27,8 +27,6 @@ exports.removePlaylists = async (req, res, next) => {
     res.status(500).send('Internal server error.');
   }
 };
-// TODO
-exports.refreshPlaylists = async (req, res, next) => {};
 
 exports.create = async (req, res, next) => {};
 exports.update = async (req, res, next) => {};

@@ -8,5 +8,6 @@ router.patch('/track/:id/rate', controller.rate);
 router.patch('/track/:id/like', controller.like);
 
 router.get('/tracks/refresh', controller.refreshTracks);
+router.get('/tracks/sync', controller.syncTracks);
 
 module.exports = router;

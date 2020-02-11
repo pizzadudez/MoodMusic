@@ -15,6 +15,10 @@ exports.authUri = () => {
     'user-read-playback-state',
     'user-read-currently-playing',
     'user-read-recently-played',
+    // Web SDK
+    'streaming',
+    'user-read-email',
+    'user-read-private',
   ].join(' ');
   const uri =
     'https://accounts.spotify.com/authorize?' +
