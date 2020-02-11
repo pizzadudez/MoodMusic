@@ -18,7 +18,7 @@ export const fetchData = () => async dispatch => {
   if (!authorized) return;
 
   // update playlists
-  await axios.get('/api/tracks/check');
+  await axios.get('/api/v1/tracks/check');
   const fetchPlaylists = axios.get('/api/playlists').then(res => {
     dispatch({ type: FETCH_PLAYLISTS, payload: res.data });
   });
@@ -33,7 +33,7 @@ export const fetchData = () => async dispatch => {
   dispatch({ type: LOADING_FINISHED });
 };
 export const fetchUpdates = () => dispatch => {
-  axios.get('/api/tracks/check').then(res => {
+  axios.get('/api/v1/tracks/check').then(res => {
     if (res.data.playlists) {
       dispatch({ type: FETCH_PLAYLISTS, payload: res.data.playlists });
     }

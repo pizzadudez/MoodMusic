@@ -83,3 +83,101 @@ exports.removeLabels = data => {
     });
   });
 };
+
+exports.createLabel = data => {
+  const values = [
+    data.type,
+    data.name,
+    data.color,
+    !!data.parent_id ? data.parent_id : null,
+    !!data.verbose ? data.verbose : null,
+    !!data.suffix ? data.suffix : null,
+  ];
+  const insertSql = `INSERT INTO labels
+    (type, name, color, parent_id, verbose, suffix)
+    VALUES(?, ?, ?, ?, ?, ?)`;
+
+  return new Promise((resolve, reject) => {
+    const sql =
+      data.type === 'subgenre'
+        ? 'SELECT 1 FROM labels WHERE id=? AND type="genre"'
+        : 'SELECT 1';
+    db.get(sql, [data.parent_id], (err, row) => {
+      if (err) {
+        reject(new Error(err.message));
+      } else if (!row) {
+        reject(new Error('"parent_id" does not match a genre id.'));
+      } else {
+        db.run(insertSql, values, function(err) {
+          if (err) {
+            reject(new Error(err.message));
+          } else {
+            resolve(getOne(this.lastID));
+          }
+        });
+      }
+    });
+  });
+};
+exports.updateLabel = (id, data) => {
+  const sanitizedData = {
+    ...(!!data.name && { name: data.name }),
+    ...(!!data.color && { color: data.color }),
+    ...(!!data.parent_id && { parent_id: data.parent_id }),
+    ...(!!data.verbose && { verbose: data.verbose }),
+    ...(!!data.suffix && { suffix: data.suffix }),
+  };
+  const fields = Object.keys(sanitizedData)
+    .map(key => key + '=?')
+    .join(', ');
+  const values = Object.values(sanitizedData);
+  const updateSql = 'UPDATE labels SET ' + fields + ' WHERE id=?';
+
+  return new Promise((resolve, reject) => {
+    const sql = sanitizedData.parent_id
+      ? 'SELECT 1 FROM labels WHERE id=? AND type="genre"'
+      : 'SELECT 1';
+    db.get(sql, sanitizedData.parent_id, (err, row) => {
+      if (err) {
+        reject(new Error(err.message));
+      } else if (!row) {
+        reject(new Error('"parent_id" does not match a genre id.'));
+      } else {
+        db.run(updateSql, values, function(err) {
+          if (err) {
+            reject(new Error(err.message));
+          } else {
+            resolve(getOne(this.lastID));
+          }
+        });
+      }
+    });
+  });
+};
+exports.deleteLabel = id => {};
+
+// Helpers
+const getOne = id => {
+  return new Promise((resolve, reject) => {
+    db.get('SELECT * FROM labels WHERE id=?', id, (err, label) => {
+      if (err) {
+        reject(new Error(err.message));
+      } else {
+        const sql = `SELECT group_concat(id) AS subgenre_ids
+                       FROM labels WHERE parent_id=?`;
+        db.get(sql, [id], (err, row) => {
+          if (err) {
+            reject(new Error(err.message));
+          } else {
+            resolve({
+              ...label,
+              ...(row.subgenre_ids && {
+                subgenre_ids: row.subgenre_ids.split(',').map(Number),
+              }),
+            });
+          }
+        });
+      }
+    });
+  });
+};

@@ -89,7 +89,7 @@ const parseAndSubmit = (changeData, fieldName, operation) => {
 
   if (json.length) {
     return axios
-      .post(`/api/v2/${fieldName}s/${operation}`, json)
+      .post(`/api/${fieldName}s/${operation}`, json)
       .catch(err => console.log(err));
   }
   return Promise.resolve('No data to send.');

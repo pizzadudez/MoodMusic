@@ -2,6 +2,59 @@ const Joi = require('@hapi/joi');
 
 const validate = field => {
   const schema = {
+    addLabels: Joi.array().items(
+      Joi.object()
+        .keys({
+          label_id: Joi.number().required(),
+          track_ids: Joi.array().items(Joi.string().required()),
+        })
+        .required()
+    ),
+    addPlaylists: Joi.array().items(
+      Joi.object()
+        .keys({
+          playlist_id: Joi.string().required(),
+          track_ids: Joi.array().items(Joi.string().required()),
+        })
+        .required()
+    ),
+    createLabel: Joi.object().keys({
+      type: Joi.string()
+        .valid('genre', 'subgenre', 'mood')
+        .required(),
+      name: Joi.string()
+        .min(2)
+        .required(),
+      color: Joi.string()
+        .regex(/^#[A-Fa-f0-9]{6}/)
+        .required(),
+      parent_id: Joi.when('type', {
+        is: 'subgenre',
+        then: Joi.number().required(),
+        otherwise: Joi.forbidden(),
+      }),
+      verbose: Joi.string(),
+      suffix: Joi.string().when('type', {
+        is: 'subgenre',
+        then: Joi.string(),
+        otherwise: Joi.forbidden(),
+      }),
+    }),
+    updateLabel: Joi.object().keys({
+      name: Joi.string().min(2),
+      color: Joi.string().regex(/^#[A-Fa-f0-9]{6}/),
+      parent_id: Joi.when('type', {
+        is: 'subgenre',
+        then: Joi.number().required(),
+        otherwise: Joi.forbidden(),
+      }),
+      verbose: Joi.string(),
+      suffix: Joi.string().when('type', {
+        is: 'subgenre',
+        then: Joi.string(),
+        otherwise: Joi.forbidden(),
+      }),
+    }),
     test: Joi.object().keys({
       test: Joi.string().required(),
       array: Joi.array()

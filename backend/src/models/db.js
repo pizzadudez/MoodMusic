@@ -5,6 +5,7 @@ const db = new sqlite3.Database('./db.sqlite3', err => {
 });
 // Import this into models
 exports.conn = () => {
+  db.get('PRAGMA foreign_keys = ON');
   return db;
 };
 // Init database on server start
