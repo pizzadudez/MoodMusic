@@ -56,12 +56,6 @@ const validate = field => {
         otherwise: Joi.forbidden(),
       }),
     }),
-    test: Joi.object().keys({
-      test: Joi.string().required(),
-      array: Joi.array()
-        .items(Joi.string())
-        .required(),
-    }),
   };
 
   return (req, res, next) => {

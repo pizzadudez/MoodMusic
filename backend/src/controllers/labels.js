@@ -1,6 +1,6 @@
 const LabelModel = require('../models/Label');
 
-exports.getAllLabels = async (req, res, next) => {
+exports.getAll = async (req, res, next) => {
   try {
     const labels = await LabelModel.getAll();
     res.status(200).json(labels);
@@ -12,7 +12,7 @@ exports.getAllLabels = async (req, res, next) => {
 exports.addLabels = async (req, res, next) => {
   try {
     await LabelModel.addLabels(req.body);
-    res.status(204).send('Associations added.');
+    res.status(200).send('Associations added.');
   } catch (err) {
     console.log(err);
     res.status(500).send('Internal server error.');
@@ -21,14 +21,14 @@ exports.addLabels = async (req, res, next) => {
 exports.removeLabels = async (req, res, next) => {
   try {
     await LabelModel.removeLabels(req.body);
-    res.status(204).send('Associations removed.');
+    res.status(200).send('Associations removed.');
   } catch (err) {
     console.log(err);
     res.status(500).send('Internal server error.');
   }
 };
 
-exports.createLabel = async (req, res, next) => {
+exports.create = async (req, res, next) => {
   try {
     const label = await LabelModel.createLabel(req.body);
     res.status(200).json(label);
@@ -37,7 +37,7 @@ exports.createLabel = async (req, res, next) => {
     res.status(500).send('Internal server error.');
   }
 };
-exports.updateLabel = async (req, res, next) => {
+exports.update = async (req, res, next) => {
   try {
     const label = await LabelModel.updateLabel(req.params.id, req.body);
     res.status(200).json(label);
@@ -46,5 +46,12 @@ exports.updateLabel = async (req, res, next) => {
     res.status(500).send('Internal server error.');
   }
 };
-//TODO
-exports.deleteLabel = async (req, res, next) => {};
+exports.delete = async (req, res, next) => {
+  try {
+    const message = await LabelModel.deleteLabel(req.params.id);
+    res.status(200).send(message || 'Successfully deleted.');
+  } catch (err) {
+    console.log(err);
+    res.status(500).send('Internal server error.');
+  }
+};

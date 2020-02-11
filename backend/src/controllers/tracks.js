@@ -1,6 +1,6 @@
 const TrackModel = require('../models/Track');
 
-exports.getAllTracks = async (req, res, next) => {
+exports.getAll = async (req, res, next) => {
   try {
     const tracks = await TrackModel.getAll();
     res.status(200).json(tracks);
@@ -12,6 +12,6 @@ exports.getAllTracks = async (req, res, next) => {
 // TODO
 exports.refreshTracks = async (req, res, next) => {};
 
-exports.removeTrack = async (req, res, next) => {};
-exports.rateTrack = async (req, res, next) => {};
-exports.likeTrack = async (req, res, next) => {};
+exports.delete = async (req, res, next) => {};
+exports.rate = async (req, res, next) => {};
+exports.like = async (req, res, next) => {};

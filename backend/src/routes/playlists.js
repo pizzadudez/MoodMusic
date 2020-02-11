@@ -2,10 +2,10 @@ const router = require('express').Router();
 const controller = require('../controllers/playlists');
 const validate = require('../middlewares/validate');
 
-router.get('/playlists', controller.getAllPlaylists);
-router.post('/playlists', controller.createPlaylist);
-router.patch('/playlist/:id', controller.updatePlaylist);
-router.delete('/playlist/:id', controller.deletePlaylist);
+router.get('/playlists', controller.getAll);
+router.post('/playlists', controller.create);
+router.patch('/playlist/:id', controller.update);
+router.delete('/playlist/:id', controller.delete);
 
 router.post('/playlists/refresh', controller.refreshPlaylists);
 router.post(
@@ -18,6 +18,6 @@ router.post(
   validate('addPlaylists'),
   controller.removePlaylists
 );
-router.post('/playlist/:id/reorder', controller.reorderPlaylistTracks);
+router.post('/playlist/:id/reorder', controller.reorderTracks);
 
 module.exports = router;

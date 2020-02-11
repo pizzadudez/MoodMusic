@@ -1,6 +1,6 @@
 const PlaylistModel = require('../models/Playlist');
 
-exports.getAllPlaylists = async (req, res, next) => {
+exports.getAll = async (req, res, next) => {
   try {
     const playlists = await PlaylistModel.getAll();
     res.status(200).json(playlists);
@@ -30,7 +30,7 @@ exports.removePlaylists = async (req, res, next) => {
 // TODO
 exports.refreshPlaylists = async (req, res, next) => {};
 
-exports.createPlaylist = async (req, res, next) => {};
-exports.updatePlaylist = async (req, res, next) => {};
-exports.deletePlaylist = async (req, res, next) => {};
-exports.reorderPlaylistTracks = async (req, res, next) => {};
+exports.create = async (req, res, next) => {};
+exports.update = async (req, res, next) => {};
+exports.delete = async (req, res, next) => {};
+exports.reorderTracks = async (req, res, next) => {};
