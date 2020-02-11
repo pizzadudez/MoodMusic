@@ -1,7 +1,9 @@
 import axios from 'axios';
+import _ from 'lodash';
 import { CREATE_LABEL, UPDATE_LABEL, SELECT_LABEL_TO_UPDATE } from './types';
 
-export const createLabel = json => dispatch => {
+export const createLabel = data => dispatch => {
+  const json = _.pickBy(data);
   axios
     .post('/api/labels', json)
     .then(res => {
@@ -12,7 +14,8 @@ export const createLabel = json => dispatch => {
     })
     .catch(err => console.log(err));
 };
-export const updateLabel = (id, json) => dispatch => {
+export const updateLabel = (id, data) => dispatch => {
+  const json = _.pickBy(data);
   axios
     .patch('/api/label/' + id, json)
     .then(res => {

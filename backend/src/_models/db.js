@@ -19,11 +19,11 @@ exports.init = () => {
             id TEXT NOT NULL PRIMARY KEY,
             name TEXT,
             snapshot_id TEXT,
-            genre_id INTEGER DEFAULT NULL,
+            label_id INTEGER DEFAULT NULL,
             mood_playlist INTEGER DEFAULT 0,
             changes INTEGER DEFAULT 1,
             tracking INTEGER DEFAULT 0,
-            FOREIGN KEY (genre_id) REFERENCES labels (id) ON DELETE SET NULL)`);
+            FOREIGN KEY (label_id) REFERENCES labels (id) ON DELETE SET NULL)`);
     db.run(`CREATE TABLE IF NOT EXISTS tracks (
             id TEXT NOT NULL PRIMARY KEY,
             name TEXT,

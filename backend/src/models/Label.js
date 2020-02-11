@@ -1,8 +1,13 @@
 const db = require('./db').conn();
 
 exports.getAll = () => {
+  const selectSql = `SELECT l.*, p.id as playlist_id
+    FROM labels l LEFT JOIN playlists p
+    ON l.id = p.label_id
+    ORDER BY l.id`;
+
   return new Promise((resolve, reject) => {
-    db.all('SELECT * FROM labels ORDER BY id', (err, rows) => {
+    db.all(selectSql, (err, rows) => {
       if (err) {
         reject(new Error(err.message));
       } else {

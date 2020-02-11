@@ -41,6 +41,7 @@ const validate = field => {
       }),
     }),
     updateLabel: Joi.object().keys({
+      type: Joi.string().valid('genre', 'subgenre', 'mood'),
       name: Joi.string().min(2),
       color: Joi.string().regex(/^#[A-Fa-f0-9]{6}/),
       parent_id: Joi.when('type', {
