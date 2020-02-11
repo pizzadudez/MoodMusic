@@ -3,13 +3,14 @@ const path = require('path');
 
 const db = require('./_models/db');
 const config = require('./config');
+const handleJSON = require('./middlewares/handleJSON');
 const AuthServices = require('./_services/auth');
 const AuthRouter = require('./auth');
 const ApiRouter = require('./routes');
 
 const app = express();
 app.use(express.urlencoded({ extended: true }));
-app.use(express.json());
+app.use(handleJSON());
 app.set('json spaces', 2);
 // Routers
 app.use(express.static(path.join(__dirname, '../public')));

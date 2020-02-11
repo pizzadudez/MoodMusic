@@ -111,10 +111,10 @@ export default memo(() => {
             <Button type="submit" onClick={handleSubmit}>
               {isSubmitting ? 'Submitting...' : 'Submit'}
             </Button>
-            <div>
+            {/* <div>
               <pre>{JSON.stringify(values, null, 2)}</pre>
-              {/* <pre>{JSON.stringify(errors, null, 2)}</pre> */}
-            </div>
+              <pre>{JSON.stringify(errors, null, 2)}</pre>
+            </div> */}
           </StyledForm>
         )}
       </Formik>
