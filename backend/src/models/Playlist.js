@@ -13,21 +13,45 @@ exports.getAll = () => {
   });
 };
 // TODO: add position
-exports.addPlaylists = data => {
-  const sql = `INSERT OR IGNORE INTO tracks_playlists
-    (track_id, playlist_id, added_at)
-    VALUES(?, ?, ?)`;
+exports.addPlaylists = async (data, sync = false) => {
+  const sql = `INSERT OR ${sync ? 'REPLACE' : 'IGNORE'} INTO tracks_playlists
+    (track_id, playlist_id, added_at, position)
+    VALUES(?, ?, ?, ?)`;
   const added_at = new Date().toISOString();
+  // TODO handle empty (maybe null returns)
+  const lastPositions = await getLastPositions();
+  console.log(lastPositions);
 
   return new Promise((resolve, reject) => {
     db.serialize(() => {
       db.run('BEGIN TRANSACTION');
-      data.forEach(({ playlist_id, track_ids }) => {
-        track_ids.forEach(id => {
-          db.run(sql, [id, playlist_id, added_at], err => {
-            if (err) reject(new Error(err.message));
+      data.forEach(({ playlist_id, track_ids, tracks }) => {
+        if (tracks) {
+          tracks.forEach((track, idx) => {
+            const values = [
+              track.id,
+              playlist_id,
+              track.added_at,
+              sync ? idx : idx + (lastPositions[playlist_id] || -1) + 1,
+            ];
+            console.log(playlist_id);
+            db.run(sql, values, err => {
+              if (err) reject(new Error(err.message));
+            });
           });
-        });
+        } else {
+          track_ids.forEach((id, idx) => {
+            const values = [
+              id,
+              playlist_id,
+              added_at,
+              idx + lastPositions[playlist_id] + 1,
+            ];
+            db.run(sql, values, err => {
+              if (err) reject(new Error(err.message));
+            });
+          });
+        }
       });
       db.run('COMMIT TRANSACTION', err => {
         if (err) {
@@ -65,7 +89,7 @@ exports.removePlaylists = data => {
 };
 
 // Upsert playlits and return list tracked playlists with changes
-exports.refresh = data => {
+exports.refresh = (data, sync = false) => {
   const insertSql = `INSERT INTO playlists
     (id, name, snapshot_id, tracks_num)
     VALUES (?, ?, ?, ?)`;
@@ -99,7 +123,7 @@ exports.refresh = data => {
         if (err) {
           reject(new Error(err.message));
         } else {
-          resolve(getTrackedWithChanges());
+          resolve(sync ? getTracked() : getTrackedWithChanges());
         }
       });
     });
@@ -148,6 +172,25 @@ const getTracked = () => {
         reject(new Error(err.message));
       } else {
         resolve(rows.map(row => row.id));
+      }
+    });
+  });
+};
+const getLastPositions = () => {
+  return new Promise((resolve, reject) => {
+    const sql = `SELECT playlist_id, 
+      max(position) AS last_position
+      FROM tracks_playlists
+      GROUP BY playlist_id`;
+    db.all(sql, (err, rows) => {
+      if (err) {
+        reject(new Error(err.message));
+      } else {
+        resolve(
+          Object.fromEntries(
+            rows.map(row => [row.playlist_id, row.last_position || -1])
+          )
+        );
       }
     });
   });

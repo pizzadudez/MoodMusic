@@ -16,8 +16,8 @@ exports.init = () => {
             user_id TEXT UNIQUE,
             access_token TEXT,
             refresh_token TEXT,
-            get_liked_songs INTEGER DEFAULT 0,
-            last_liked_song_timestamp TEXT)`);
+            refreshed_at TEXT,
+            synced_at TEXT)`);
     db.run(`CREATE TABLE IF NOT EXISTS playlists (
             id TEXT NOT NULL PRIMARY KEY,
             name TEXT,

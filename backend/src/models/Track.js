@@ -142,6 +142,8 @@ exports.addTracks = async (list, liked = false) => {
       db.run('COMMIT TRANSACTION', err => {
         if (err) {
           reject(new Error(err.message));
+        } else if (liked) {
+          resolve(syncLikedTracks(list));
         } else {
           resolve();
         }
@@ -149,7 +151,9 @@ exports.addTracks = async (list, liked = false) => {
     });
   });
 };
-exports.syncLikedTracks = async tracks => {
+
+// Helpers
+const syncLikedTracks = async tracks => {
   const hashMap = Object.fromEntries(tracks.map(track => [track.id, true]));
   const likedIds = await new Promise((resolve, reject) => {
     db.all('SELECT id FROM tracks WHERE liked=1', (err, rows) => {
@@ -185,8 +189,6 @@ exports.syncLikedTracks = async tracks => {
     });
   });
 };
-
-// Helpers
 const tracksHashMap = () => {
   return new Promise((resolve, reject) => {
     db.all('SELECT id FROM tracks', (err, rows) => {

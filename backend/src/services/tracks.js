@@ -4,30 +4,21 @@ const PlaylistModel = require('../models/Playlist');
 const TrackModel = require('../models/Track');
 const LabelModel = require('../models/Label');
 
-exports.refreshTracks = async () => {
-  // Get new Liked Tracks => add new
-  const likedTracks = await getLikedTracks();
+exports.refreshTracks = async (sync = false) => {
+  // Liked Tracks (last 50 / all)
+  const likedTracks = await getLikedTracks(sync);
   await TrackModel.addTracks(likedTracks, true);
-  await TrackModel.syncLikedTracks(likedTracks);
-  // Get up-to date playlists and update them
-  const playlists = await refreshPlaylists();
-  const promises = playlists.map(id => getPlaylistTracks(id));
-  const results = await Promise.all(promises);
+  // Playlist Tracks (tracked+changes / tracked)
+  const playlists = await refreshPlaylists(sync);
+  const requests = playlists.map(id => getPlaylistTracks(id));
+  const responses = await Promise.all(requests);
   const playlistTracks = playlists.map((id, idx) => ({
     playlist_id: id,
-    track_ids: results[idx].map(track => track.id),
+    tracks: responses[idx],
   }));
-  await TrackModel.addTracks(results.flat(Infinity));
-  await PlaylistModel.addPlaylists(playlistTracks);
-  await PlaylistModel.setNoChanges(playlists);
-};
-exports.syncTracks = async () => {
-  const likedTracks = await getLikedTracks(true);
-  await TrackModel.addTracks(likedTracks, true);
-  await TrackModel.syncLikedTracks(likedTracks);
-  // add new liked Tracks
-  // remove liked from tracks not in this list (use hashMap)
-  // const playlistsWithChanges = await refreshPlaylists();
+  await TrackModel.addTracks(responses.flat(Infinity));
+  await PlaylistModel.addPlaylists(playlistTracks, sync);
+  // await PlaylistModel.setNoChanges(playlists);
 };
 
 // Helpers
@@ -63,7 +54,7 @@ const getLikedTracks = async (sync = false) => {
     return parseTracks(response.items);
   }
 };
-const refreshPlaylists = async () => {
+const refreshPlaylists = async (sync = false) => {
   const { access_token: token } = await UserModel.userData();
   const response = await request.get({
     url: 'https://api.spotify.com/v1/me/playlists?limit=50',
@@ -73,7 +64,7 @@ const refreshPlaylists = async () => {
   const totalPlaylists = response.total;
 
   if (totalPlaylists <= 50) {
-    return PlaylistModel.refresh(parsePlaylists(response.items));
+    return PlaylistModel.refresh(parsePlaylists(response.items), sync);
   } else {
     const requests = [];
     for (let offset = 1; offset <= totalPlaylists / 50; offset++) {
@@ -91,7 +82,8 @@ const refreshPlaylists = async () => {
     }
     const otherPlaylists = (await Promise.all(requests)).flat(Infinity);
     return PlaylistModel.refresh(
-      parsePlaylists([...response.items, ...otherPlaylists])
+      parsePlaylists([...response.items, ...otherPlaylists]),
+      sync
     );
   }
 };

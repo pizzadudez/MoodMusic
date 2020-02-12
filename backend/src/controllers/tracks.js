@@ -24,7 +24,7 @@ exports.refreshTracks = async (req, res, next) => {
 // TODO get all tracks from playlists/liked and sync all associations
 exports.syncTracks = async (req, res, next) => {
   try {
-    const test = await TracksService.syncTracks();
+    const test = await TracksService.refreshTracks(true);
     res.status(200).json(test);
   } catch (err) {
     console.log(err);
