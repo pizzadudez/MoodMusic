@@ -14,7 +14,7 @@ exports.createUser = (userId, accessToken, refreshToken) => {
     });
   });
 };
-exports.userData = () => {
+exports.data = () => {
   return new Promise((resolve, reject) => {
     db.get('SELECT * from users', (err, row) => {
       if (err) {
@@ -34,10 +34,15 @@ exports.updateToken = accessToken => {
     });
   });
 };
+exports.updateUser = (fieldName, value = undefined) => {
+  const fields = { refresh: 'refreshed_at', sync: 'synced_at' };
+  if (!fields[fieldName]) {
+    return Promise.reject(new Error('Invalid fieldName'));
+  }
+  value = value || new Date().toISOString();
 
-exports.setLikedSongsTime = timestamp => {
   return new Promise((resolve, reject) => {
-    db.run('UPDATE users set liked_songs_timestamp=?', [timestamp], err => {
+    db.run(`UPDATE users set ${fields[fieldName]}=?`, [value], err => {
       err ? reject(new Error(err.message)) : resolve();
     });
   });

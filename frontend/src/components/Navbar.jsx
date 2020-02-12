@@ -4,7 +4,7 @@ import { createSelector } from 'reselect';
 import { NavLink } from 'react-router-dom';
 import styled from 'styled-components';
 
-// import { fetchUpdates } from '../actions/dataActions';
+import { syncData } from '../actions/dataActions';
 import { submitChanges } from '../actions/trackActions';
 import Button from './common/Button';
 
@@ -21,9 +21,9 @@ export default memo(() => {
   const submitChangesHandle = useCallback(() => {
     dispatch(submitChanges());
   }, [dispatch]);
-  // const checkForUpdates = useCallback(() => {
-  //   dispatch(fetchUpdates());
-  // }, [dispatch]);
+  const syncDataHandle = useCallback(() => {
+    dispatch(syncData());
+  }, [dispatch]);
 
   return (
     <Nav>
@@ -40,13 +40,10 @@ export default memo(() => {
         </li>
         {/* <li><NavLink to="/playlists"><button>Manage Playlists</button></NavLink></li> */}
       </Links>
-      <Button onClick={submitChangesHandle}>Submit Changes</Button>
-      <Button
-        highlight={changes}
-        // onClick={checkForUpdates}
-      >
-        Check for Updates
+      <Button highlight={changes} onClick={submitChangesHandle}>
+        Submit Changes
       </Button>
+      <Button onClick={syncDataHandle}>Hard Sync</Button>
     </Nav>
   );
 });

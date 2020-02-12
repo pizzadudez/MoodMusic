@@ -10,20 +10,31 @@ exports.refreshTracks = async (sync = false) => {
   await TrackModel.addTracks(likedTracks, true);
   // Playlist Tracks (tracked+changes / tracked)
   const playlists = await refreshPlaylists(sync);
-  const requests = playlists.map(id => getPlaylistTracks(id));
+  const requests = playlists.map(({ id, tracks_num }) =>
+    getPlaylistTracks(id, sync, tracks_num)
+  );
   const responses = await Promise.all(requests);
-  const playlistTracks = playlists.map((id, idx) => ({
+  const playlistTracks = playlists.map(({ id }, idx) => ({
     playlist_id: id,
     tracks: responses[idx],
   }));
+  // Add Tracks and PlaylistTracks
   await TrackModel.addTracks(responses.flat(Infinity));
   await PlaylistModel.addPlaylists(playlistTracks, sync);
-  // await PlaylistModel.setNoChanges(playlists);
+  // Update User and Playlists
+  await PlaylistModel.setNoChanges(playlists);
+  await UserModel.updateUser(sync ? 'sync' : 'refresh');
+
+  return {
+    message: `Track ${sync ? 'sync' : 'refresh'} complete!`,
+    tracks: await TrackModel.getAll(),
+    playlists: await PlaylistModel.getAll(),
+  };
 };
 
 // Helpers
 const getLikedTracks = async (sync = false) => {
-  const { access_token: token } = await UserModel.userData();
+  const { access_token: token } = await UserModel.data();
   const response = await request.get({
     url: 'https://api.spotify.com/v1/me/tracks?limit=50',
     headers: { Authorization: 'Bearer ' + token },
@@ -55,7 +66,7 @@ const getLikedTracks = async (sync = false) => {
   }
 };
 const refreshPlaylists = async (sync = false) => {
-  const { access_token: token } = await UserModel.userData();
+  const { access_token: token } = await UserModel.data();
   const response = await request.get({
     url: 'https://api.spotify.com/v1/me/playlists?limit=50',
     headers: { Authorization: 'Bearer ' + token },
@@ -87,32 +98,41 @@ const refreshPlaylists = async (sync = false) => {
     );
   }
 };
-const getPlaylistTracks = async id => {
-  const { access_token: token } = await UserModel.userData();
+const getPlaylistTracks = async (id, sync = false, tracks_num) => {
+  const { access_token: token } = await UserModel.data();
   const response = await request.get({
-    url: 'https://api.spotify.com/v1/playlists/' + id + '/tracks',
+    url:
+      'https://api.spotify.com/v1/playlists/' +
+      id +
+      '/tracks' +
+      (!sync ? '?offset=' + (tracks_num > 100 ? tracks_num - 100 : 0) : ''),
     headers: { Authorization: 'Bearer ' + token },
     json: true,
   });
   const totalTracks = response.total;
-  const requests = [];
-  for (let offset = 1; offset <= totalTracks / 50; offset++) {
-    const req = async () => {
-      const response = await request.get({
-        url:
-          'https://api.spotify.com/v1/playlists/' +
-          id +
-          '/tracks?offset=' +
-          offset * 100,
-        headers: { Authorization: 'Bearer ' + token },
-        json: true,
-      });
-      return response.items;
-    };
-    requests.push(req());
+
+  if (sync) {
+    const requests = [];
+    for (let offset = 1; offset <= totalTracks / 50; offset++) {
+      const req = async () => {
+        const response = await request.get({
+          url:
+            'https://api.spotify.com/v1/playlists/' +
+            id +
+            '/tracks?offset=' +
+            offset * 100,
+          headers: { Authorization: 'Bearer ' + token },
+          json: true,
+        });
+        return response.items;
+      };
+      requests.push(req());
+    }
+    const otherTracks = (await Promise.all(requests)).flat(Infinity);
+    return parseTracks([...response.items, ...otherTracks]);
+  } else {
+    return parseTracks(response.items);
   }
-  const otherTracks = (await Promise.all(requests)).flat(Infinity);
-  return parseTracks([...response.items, ...otherTracks]);
 };
 
 // Data Parsing

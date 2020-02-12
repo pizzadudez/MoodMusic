@@ -12,29 +12,26 @@ exports.getAll = () => {
     });
   });
 };
-// TODO: add position
 exports.addPlaylists = async (data, sync = false) => {
   const sql = `INSERT OR ${sync ? 'REPLACE' : 'IGNORE'} INTO tracks_playlists
     (track_id, playlist_id, added_at, position)
     VALUES(?, ?, ?, ?)`;
   const added_at = new Date().toISOString();
-  // TODO handle empty (maybe null returns)
   const lastPositions = await getLastPositions();
-  console.log(lastPositions);
 
   return new Promise((resolve, reject) => {
     db.serialize(() => {
       db.run('BEGIN TRANSACTION');
       data.forEach(({ playlist_id, track_ids, tracks }) => {
+        // track_ids from manual Add and tracks from refresh/sync
         if (tracks) {
           tracks.forEach((track, idx) => {
             const values = [
               track.id,
               playlist_id,
               track.added_at,
-              sync ? idx : idx + (lastPositions[playlist_id] || -1) + 1,
+              sync ? idx : idx + lastPositions[playlist_id] + 1,
             ];
-            console.log(playlist_id);
             db.run(sql, values, err => {
               if (err) reject(new Error(err.message));
             });
@@ -88,7 +85,7 @@ exports.removePlaylists = data => {
   });
 };
 
-// Upsert playlits and return list tracked playlists with changes
+// Upsert playlits and return list of tracked playlists with changes
 exports.refresh = (data, sync = false) => {
   const insertSql = `INSERT INTO playlists
     (id, name, snapshot_id, tracks_num)
@@ -123,19 +120,19 @@ exports.refresh = (data, sync = false) => {
         if (err) {
           reject(new Error(err.message));
         } else {
-          resolve(sync ? getTracked() : getTrackedWithChanges());
+          resolve(sync ? getTracked() : getTracked(true));
         }
       });
     });
   });
 };
-// Use after adding new Tracks
-exports.setNoChanges = list => {
+// Used after Tracks refresh
+exports.setNoChanges = playlists => {
   return new Promise((resolve, reject) => {
     const sql = `UPDATE playlists SET changes=0 WHERE id=?`;
     db.serialize(() => {
       db.run('BEGIN TRANSACTION');
-      list.forEach(id => {
+      playlists.forEach(({ id }) => {
         db.run(sql, [id], err => {
           if (err) reject(new Error(err.message));
         });
@@ -152,26 +149,15 @@ exports.setNoChanges = list => {
 };
 
 // Helpers
-const getTrackedWithChanges = () => {
+const getTracked = (withChanges = false) => {
   return new Promise((resolve, reject) => {
-    const sql = `SELECT id FROM playlists WHERE changes=1 AND tracking=1`;
+    const sql = `SELECT id, tracks_num FROM playlists 
+      WHERE tracking=1 ${withChanges ? 'AND changes=1' : ''}`;
     db.all(sql, (err, rows) => {
       if (err) {
         reject(new Error(err.message));
       } else {
-        resolve(rows.map(row => row.id));
-      }
-    });
-  });
-};
-const getTracked = () => {
-  return new Promise((resolve, reject) => {
-    const sql = `SELECT id FROM playlists WHERE tracking=1`;
-    db.all(sql, (err, rows) => {
-      if (err) {
-        reject(new Error(err.message));
-      } else {
-        resolve(rows.map(row => row.id));
+        resolve(rows);
       }
     });
   });

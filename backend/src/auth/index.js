@@ -1,7 +1,7 @@
 const router = require('express').Router();
 const config = require('../config');
 const AuthService = require('../_services/auth');
-const UserModel = require('../_models/User');
+const UserModel = require('../models/User');
 
 // Start Authorization Flow
 router.get('/', (req, res, next) => {
@@ -10,9 +10,10 @@ router.get('/', (req, res, next) => {
 // Check if authorized
 router.get('/check', async (req, res, next) => {
   try {
-    await UserModel.userData();
+    await UserModel.data();
     res.json({ authorized: true });
   } catch (err) {
+    console.log(err);
     res.json({ authorized: false });
   }
 });

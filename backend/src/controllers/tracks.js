@@ -10,22 +10,19 @@ exports.getAll = async (req, res, next) => {
     res.status(500).send('Internal server error.');
   }
 };
-// TODO get new tracks with as few requests as possible
 exports.refreshTracks = async (req, res, next) => {
   try {
-    const test = await TracksService.refreshTracks();
-    res.status(200).json(test);
+    const updates = await TracksService.refreshTracks();
+    res.status(200).json(updates);
   } catch (err) {
     console.log(err);
     res.sendStatus(500);
   }
 };
-
-// TODO get all tracks from playlists/liked and sync all associations
 exports.syncTracks = async (req, res, next) => {
   try {
-    const test = await TracksService.refreshTracks(true);
-    res.status(200).json(test);
+    const updates = await TracksService.refreshTracks(true);
+    res.status(200).json(updates);
   } catch (err) {
     console.log(err);
     res.sendStatus(500);

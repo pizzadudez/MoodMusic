@@ -1,10 +1,10 @@
 const request = require('request');
-const UserModel = require('../_models/User');
+const UserModel = require('../models/User');
 
 // Play track on available devices
 exports.playTrack = async id => {
   try {
-    const userData = await UserModel.userData();
+    const userData = await UserModel.data();
     const options = {
       url: 'https://api.spotify.com/v1/me/player/play',
       headers: { Authorization: 'Bearer ' + userData.access_token },

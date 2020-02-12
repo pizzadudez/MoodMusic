@@ -1,6 +1,6 @@
 const request = require('request');
 const config = require('../config');
-const UserModel = require('../_models/User');
+const UserModel = require('../models/User');
 
 // Spotify authorization uri
 exports.authUri = () => {
@@ -89,7 +89,7 @@ exports.registerUser = async tokensObj => {
 // Refresh accessToken
 exports.refreshToken = async () => {
   try {
-    const userData = await UserModel.userData();
+    const userData = await UserModel.data();
     const authOptions = {
       url: 'https://accounts.spotify.com/api/token',
       form: {

@@ -1,5 +1,5 @@
 const request = require('request-promise-native');
-const UserModel = require('../_models/User');
+const UserModel = require('../models/User');
 const PlaylistModel = require('../_models/Playlist');
 const TrackModel = require('../_models/Track');
 const LabelModel = require('../_models/Label');
@@ -7,7 +7,7 @@ const LabelModel = require('../_models/Label');
 // Request up to date playlist data from Spotify
 exports.refreshPlaylists = async () => {
   try {
-    const userData = await UserModel.userData();
+    const userData = await UserModel.data();
     const playlists = await getPlaylists(
       userData.user_id,
       userData.access_token
@@ -36,7 +36,7 @@ exports.refreshTracks = async () => {
       return {
         message: 'No tracked playlists have changes.',
       };
-    const token = (await UserModel.userData()).access_token;
+    const token = (await UserModel.data()).access_token;
     const playlistPromises = playlistIds.map(id =>
       getPlaylistTracks(id, token)
     );
@@ -81,7 +81,7 @@ exports.refreshTracks = async () => {
 };
 // Get new Liked Tracks (from <Liked Songs> 'playlist')
 const refreshLikedTracks = async ({ token, nextUrl, tracks = [] } = {}) => {
-  token = token ? token : (await UserModel.userData()).access_token;
+  token = token ? token : (await UserModel.data()).access_token;
   const response = await request.get({
     url: nextUrl ? nextUrl : 'https://api.spotify.com/v1/me/tracks?limit=50',
     headers: { Authorization: 'Bearer ' + token },
@@ -109,7 +109,7 @@ exports.refreshLikedTracks = refreshLikedTracks;
 // Create Playlist
 exports.createPlaylist = async name => {
   try {
-    const userData = await UserModel.userData();
+    const userData = await UserModel.data();
     const options = {
       url:
         'https://api.spotify.com/v1/users/' + userData.user_id + '/playlists',
@@ -147,7 +147,7 @@ exports.createPlaylist = async name => {
 // 'Delete' playlist
 exports.deletePlaylist = async id => {
   try {
-    const userData = await UserModel.userData();
+    const userData = await UserModel.data();
     const options = {
       url: 'https://api.spotify.com/v1/playlists/' + id + '/followers',
       headers: { Authorization: 'Bearer ' + userData.access_token },
@@ -170,7 +170,7 @@ exports.deletePlaylist = async id => {
 // Add Tracks to Spotify playlist
 exports.addTracks = async playlistsTracks => {
   try {
-    const token = (await UserModel.userData()).access_token;
+    const token = (await UserModel.data()).access_token;
     const requests = playlistsTracks.map(pl => {
       return new Promise(async (resolve, reject) => {
         let uris = pl.tracks.map(id => 'spotify:track:' + id);
@@ -205,7 +205,7 @@ exports.addTracks = async playlistsTracks => {
 // Remove Tracks from Spotify Playlist
 exports.removeTracks = async playlistsTracks => {
   try {
-    const token = (await UserModel.userData()).access_token;
+    const token = (await UserModel.data()).access_token;
     const requests = playlistsTracks.map(pl => {
       return new Promise((resolve, reject) => {
         const uris = pl.tracks.map(id => 'spotify:track:' + id);
@@ -237,7 +237,7 @@ exports.removeTracks = async playlistsTracks => {
 // Update Playlist Track positions
 exports.updatePositions = async (id, tracks) => {
   try {
-    const token = (await UserModel.userData()).access_token;
+    const token = (await UserModel.data()).access_token;
     const currTrackList = await getPlaylistTracks(id, token, true);
     if (currTrackList.tracks.length != tracks.length) {
       throw new Error('Malformed tracklist. Unequal lengths');

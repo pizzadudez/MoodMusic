@@ -106,7 +106,12 @@ exports.addTracks = async (list, liked = false) => {
 
   const hashMap = await tracksHashMap();
   const newTracks = list.filter(track => !hashMap[track.id]);
-  if (!newTracks.length) return;
+  if (!newTracks.length) {
+    if (liked) {
+      syncLikedTracks(list);
+    }
+    return;
+  }
 
   const albumsById = Object.fromEntries(
     newTracks.map(track => [track.album.id, track.album])

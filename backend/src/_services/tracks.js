@@ -1,5 +1,5 @@
 const request = require('request-promise-native');
-const UserModel = require('../_models/User');
+const UserModel = require('../models/User');
 const TrackModel = require('../_models/Track');
 
 // Sync Liked Songs
@@ -17,7 +17,7 @@ exports.syncLikedSongs = async () => {
 };
 
 const getLikedSongs = async () => {
-  const token = (await UserModel.userData()).access_token;
+  const token = (await UserModel.data()).access_token;
   const response = await request.get({
     url: 'https://api.spotify.com/v1/me/tracks',
     headers: { Authorization: 'Bearer ' + token },
