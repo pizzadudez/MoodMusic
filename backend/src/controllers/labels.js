@@ -12,7 +12,7 @@ exports.getAll = async (req, res, next) => {
 exports.addLabels = async (req, res, next) => {
   try {
     await LabelModel.addLabels(req.body);
-    res.status(200).send('Associations added.');
+    res.status(200).send('Labels added to Tracks.');
   } catch (err) {
     console.log(err);
     res.status(500).send('Internal server error.');
@@ -21,7 +21,7 @@ exports.addLabels = async (req, res, next) => {
 exports.removeLabels = async (req, res, next) => {
   try {
     await LabelModel.removeLabels(req.body);
-    res.status(200).send('Associations removed.');
+    res.status(200).send('Labels removed from Tracks.');
   } catch (err) {
     console.log(err);
     res.status(500).send('Internal server error.');

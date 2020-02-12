@@ -166,10 +166,8 @@ exports.deleteLabel = id => {
       if (err) {
         reject(new Error(err.message));
       } else if (this.changes) {
-        console.log('deleted');
         resolve();
       } else {
-        console.log('not here');
         resolve(`Could not delete label with id: ${id}`);
       }
     });

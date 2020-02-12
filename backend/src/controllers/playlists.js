@@ -1,4 +1,5 @@
 const PlaylistModel = require('../models/Playlist');
+const PlaylistsService = require('../services/playlists');
 
 exports.getAll = async (req, res, next) => {
   try {
@@ -11,8 +12,8 @@ exports.getAll = async (req, res, next) => {
 };
 exports.addPlaylists = async (req, res, next) => {
   try {
-    await PlaylistModel.addPlaylists(req.body);
-    res.status(201).send('Associations added.');
+    await PlaylistsService.addTracks(req.body);
+    res.status(201).send('Tracks added to playlists.');
   } catch (err) {
     console.log(err);
     res.status(500).send('Internal server error.');
@@ -20,8 +21,8 @@ exports.addPlaylists = async (req, res, next) => {
 };
 exports.removePlaylists = async (req, res, next) => {
   try {
-    await PlaylistModel.removePlaylists(req.body);
-    res.status(201).send('Associations removed.');
+    await PlaylistsService.removeTracks(req.body);
+    res.status(201).send('Tracks removed from playlists.');
   } catch (err) {
     console.log(err);
     res.status(500).send('Internal server error.');

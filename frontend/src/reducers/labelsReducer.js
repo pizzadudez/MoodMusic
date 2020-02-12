@@ -18,9 +18,7 @@ export default (state = initialState, action) => {
       let parent = {};
       if (label.parent_id) {
         parent = {
-          [label.parent_id]: {
-            ...state.labelsById[label.parent_id],
-          },
+          ...state.labelsById[label.parent_id],
         };
         parent.subgenre_ids = [...(parent.subgenre_ids || []), label.id];
       }
@@ -29,7 +27,7 @@ export default (state = initialState, action) => {
         labelsById: {
           ...state.labelsById,
           [label.id]: label,
-          ...parent,
+          ...(label.parent_id && { [label.parent_id]: parent }),
         },
         ids: [...state.ids, action.label.id],
       };

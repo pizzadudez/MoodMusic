@@ -1,7 +1,7 @@
 const sqlite3 = require('sqlite3').verbose();
 
 const db = new sqlite3.Database('./db.sqlite3', err => {
-  err ? console.log(err) : console.log('Database connected');
+  err ? console.log(err) : {};
 });
 // Import this into models
 exports.conn = () => {

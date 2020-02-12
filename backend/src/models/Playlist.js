@@ -16,6 +16,7 @@ exports.addPlaylists = async (data, sync = false) => {
   const sql = `INSERT OR ${sync ? 'REPLACE' : 'IGNORE'} INTO tracks_playlists
     (track_id, playlist_id, added_at, position)
     VALUES(?, ?, ?, ?)`;
+  const deleteSql = `DELETE FROM tracks_playlists WHERE playlist_id=?`;
   const added_at = new Date().toISOString();
   const lastPositions = await getLastPositions();
 
@@ -23,6 +24,11 @@ exports.addPlaylists = async (data, sync = false) => {
     db.serialize(() => {
       db.run('BEGIN TRANSACTION');
       data.forEach(({ playlist_id, track_ids, tracks }) => {
+        if (sync) {
+          db.run(deleteSql, [playlist_id], err => {
+            if (err) reject(new Error(err.message));
+          });
+        }
         // track_ids from manual Add and tracks from refresh/sync
         if (tracks) {
           tracks.forEach((track, idx) => {
@@ -136,6 +142,47 @@ exports.setNoChanges = playlists => {
         db.run(sql, [id], err => {
           if (err) reject(new Error(err.message));
         });
+      });
+      db.run('COMMIT TRANSACTION', err => {
+        if (err) {
+          reject(new Error(err.message));
+        } else {
+          resolve();
+        }
+      });
+    });
+  });
+};
+// Used to omit adding duplicate tracks on Spotify
+exports.tracksHashMap = id => {
+  return new Promise((resolve, reject) => {
+    const sql = `SELECT track_id FROM tracks_playlists
+      WHERE playlist_id=? ORDER BY position ASC`;
+    db.all(sql, [id], (err, rows) => {
+      if (err) {
+        reject(new Error(err.message));
+      } else {
+        const hashMap = Object.fromEntries(
+          rows.map(row => [row.track_id, true])
+        );
+        resolve(hashMap);
+      }
+    });
+  });
+};
+// Update snapshot_ids and tracks_num after adding/removing tracks
+exports.updateChanges = list => {
+  return new Promise((resolve, reject) => {
+    const sql = `UPDATE playlists SET snapshot_id=?, tracks_num=? WHERE id=?`;
+    db.serialize(() => {
+      db.run('BEGIN TRANSACTION');
+      list.forEach(({ playlist_id, snapshot_id, tracks_num }) => {
+        // snapshot_id can be undefined when no changes have actually been made
+        if (snapshot_id) {
+          db.run(sql, [snapshot_id, tracks_num, playlist_id], err => {
+            if (err) reject(new Error(err.message));
+          });
+        }
       });
       db.run('COMMIT TRANSACTION', err => {
         if (err) {

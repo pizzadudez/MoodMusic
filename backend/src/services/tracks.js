@@ -7,7 +7,7 @@ const LabelModel = require('../models/Label');
 exports.refreshTracks = async (sync = false) => {
   // Liked Tracks (last 50 / all)
   const likedTracks = await getLikedTracks(sync);
-  await TrackModel.addTracks(likedTracks, true);
+  await TrackModel.addTracks(likedTracks, true, sync);
   // Playlist Tracks (tracked+changes / tracked)
   const playlists = await refreshPlaylists(sync);
   const requests = playlists.map(({ id, tracks_num }) =>
@@ -28,7 +28,6 @@ exports.refreshTracks = async (sync = false) => {
   return {
     message: `Track ${sync ? 'sync' : 'refresh'} complete!`,
     tracks: await TrackModel.getAll(),
-    playlists: await PlaylistModel.getAll(),
   };
 };
 

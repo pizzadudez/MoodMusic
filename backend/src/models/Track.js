@@ -96,7 +96,7 @@ exports.getAll = async () => {
   );
   return tracksById;
 };
-exports.addTracks = async (list, liked = false) => {
+exports.addTracks = async (list, liked = false, sync = false) => {
   const albumSql = `INSERT OR IGNORE INTO albums
     (id, name, large, medium, small)
     VALUES(?, ?, ?, ?, ?)`;
@@ -107,7 +107,7 @@ exports.addTracks = async (list, liked = false) => {
   const hashMap = await tracksHashMap();
   const newTracks = list.filter(track => !hashMap[track.id]);
   if (!newTracks.length) {
-    if (liked) {
+    if (liked && sync) {
       syncLikedTracks(list);
     }
     return;
@@ -147,7 +147,7 @@ exports.addTracks = async (list, liked = false) => {
       db.run('COMMIT TRANSACTION', err => {
         if (err) {
           reject(new Error(err.message));
-        } else if (liked) {
+        } else if (liked && sync) {
           resolve(syncLikedTracks(list));
         } else {
           resolve();

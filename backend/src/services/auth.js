@@ -111,8 +111,8 @@ exports.refreshToken = async () => {
         error ? reject(error) : resolve(body);
       });
     });
-    const message = await UserModel.updateToken(res.access_token);
-    console.log(message);
+    await UserModel.updateToken(res.access_token);
+    console.log('Refreshed access token!');
     setTimeout(exports.refreshToken, (res.expires_in - 1) * 1000);
   } catch (err) {
     console.log(err);

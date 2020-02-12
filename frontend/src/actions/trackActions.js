@@ -7,6 +7,7 @@ import {
   SET_TRACK_CHANGES,
   UPDATE_TRACKS,
   CLEAR_TRACK_CHANGES,
+  FILTER_BY_PLAYLIST,
 } from './types';
 
 // Track Selecting
@@ -68,6 +69,7 @@ export const submitChanges = () => async (dispatch, getState) => {
       parseAndSubmit(playlistsToAdd, 'playlist', 'add'),
       parseAndSubmit(playlistsToRemove, 'playlist', 'remove'),
     ]);
+    dispatch({ type: CLEAR_TRACK_CHANGES });
   } catch (err) {
     console.log(err);
   }

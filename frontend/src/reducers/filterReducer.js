@@ -25,6 +25,7 @@ export default (state = initialState, action) => {
         ...state,
         ids: Object.keys(action.payload),
         byPlaylists: Object.keys(action.payload),
+        filterType: 'all',
       };
     case PLAYLIST_FILTER_ALL:
       return {
@@ -68,31 +69,22 @@ export default (state = initialState, action) => {
       let newValue = undefined;
       if (labels[id] === true) newValue = false;
       else if (labels[id] === undefined) newValue = true;
-      const changeIds = [id, ...subgenreIds].reduce(
-        (obj, id) => ({
-          ...obj,
-          [id]: true,
-        }),
-        {}
+      const changeIds = Object.fromEntries(
+        [id, ...subgenreIds].map(id => [id, true])
       );
 
       return {
         ...state,
         labels: {
-          ...Object.keys(labels).reduce(
-            (obj, id) => ({
-              ...obj,
-              ...(!changeIds[id] && { [id]: labels[id] }),
-            }),
-            {}
+          ...Object.fromEntries(
+            Object.keys(labels)
+              .filter(id => !changeIds[id])
+              .map(id => [id, labels[id]])
           ),
-          ...Object.keys(changeIds).reduce(
-            (obj, id) => ({
-              ...obj,
-              ...(newValue !== undefined && { [id]: newValue }),
-            }),
-            {}
-          ),
+          ...(newValue !== undefined &&
+            Object.fromEntries(
+              Object.keys(changeIds).map(id => [id, newValue])
+            )),
         },
       };
     }
