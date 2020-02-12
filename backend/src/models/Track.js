@@ -104,7 +104,7 @@ exports.addTracks = async (list, liked = false) => {
     (id, name, artist, album_id, added_at, liked)
     VALUES(?, ?, ?, ?, ?, ?)`;
 
-  const hashMap = await getAllIds();
+  const hashMap = await tracksHashMap();
   const newTracks = list.filter(track => !hashMap[track.id]);
   if (!newTracks.length) return;
 
@@ -149,9 +149,45 @@ exports.addTracks = async (list, liked = false) => {
     });
   });
 };
+exports.syncLikedTracks = async tracks => {
+  const hashMap = Object.fromEntries(tracks.map(track => [track.id, true]));
+  const likedIds = await new Promise((resolve, reject) => {
+    db.all('SELECT id FROM tracks WHERE liked=1', (err, rows) => {
+      if (err) {
+        reject(new Error(err.message));
+      } else {
+        resolve(rows.map(row => row.id));
+      }
+    });
+  });
+  const idsToUnlike = likedIds.filter(id => !hashMap[id]);
+
+  return new Promise((resolve, reject) => {
+    db.serialize(() => {
+      db.run('BEGIN TRANSACTION');
+      idsToUnlike.forEach(id => {
+        db.run('UPDATE tracks SET liked=0 WHERE id=?', [id], err => {
+          if (err) reject(new Error(err.message));
+        });
+      });
+      Object.keys(hashMap).forEach(id => {
+        db.run('UPDATE tracks set liked=1 WHERE id=?', [id], err => {
+          if (err) reject(new Error(err.message));
+        });
+      });
+      db.run('COMMIT TRANSACTION', err => {
+        if (err) {
+          reject(new Error(err.message));
+        } else {
+          resolve();
+        }
+      });
+    });
+  });
+};
 
 // Helpers
-const getAllIds = () => {
+const tracksHashMap = () => {
   return new Promise((resolve, reject) => {
     db.all('SELECT id FROM tracks', (err, rows) => {
       if (err) {

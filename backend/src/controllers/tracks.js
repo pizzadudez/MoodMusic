@@ -22,7 +22,15 @@ exports.refreshTracks = async (req, res, next) => {
 };
 
 // TODO get all tracks from playlists/liked and sync all associations
-exports.syncTracks = async (req, res, next) => {};
+exports.syncTracks = async (req, res, next) => {
+  try {
+    const test = await TracksService.syncTracks();
+    res.status(200).json(test);
+  } catch (err) {
+    console.log(err);
+    res.sendStatus(500);
+  }
+};
 
 exports.delete = async (req, res, next) => {};
 exports.rate = async (req, res, next) => {};

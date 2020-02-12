@@ -6,26 +6,35 @@ const LabelModel = require('../models/Label');
 
 exports.refreshTracks = async () => {
   // Get new Liked Tracks => add new
-  const likedTracks = await getLikedTracks(true);
-  return await TrackModel.addTracks(likedTracks, true);
+  const likedTracks = await getLikedTracks();
+  await TrackModel.addTracks(likedTracks, true);
+  await TrackModel.syncLikedTracks(likedTracks);
   // Get up-to date playlists and update them
-  // const playlistsWithChanges = await refreshPlaylists();
-  // Get last 100 tracks from playlists with changes => add new
-
-  // const playlistTracks = await getPlaylistTracks(playlistsWithChanges);
+  const playlists = await refreshPlaylists();
+  const promises = playlists.map(id => getPlaylistTracks(id));
+  const results = await Promise.all(promises);
+  const playlistTracks = playlists.map((id, idx) => ({
+    playlist_id: id,
+    track_ids: results[idx].map(track => track.id),
+  }));
+  await TrackModel.addTracks(results.flat(Infinity));
+  await PlaylistModel.addPlaylists(playlistTracks);
+  await PlaylistModel.setNoChanges(playlists);
 };
 exports.syncTracks = async () => {
   const likedTracks = await getLikedTracks(true);
+  await TrackModel.addTracks(likedTracks, true);
+  await TrackModel.syncLikedTracks(likedTracks);
   // add new liked Tracks
   // remove liked from tracks not in this list (use hashMap)
-  const playlistsWithChanges = await refreshPlaylists();
+  // const playlistsWithChanges = await refreshPlaylists();
 };
 
 // Helpers
 const getLikedTracks = async (sync = false) => {
   const { access_token: token } = await UserModel.userData();
   const response = await request.get({
-    url: 'https://api.spotify.com/v1/me/tracks',
+    url: 'https://api.spotify.com/v1/me/tracks?limit=50',
     headers: { Authorization: 'Bearer ' + token },
     json: true,
   });
@@ -57,7 +66,7 @@ const getLikedTracks = async (sync = false) => {
 const refreshPlaylists = async () => {
   const { access_token: token } = await UserModel.userData();
   const response = await request.get({
-    url: nextUrl ? nextUrl : 'https://api.spotify.com/v1/me/playlists?limit=50',
+    url: 'https://api.spotify.com/v1/me/playlists?limit=50',
     headers: { Authorization: 'Bearer ' + token },
     json: true,
   });
@@ -86,9 +95,8 @@ const refreshPlaylists = async () => {
     );
   }
 };
-const getPlaylistTracks = async playlist => {
+const getPlaylistTracks = async id => {
   const { access_token: token } = await UserModel.userData();
-  const { id, tracks_num: tracksNum } = playlist;
   const response = await request.get({
     url: 'https://api.spotify.com/v1/playlists/' + id + '/tracks',
     headers: { Authorization: 'Bearer ' + token },
