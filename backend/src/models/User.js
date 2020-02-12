@@ -34,3 +34,11 @@ exports.updateToken = accessToken => {
     });
   });
 };
+
+exports.setLikedSongsTime = timestamp => {
+  return new Promise((resolve, reject) => {
+    db.run('UPDATE users set liked_songs_timestamp=?', [timestamp], err => {
+      err ? reject(new Error(err.message)) : resolve();
+    });
+  });
+};

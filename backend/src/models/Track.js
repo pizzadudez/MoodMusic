@@ -96,3 +96,70 @@ exports.getAll = async () => {
   );
   return tracksById;
 };
+exports.addTracks = async (list, liked = false) => {
+  const albumSql = `INSERT OR IGNORE INTO albums
+    (id, name, large, medium, small)
+    VALUES(?, ?, ?, ?, ?)`;
+  const trackSql = `INSERT OR IGNORE INTO tracks
+    (id, name, artist, album_id, added_at, liked)
+    VALUES(?, ?, ?, ?, ?, ?)`;
+
+  const hashMap = await getAllIds();
+  const newTracks = list.filter(track => !hashMap[track.id]);
+  if (!newTracks.length) return;
+
+  const albumsById = Object.fromEntries(
+    newTracks.map(track => [track.album.id, track.album])
+  );
+  const newAlbums = Object.values(albumsById);
+  await new Promise((resolve, reject) => {
+    db.serialize(() => {
+      db.run('BEGIN TRANSACTION');
+      newAlbums.forEach(a => {
+        db.run(albumSql, [a.id, a.name, ...a.images], err => {
+          if (err) reject(new Error(err.message));
+        });
+      });
+      db.run('COMMIT TRANSACTION', err => {
+        if (err) {
+          reject(new Error(err.message));
+        } else {
+          resolve();
+        }
+      });
+    });
+  });
+
+  return new Promise((resolve, reject) => {
+    db.serialize(() => {
+      db.run('BEGIN TRANSACTION');
+      newTracks.forEach(t => {
+        const values = [t.id, t.name, t.artist, t.album_id, t.added_at, +liked];
+        db.run(trackSql, values, err => {
+          if (err) reject(new Error(err.message));
+        });
+      });
+      db.run('COMMIT TRANSACTION', err => {
+        if (err) {
+          reject(new Error(err.message));
+        } else {
+          resolve();
+        }
+      });
+    });
+  });
+};
+
+// Helpers
+const getAllIds = () => {
+  return new Promise((resolve, reject) => {
+    db.all('SELECT id FROM tracks', (err, rows) => {
+      if (err) {
+        reject(new Error(err.message));
+      } else {
+        const hashMap = Object.fromEntries(rows.map(row => [row.id, true]));
+        resolve(hashMap);
+      }
+    });
+  });
+};

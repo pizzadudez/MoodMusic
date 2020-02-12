@@ -62,3 +62,7 @@ exports.removePlaylists = data => {
     });
   });
 };
+
+// Takes list of playlists from refresh and returns playlists with changes
+// and tracked
+exports.refresh = data => {};

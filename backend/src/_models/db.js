@@ -22,6 +22,7 @@ exports.init = () => {
             id TEXT NOT NULL PRIMARY KEY,
             name TEXT,
             snapshot_id TEXT,
+            tracks_num INTEGER,
             tracking INTEGER DEFAULT 0,
             changes INTEGER DEFAULT 1,
             custom_playlist INTEGER DEFAULT 0,

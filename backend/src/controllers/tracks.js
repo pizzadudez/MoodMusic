@@ -1,4 +1,5 @@
 const TrackModel = require('../models/Track');
+const TracksService = require('../services/tracks');
 
 exports.getAll = async (req, res, next) => {
   try {
@@ -10,7 +11,15 @@ exports.getAll = async (req, res, next) => {
   }
 };
 // TODO get new tracks with as few requests as possible
-exports.refreshTracks = async (req, res, next) => {};
+exports.refreshTracks = async (req, res, next) => {
+  try {
+    const test = await TracksService.refreshTracks();
+    res.status(200).json(test);
+  } catch (err) {
+    console.log(err);
+    res.sendStatus(500);
+  }
+};
 
 // TODO get all tracks from playlists/liked and sync all associations
 exports.syncTracks = async (req, res, next) => {};
