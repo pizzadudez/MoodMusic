@@ -2,8 +2,8 @@ const LabelModel = require('../models/Label');
 
 exports.getAll = async (req, res, next) => {
   try {
-    const labels = await LabelModel.getAll();
-    res.status(200).json(labels);
+    const labelsById = await LabelModel.getAllById();
+    res.status(200).json(labelsById);
   } catch (err) {
     console.log(err);
     res.status(500).send('Internal server error.');

@@ -30,15 +30,19 @@ export default memo(() => {
       <Links>
         <li>
           <NavLink to="/">
-            <Button>Main View</Button>
+            <Button>Tracks</Button>
+          </NavLink>
+        </li>
+        <li>
+          <NavLink to="/playlists">
+            <Button>Playlists</Button>
           </NavLink>
         </li>
         <li>
           <NavLink to="/labels">
-            <Button>Manage Labels</Button>
+            <Button>Labels</Button>
           </NavLink>
         </li>
-        {/* <li><NavLink to="/playlists"><button>Manage Playlists</button></NavLink></li> */}
       </Links>
       <Button highlight={changes} onClick={submitChangesHandle}>
         Submit Changes

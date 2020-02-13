@@ -1,6 +1,6 @@
 const db = require('./db').conn();
 
-exports.getAll = async () => {
+exports.getAll = async (byId = false) => {
   const trackSQL = `SELECT id, name, artist, added_at, 
                     rating, liked, album_id as album
                     FROM tracks ORDER BY added_at DESC`;
@@ -83,19 +83,21 @@ exports.getAll = async () => {
     trackPlaylists,
     trackLabels,
   ] = await Promise.all([tracks, albums, playlists, labels]);
-  const tracksById = Object.fromEntries(
-    trackList.map(t => {
-      const track = {
-        ...t,
-        album: albumsById[t.album],
-        playlist_ids: trackPlaylists[t.id] || [],
-        label_ids: trackLabels[t.id] || [],
-      };
-      return [t.id, track];
-    })
-  );
-  return tracksById;
+  const complexTracks = trackList.map(t => ({
+    ...t,
+    album: albumsById[t.album],
+    playlist_ids: trackPlaylists[t.id] || [],
+    label_ids: trackLabels[t.id] || [],
+  }));
+
+  return byId
+    ? Object.fromEntries(complexTracks.map(t => [t.id, t]))
+    : complexTracks;
 };
+exports.getAllById = () => {
+  return exports.getAll(true);
+};
+
 exports.addTracks = async (list, liked = false, sync = false) => {
   const albumSql = `INSERT OR IGNORE INTO albums
     (id, name, large, medium, small)

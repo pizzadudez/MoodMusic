@@ -3,8 +3,8 @@ const PlaylistsService = require('../services/playlists');
 
 exports.getAll = async (req, res, next) => {
   try {
-    const playlists = await PlaylistModel.getAll();
-    res.status(200).json(playlists);
+    const playlistsById = await PlaylistModel.getAllById();
+    res.status(200).json(playlistsById);
   } catch (err) {
     console.log(err);
     res.status(500).send('Internal server error.');

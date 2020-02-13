@@ -10,6 +10,7 @@ import Navbar from './components/Navbar';
 import Footer from './components/Footer';
 import Main from './views/Main';
 import Labels from './views/Labels';
+import Playlists from './views/Playlists';
 import { fetchData } from './actions/dataActions';
 
 const stateSelector = createSelector(
@@ -36,6 +37,9 @@ export default memo(() => {
               <Route path="/labels">
                 <Labels />
               </Route>
+              <Router path="/playlists">
+                <Playlists />
+              </Router>
               <Route path="/">
                 <Main />
               </Route>

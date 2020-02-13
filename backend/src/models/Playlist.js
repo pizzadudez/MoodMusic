@@ -1,17 +1,22 @@
 const db = require('./db').conn();
 
-exports.getAll = () => {
+exports.getAll = (byId = false) => {
   return new Promise((resolve, reject) => {
     db.all('SELECT * FROM playlists', (err, rows) => {
       if (err) {
         reject(new Error(err.message));
       } else {
-        const byId = Object.fromEntries(rows.map(row => [row.id, row]));
-        resolve(byId);
+        resolve(
+          byId ? Object.fromEntries(rows.map(row => [row.id, row])) : rows
+        );
       }
     });
   });
 };
+exports.getAllById = () => {
+  return exports.getAll(true);
+};
+
 exports.addPlaylists = async (data, sync = false) => {
   const sql = `INSERT OR ${sync ? 'REPLACE' : 'IGNORE'} INTO tracks_playlists
     (track_id, playlist_id, added_at, position)

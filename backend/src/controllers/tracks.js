@@ -3,8 +3,8 @@ const TracksService = require('../services/tracks');
 
 exports.getAll = async (req, res, next) => {
   try {
-    const tracks = await TrackModel.getAll();
-    res.status(200).json(tracks);
+    const tracksById = await TrackModel.getAllById();
+    res.status(200).json(tracksById);
   } catch (err) {
     console.log(err);
     res.status(500).send('Internal server error.');
