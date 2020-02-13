@@ -9,11 +9,13 @@ exports.addTracks = async data => {
   const responses = await Promise.all(requests);
   await PlaylistModel.addPlaylists(data);
 
-  const playlistsUpdates = responses.map(([snapshotId, newTracksNum], idx) => ({
-    playlist_id: data[idx].playlist_id,
-    snapshot_id: snapshotId,
-    tracks_num: newTracksNum,
-  }));
+  const playlistsUpdates = responses.map(
+    ([snapshotId, newTrackCount], idx) => ({
+      playlist_id: data[idx].playlist_id,
+      snapshot_id: snapshotId,
+      track_count: newTrackCount,
+    })
+  );
   await PlaylistModel.updateChanges(playlistsUpdates);
 };
 exports.removeTracks = async data => {
@@ -23,11 +25,13 @@ exports.removeTracks = async data => {
   const responses = await Promise.all(requests);
   await PlaylistModel.removePlaylists(data);
 
-  const playlistsUpdates = responses.map(([snapshotId, newTracksNum], idx) => ({
-    playlist_id: data[idx].playlist_id,
-    snapshot_id: snapshotId,
-    tracks_num: newTracksNum,
-  }));
+  const playlistsUpdates = responses.map(
+    ([snapshotId, newTrackCount], idx) => ({
+      playlist_id: data[idx].playlist_id,
+      snapshot_id: snapshotId,
+      track_count: newTrackCount,
+    })
+  );
   await PlaylistModel.updateChanges(playlistsUpdates);
 };
 
@@ -37,7 +41,7 @@ const addPlaylistTracks = async ({ playlist_id, track_ids }) => {
   let uris = track_ids
     .filter(id => !hashMap[id])
     .map(id => 'spotify:track:' + id);
-  const newTracksNum = Object.keys(hashMap).length + uris.length;
+  const newTrackCount = Object.keys(hashMap).length + uris.length;
 
   // 100 tracks per request
   let snapshotId;
@@ -51,7 +55,7 @@ const addPlaylistTracks = async ({ playlist_id, track_ids }) => {
     });
     snapshotId = response.snapshot_id;
   }
-  return [snapshotId, newTracksNum];
+  return [snapshotId, newTrackCount];
 };
 const removePlaylistTracks = async ({ playlist_id, track_ids }) => {
   const { access_token: token } = await UserModel.data();
@@ -59,7 +63,7 @@ const removePlaylistTracks = async ({ playlist_id, track_ids }) => {
   let uris = track_ids
     .filter(id => hashMap[id])
     .map(id => 'spotify:track:' + id);
-  const newTracksNum = Object.keys(hashMap).length - uris.length;
+  const newTrackCount = Object.keys(hashMap).length - uris.length;
 
   // 100 tracks per request
   let snapshotId;
@@ -73,5 +77,5 @@ const removePlaylistTracks = async ({ playlist_id, track_ids }) => {
     });
     snapshotId = response.snapshot_id;
   }
-  return [snapshotId, newTracksNum];
+  return [snapshotId, newTrackCount];
 };

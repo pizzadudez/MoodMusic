@@ -98,18 +98,27 @@ exports.removePlaylists = data => {
 
 // Upsert playlits and return list of tracked playlists with changes
 exports.refresh = (data, sync = false) => {
+  const added_at = new Date().toISOString();
   const insertSql = `INSERT INTO playlists
-    (id, name, snapshot_id, tracks_num)
-    VALUES (?, ?, ?, ?)`;
+    (id, name, description, snapshot_id, track_count,
+    added_at)
+    VALUES (?, ?, ?, ?, ?, ?)`;
   const updateSql = `UPDATE playlists
-    SET snapshot_id=?, changes=?, tracks_num=?
+    SET snapshot_id=?, updates=?, track_count=?
     WHERE id=? AND snapshot_id!=?`;
 
   return new Promise((resolve, reject) => {
     db.serialize(() => {
       db.run('BEGIN TRANSACTION');
       data.forEach(pl => {
-        const values = [pl.id, pl.name, pl.snapshot_id, pl.tracks_num];
+        const values = [
+          pl.id,
+          pl.name,
+          pl.description,
+          pl.snapshot_id,
+          pl.track_count,
+          added_at,
+        ];
         db.run(insertSql, values, err => {
           if (err && err.code !== 'SQLITE_CONSTRAINT') {
             reject(new Error(err.message));
@@ -117,7 +126,7 @@ exports.refresh = (data, sync = false) => {
             const values = [
               pl.snapshot_id,
               1,
-              pl.tracks_num,
+              pl.track_count,
               pl.id,
               pl.snapshot_id,
             ];
@@ -140,7 +149,7 @@ exports.refresh = (data, sync = false) => {
 // Used after Tracks refresh
 exports.setNoChanges = playlists => {
   return new Promise((resolve, reject) => {
-    const sql = `UPDATE playlists SET changes=0 WHERE id=?`;
+    const sql = `UPDATE playlists SET updates=0 WHERE id=?`;
     db.serialize(() => {
       db.run('BEGIN TRANSACTION');
       playlists.forEach(({ id }) => {
@@ -175,16 +184,16 @@ exports.tracksHashMap = id => {
     });
   });
 };
-// Update snapshot_ids and tracks_num after adding/removing tracks
+// Update snapshot_ids and track_count after adding/removing tracks
 exports.updateChanges = list => {
   return new Promise((resolve, reject) => {
-    const sql = `UPDATE playlists SET snapshot_id=?, tracks_num=? WHERE id=?`;
+    const sql = `UPDATE playlists SET snapshot_id=?, track_count=? WHERE id=?`;
     db.serialize(() => {
       db.run('BEGIN TRANSACTION');
-      list.forEach(({ playlist_id, snapshot_id, tracks_num }) => {
+      list.forEach(({ playlist_id, snapshot_id, track_count }) => {
         // snapshot_id can be undefined when no changes have actually been made
         if (snapshot_id) {
-          db.run(sql, [snapshot_id, tracks_num, playlist_id], err => {
+          db.run(sql, [snapshot_id, track_count, playlist_id], err => {
             if (err) reject(new Error(err.message));
           });
         }
@@ -203,8 +212,8 @@ exports.updateChanges = list => {
 // Helpers
 const getTracked = (withChanges = false) => {
   return new Promise((resolve, reject) => {
-    const sql = `SELECT id, tracks_num FROM playlists 
-      WHERE tracking=1 ${withChanges ? 'AND changes=1' : ''}`;
+    const sql = `SELECT id, track_count FROM playlists 
+      WHERE type IN (2, 3) ${withChanges ? 'AND updates=1' : ''}`;
     db.all(sql, (err, rows) => {
       if (err) {
         reject(new Error(err.message));

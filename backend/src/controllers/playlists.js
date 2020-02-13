@@ -33,3 +33,4 @@ exports.create = async (req, res, next) => {};
 exports.update = async (req, res, next) => {};
 exports.delete = async (req, res, next) => {};
 exports.reorderTracks = async (req, res, next) => {};
+exports.syncTracks = async (req, res, next) => {};
