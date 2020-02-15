@@ -25,9 +25,11 @@ export const FILTER_BY_LABEL = 'FILTER_BY_LABEL';
 export const CREATE_LABEL = 'CREATE_LABEL';
 export const UPDATE_LABEL = 'UPDATE_LABEL';
 export const SELECT_LABEL_TO_UPDATE = 'SELECT_LABEL_TO_UPDATE';
+export const DELETE_LABEL = 'DELETE_LABEL';
 
 export const CREATE_PLAYLIST = 'CREATE_PLAYLIST';
-export const CLEAR_PLAYLIST_CHANGES = 'CLEAR_PLAYLIST_CHANGES';
+export const UPDATE_PLAYLIST = 'UPDATE_PLAYLIST';
+export const DELETE_PLAYLIST = 'DELETE_PLAYLIST';
 
 // ============================================================================
 // Track selection

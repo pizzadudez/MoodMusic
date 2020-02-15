@@ -1,12 +1,16 @@
 import React, { memo } from 'react';
 import styled from 'styled-components';
 
+import Container from '../components/common/Container';
 import ContainerColumn from '../components/common/ContainerColumn';
+import PlaylistManager from '../components/PlaylistManager';
 
 export default memo(() => (
   <Content>
     <ContainerColumn>hello</ContainerColumn>
-    <ContainerColumn>there</ContainerColumn>
+    <Container>
+      <PlaylistManager />
+    </Container>
   </Content>
 ));
 
