@@ -1,12 +1,18 @@
 import React, { memo, useCallback } from 'react';
 import styled from 'styled-components';
 
+import { syncPlaylist } from '../../actions/playlistActions';
 import Button from '../common/Button';
 import PlaylistForm from './PlaylistForm';
+import { useDispatch } from 'react-redux';
 
 export default memo(({ playlist, isOpen, setOpen }) => {
+  const dispatch = useDispatch();
   const open = useCallback(() => setOpen(playlist.id), [setOpen, playlist.id]);
   const close = useCallback(() => setOpen(null), [setOpen]);
+  const sync = useCallback(() => dispatch(syncPlaylist(playlist.id)), [
+    playlist.id,
+  ]);
 
   return (
     <Container isOpen={isOpen}>
@@ -14,10 +20,12 @@ export default memo(({ playlist, isOpen, setOpen }) => {
       {!isOpen && (
         <Slide>
           <Temp>{playlist.name}</Temp>
-          <Temp>{playlist.name}</Temp>
-          <Temp>{playlist.type}</Temp>
+          <Temp>{playlist.description.slice(0, 30)}</Temp>
+          <Temp>{playlist.type + ' ' + (playlist.label_id || '')}</Temp>
           <Button onClick={open}>Update</Button>
-          <Button>Sync/Import</Button>
+          <Button onClick={sync}>
+            {playlist.type === 'untracked' ? 'Import Tracks' : 'Sync Playlist'}
+          </Button>
         </Slide>
       )}
     </Container>

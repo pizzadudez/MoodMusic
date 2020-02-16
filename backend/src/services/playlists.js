@@ -1,6 +1,9 @@
 const request = require('request-promise-native');
 const UserModel = require('../models/User');
 const PlaylistModel = require('../models/Playlist');
+const TrackModel = require('../models/Track');
+const LabelModel = require('../models/Label');
+const TracksService = require('./tracks');
 
 exports.addTracks = async data => {
   const requests = data.map(playlistTracks =>
@@ -34,10 +37,133 @@ exports.removeTracks = async data => {
   );
   await PlaylistModel.updateChanges(playlistsUpdates);
 };
+// TODO: Handle label_id assoc (add tracks with that label to playlist)
+exports.createPlaylist = async data => {
+  const { access_token: token, user_id: userId } = await UserModel.data();
+  const response = await request.post({
+    url: 'https://api.spotify.com/v1/users/' + userId + '/playlists',
+    headers: { Authorization: 'Bearer ' + token },
+    body: {
+      name: data.name,
+      description: data.description,
+    },
+    json: true,
+  });
 
+  const playlistData = {
+    id: response.id,
+    name: response.name,
+    description: response.description,
+    track_count: response.tracks.total,
+    snapshot_id: response.snapshot_id,
+    added_at: new Date().toISOString(),
+    type: data.type,
+    label_id: !!data.label_id ? data.label_id : null,
+  };
+  return PlaylistModel.create(playlistData);
+};
+exports.updatePlaylist = async (id, data) => {
+  const { access_token: token } = await UserModel.data();
+  const { type, label_id } = await PlaylistModel.getOne(id);
+
+  // Changing the playlist type comes with multiple side-effects
+  switch (data.type) {
+    case 'untracked': {
+      if (type === 'label') {
+        // Remove playlist-label assoc
+        data.label_id = null;
+      }
+      // Remove playlist-tracks associations (but leave tracks)
+      await PlaylistModel.removePlaylistTracks(id);
+      break;
+    }
+    case 'mix': {
+      const tracks = await TracksService.getPlaylistTracks(id, true);
+      if (type === 'label') {
+        // Remove playlist-label assoc
+        data.label_id = null;
+      }
+      // sync/import
+      await TrackModel.addTracks(tracks);
+      await PlaylistModel.addPlaylists([{ playlist_id: id, tracks }], true);
+      break;
+    }
+    case 'label': {
+      const tracks = await TracksService.getPlaylistTracks(id, true);
+      if (type === 'label' && data.label_id) {
+        // Remove prev label from tracks and add new one
+        await LabelModel.removeLabelTracks(label_id);
+      }
+      // sync/import
+      await TrackModel.addTracks(tracks);
+      await PlaylistModel.addPlaylists([{ playlist_id: id, tracks }]);
+      await LabelModel.addLabels([
+        { label_id: data.label_id, track_ids: tracks.map(t => t.id) },
+      ]);
+
+      // Add all tracks with label_id (not in playlist) to playlist
+      const labelTracks = await LabelModel.getTracks(data.label_id);
+      const newPlaylistTracks = {
+        playlist_id: id,
+        track_ids: labelTracks,
+      };
+      await addPlaylistTracks(newPlaylistTracks);
+      await PlaylistModel.addPlaylists([newPlaylistTracks], true);
+      break;
+    }
+  }
+
+  // Spotify request
+  if (data.name || data.description) {
+    await request.put({
+      url: 'https://api.spotify.com/v1/playlists/' + id,
+      headers: { Authorization: 'Bearer ' + token },
+      body: {
+        ...(!!data.name && { name: data.name }),
+        ...(!!data.description && { description: data.description }),
+      },
+      json: true,
+    });
+  }
+  return PlaylistModel.update(id, data);
+};
+exports.deletePlaylist = id => {};
+
+exports.syncTracks = async id => {
+  const { type, label_id } = await PlaylistModel.getOne(id);
+  const tracks = await TracksService.getPlaylistTracks(id, true);
+
+  const associations = [
+    {
+      playlist_id: id,
+      tracks,
+      ...(label_id && {
+        label_id: label_id,
+        track_ids: tracks.map(t => t.id),
+      }),
+    },
+  ];
+  await TrackModel.addTracks(tracks);
+
+  const addPlaylist =
+    type !== 'untracked' && PlaylistModel.addPlaylists(associations, true);
+  const addLabels = type === 'label' && LabelModel.addLabels(associations);
+  await Promise.all([addPlaylist, addLabels]);
+  return TrackModel.getAllById();
+
+  // if (type !== 'untracked') {
+  //   const addPlaylist = PlaylistModel.addPlaylists(associations, true);
+  //   if (type === 'label') {
+  //     const addLabels = LabelModel.addLabels(associations);
+  //   }
+  // }
+};
+exports.revertChanges = async id => {};
+
+// Helpers
 const addPlaylistTracks = async ({ playlist_id, track_ids }) => {
   const { access_token: token } = await UserModel.data();
-  const hashMap = await PlaylistModel.tracksHashMap(playlist_id);
+  const hashMap = await PlaylistModel.getTracks(playlist_id, true);
   let uris = track_ids
     .filter(id => !hashMap[id])
     .map(id => 'spotify:track:' + id);
@@ -59,7 +185,7 @@ const addPlaylistTracks = async ({ playlist_id, track_ids }) => {
 };
 const removePlaylistTracks = async ({ playlist_id, track_ids }) => {
   const { access_token: token } = await UserModel.data();
-  const hashMap = await PlaylistModel.tracksHashMap(playlist_id);
+  const hashMap = await PlaylistModel.getTracks(playlist_id, true);
   let uris = track_ids
     .filter(id => hashMap[id])
     .map(id => 'spotify:track:' + id);

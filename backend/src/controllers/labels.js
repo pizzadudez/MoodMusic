@@ -30,7 +30,7 @@ exports.removeLabels = async (req, res, next) => {
 
 exports.create = async (req, res, next) => {
   try {
-    const label = await LabelModel.createLabel(req.body);
+    const label = await LabelModel.create(req.body);
     res.status(200).json(label);
   } catch (err) {
     console.log(err);
@@ -39,7 +39,7 @@ exports.create = async (req, res, next) => {
 };
 exports.update = async (req, res, next) => {
   try {
-    const label = await LabelModel.updateLabel(req.params.id, req.body);
+    const label = await LabelModel.update(req.params.id, req.body);
     res.status(200).json(label);
   } catch (err) {
     console.log(err);
@@ -48,7 +48,7 @@ exports.update = async (req, res, next) => {
 };
 exports.delete = async (req, res, next) => {
   try {
-    const message = await LabelModel.deleteLabel(req.params.id);
+    const message = await LabelModel.delete(req.params.id);
     res.status(200).send(message || 'Successfully deleted.');
   } catch (err) {
     console.log(err);

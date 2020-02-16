@@ -1,6 +1,11 @@
 import axios from 'axios';
 import _ from 'lodash';
-import { UPDATE_PLAYLIST, CREATE_PLAYLIST } from './types';
+import {
+  UPDATE_PLAYLIST,
+  CREATE_PLAYLIST,
+  DELETE_PLAYLIST,
+  FETCH_TRACKS,
+} from './types';
 
 export const createPlaylist = data => dispatch => {
   const json = _.pickBy(data);
@@ -35,4 +40,12 @@ export const deletePlaylist = id => dispatch => {
       });
     }
   });
+};
+export const syncPlaylist = id => dispatch => {
+  axios.get('/api/playlist/' + id + '/sync').then(res =>
+    dispatch({
+      type: FETCH_TRACKS,
+      payload: res.data,
+    })
+  );
 };

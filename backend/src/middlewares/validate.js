@@ -56,6 +56,30 @@ const validate = field => {
         otherwise: Joi.forbidden(),
       }),
     }),
+    createPlaylist: Joi.object().keys({
+      name: Joi.string()
+        .min(2)
+        .required(),
+      description: Joi.string(),
+      type: Joi.string()
+        .valid('label', 'mix')
+        .required(),
+      label_id: Joi.when('type', {
+        is: 'label',
+        then: Joi.number().required(),
+        otherwise: Joi.forbidden(),
+      }),
+    }),
+    updatePlaylist: Joi.object().keys({
+      name: Joi.string().min(2),
+      description: Joi.string(),
+      type: Joi.string().valid('label', 'mix', 'untracked'),
+      label_id: Joi.when('type', {
+        is: 'label',
+        then: Joi.number().required(),
+        otherwise: Joi.forbidden(),
+      }),
+    }),
   };
 
   return (req, res, next) => {

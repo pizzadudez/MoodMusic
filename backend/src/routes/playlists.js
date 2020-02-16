@@ -14,10 +14,11 @@ router.post(
   controller.removePlaylists
 );
 
-router.post('/playlists', controller.create);
-router.patch('/playlist/:id', controller.update);
+router.post('/playlists', validate('createPlaylist'), controller.create);
+router.patch('/playlist/:id', validate('updatePlaylist'), controller.update);
 router.delete('/playlist/:id', controller.delete);
 router.get('/playlist/:id/sync', controller.syncTracks);
+router.get('/playlist/:id/revert', controller.revertChanges);
 router.post('/playlist/:id/reorder', controller.reorderTracks);
 
 module.exports = router;

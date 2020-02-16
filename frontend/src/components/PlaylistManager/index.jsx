@@ -10,27 +10,18 @@ import PlaylistForm from './PlaylistForm';
 const stateSelector = createSelector(
   state => state.playlists.playlistsById,
   state => state.playlists.ids,
-  state => state.labels.labelsById,
-  state => state.labels.ids,
-  (playlistsById, playlists, labelsById, labels) => ({
-    playlistsById,
-    playlists,
-    labelsById,
-    labels,
-  })
+  (playlistsById, playlists) => ({ playlistsById, playlists })
 );
 
 export default memo(() => {
   console.log('PlaylistManager');
-  const dispatch = useDispatch();
-  const { playlistsById, playlists, labelsById, labels } = useSelector(
-    stateSelector
-  );
-  const [openFormId, setOpenFormId] = useState();
+  const { playlistsById, playlists } = useSelector(stateSelector);
+  const [openFormId, setOpenFormId] = useState(null);
   const [createOpen, setCreateOpen] = useState(false);
-  const toggleCreateForm = useCallback(() => setCreateOpen(open => !open), [
-    setCreateOpen,
-  ]);
+  const toggleCreateForm = useCallback(() => {
+    setCreateOpen(open => !open);
+    setOpenFormId(null);
+  }, [setCreateOpen]);
 
   return (
     <Wrapper>
@@ -46,7 +37,7 @@ export default memo(() => {
             key={id}
             playlist={playlistsById[id]}
             setOpen={setOpenFormId}
-            isOpen={id === openFormId}
+            isOpen={id === openFormId && !createOpen}
           />
         ))}
       </SlidesContainer>

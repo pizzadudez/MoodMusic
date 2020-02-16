@@ -8,21 +8,23 @@ exports.refreshTracks = async (sync = false) => {
   // Liked Tracks (last 50 / all)
   const likedTracks = await getLikedTracks(sync);
   await TrackModel.addTracks(likedTracks, true, sync);
-  // Playlist Tracks (tracked+changes / tracked)
+  // Playlist Tracks (refresh: mix, sync: mix + label)
   const playlists = await refreshPlaylists(sync);
-  const requests = playlists.map(({ id, track_count }) =>
-    getPlaylistTracks(id, sync, track_count)
-  );
-  const responses = await Promise.all(requests);
-  const playlistTracks = playlists.map(({ id }, idx) => ({
-    playlist_id: id,
-    tracks: responses[idx],
-  }));
-  // Add Tracks and PlaylistTracks
-  await TrackModel.addTracks(responses.flat(Infinity));
-  await PlaylistModel.addPlaylists(playlistTracks, sync);
-  // Update User and Playlists
-  await PlaylistModel.setNoChanges(playlists);
+  if (playlists.length) {
+    const requests = playlists.map(({ id, track_count }) =>
+      getPlaylistTracks(id, sync, track_count)
+    );
+    const responses = await Promise.all(requests);
+    const playlistTracks = playlists.map(({ id }, idx) => ({
+      playlist_id: id,
+      tracks: responses[idx],
+    }));
+    // Add Tracks and PlaylistTracks
+    await TrackModel.addTracks(responses.flat(Infinity));
+    await PlaylistModel.addPlaylists(playlistTracks, sync);
+    await PlaylistModel.setNoChanges(playlists);
+  }
+  // Update timestamps
   await UserModel.updateUser(sync ? 'sync' : 'refresh');
 
   return {
@@ -133,6 +135,7 @@ const getPlaylistTracks = async (id, sync = false, track_count) => {
     return parseTracks(response.items);
   }
 };
+exports.getPlaylistTracks = getPlaylistTracks;
 
 // Data Parsing
 const parseTracks = list => {

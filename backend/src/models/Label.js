@@ -41,8 +41,47 @@ exports.getAll = (byId = false) => {
 exports.getAllById = () => {
   return exports.getAll(true);
 };
+exports.getOne = id => {
+  return new Promise((resolve, reject) => {
+    db.get('SELECT * FROM labels WHERE id=?', id, (err, label) => {
+      if (err) {
+        reject(new Error(err.message));
+      } else {
+        const sql = `SELECT group_concat(id) AS subgenre_ids
+                       FROM labels WHERE parent_id=?`;
+        db.get(sql, [id], (err, row) => {
+          if (err) {
+            reject(new Error(err.message));
+          } else {
+            resolve({
+              ...label,
+              ...(row.subgenre_ids && {
+                subgenre_ids: row.subgenre_ids.split(',').map(Number),
+              }),
+            });
+          }
+        });
+      }
+    });
+  });
+};
+exports.getTracks = (id, hashMap = false) => {
+  return new Promise((resolve, reject) => {
+    const sql = `SELECT track_id FROM tracks_labels
+      WHERE label_id=? ORDER BY added_at DESC`;
+    db.all(sql, [id], (err, rows) => {
+      if (err) {
+        reject(new Error(err.message));
+      } else {
+        hashMap
+          ? resolve(Object.fromEntries(rows.map(row => [row.track_id, true])))
+          : resolve(rows.map(row => row.track_id));
+      }
+    });
+  });
+};
 
-exports.addLabels = data => {
+exports.addLabels = labels => {
   const sql = `INSERT OR IGNORE INTO tracks_labels
     (track_id, label_id, added_at)
     VALUES(?, ?, ?)`;
@@ -51,7 +90,7 @@ exports.addLabels = data => {
   return new Promise((resolve, reject) => {
     db.serialize(() => {
       db.run('BEGIN TRANSACTION');
-      data.forEach(({ label_id, track_ids }) => {
+      labels.forEach(({ label_id, track_ids }) => {
         track_ids.forEach(id => {
           db.run(sql, [id, label_id, added_at], err => {
             if (err) reject(new Error(err.message));
@@ -68,14 +107,14 @@ exports.addLabels = data => {
     });
   });
 };
-exports.removeLabels = data => {
+exports.removeLabels = labels => {
   const sql = `DELETE FROM tracks_labels WHERE
     track_id=? AND label_id=?`;
 
   return new Promise((resolve, reject) => {
     db.serialize(() => {
       db.run('BEGIN TRANSACTION');
-      data.forEach(({ label_id, track_ids }) => {
+      labels.forEach(({ label_id, track_ids }) => {
         track_ids.forEach(id => {
           db.run(sql, [id, label_id], err => {
             if (err) reject(new Error(err.message));
@@ -92,8 +131,22 @@ exports.removeLabels = data => {
     });
   });
 };
+// Removes all tracks_labels associations for a single label
+exports.removeLabelTracks = id => {
+  return new Promise((resolve, reject) => {
+    const sql = 'DELETE FROM tracks_labels WHERE label_id=?';
+    db.run(sql, [id], err => {
+      if (err) {
+        reject(new Error(err.message));
+      } else {
+        resolve();
+      }
+    });
+  });
+};
 
-exports.createLabel = data => {
+exports.create = data => {
+  console.log(data);
   const values = [
     data.type,
     data.name,
@@ -121,14 +174,14 @@ exports.createLabel = data => {
           if (err) {
             reject(new Error(err.message));
           } else {
-            resolve(getOne(this.lastID));
+            resolve(exports.getOne(this.lastID));
           }
         });
       }
     });
   });
 };
-exports.updateLabel = (id, data) => {
+exports.update = (id, data) => {
   const sanitizedData = {
     ...(!!data.name && { name: data.name }),
     ...(!!data.color && { color: data.color }),
@@ -152,11 +205,11 @@ exports.updateLabel = (id, data) => {
       } else if (!row) {
         reject(new Error('"parent_id" does not match a genre id.'));
       } else {
-        db.run(updateSql, values, function(err) {
+        db.run(updateSql, [...values, id], function(err) {
           if (err) {
             reject(new Error(err.message));
           } else {
-            resolve(getOne(this.lastID));
+            resolve(exports.getOne(id));
           }
         });
       }
@@ -164,7 +217,7 @@ exports.updateLabel = (id, data) => {
   });
 };
 // TODO: handle deleting genres (what happens to subgenres?)
-exports.deleteLabel = id => {
+exports.delete = id => {
   return new Promise((resolve, reject) => {
     db.run('DELETE FROM labels WHERE id=?', [id], function(err) {
       if (err) {
@@ -173,32 +226,6 @@ exports.deleteLabel = id => {
         resolve();
       } else {
         resolve(`Could not delete label with id: ${id}`);
-      }
-    });
-  });
-};
-
-// Helpers
-const getOne = id => {
-  return new Promise((resolve, reject) => {
-    db.get('SELECT * FROM labels WHERE id=?', id, (err, label) => {
-      if (err) {
-        reject(new Error(err.message));
-      } else {
-        const sql = `SELECT group_concat(id) AS subgenre_ids
-                       FROM labels WHERE parent_id=?`;
-        db.get(sql, [id], (err, row) => {
-          if (err) {
-            reject(new Error(err.message));
-          } else {
-            resolve({
-              ...label,
-              ...(row.subgenre_ids && {
-                subgenre_ids: row.subgenre_ids.split(',').map(Number),
-              }),
-            });
-          }
-        });
       }
     });
   });

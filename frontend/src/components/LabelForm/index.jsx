@@ -12,28 +12,6 @@ import RadioGroup from '../common/RadioGroup';
 import Select from '../common/Select';
 import { createLabel, updateLabel } from '../../actions/labelActions';
 
-const labelTypes = [
-  {
-    type: 'genre',
-    label: 'Genre',
-  },
-  {
-    type: 'subgenre',
-    label: 'Subgenre',
-  },
-  {
-    type: 'mood',
-    label: 'Mood',
-  },
-];
-const initialValues = {
-  name: '',
-  verbose: '',
-  suffix: '',
-  type: 'genre',
-  color: '#bdbdbd',
-  parent_id: '',
-};
 const validationSchema = yup.object().shape({
   name: yup.string().required('Required field.'),
   parent_id: yup.string().when('type', {
@@ -57,7 +35,7 @@ export default memo(() => {
   const dispatch = useDispatch();
   const { updatingLabelId, labelsById, genres } = useSelector(stateSelector);
 
-  const updateInitialValues = useMemo(() => {
+  const initialValues = useMemo(() => {
     if (updatingLabelId) {
       const l = labelsById[updatingLabelId];
       return {
@@ -66,16 +44,16 @@ export default memo(() => {
         type: l.type,
         parent_id: l.parent_id || undefined,
         suffix: l.suffix || '',
-        color: l.color || '#bdbdbd',
+        color: l.color,
       };
     }
-    return null;
+    return defaultValues;
   }, [updatingLabelId, labelsById]);
 
   return (
     <Wrapper>
       <Formik
-        initialValues={updateInitialValues || initialValues}
+        initialValues={initialValues}
         enableReinitialize
         validationSchema={validationSchema}
         onSubmit={async (data, { setSubmitting, resetForm }) => {
@@ -130,3 +108,26 @@ const StyledForm = styled(Form)`
 const Wrapper = styled.div`
   height: 100%;
 `;
+
+const defaultValues = {
+  name: '',
+  verbose: '',
+  type: 'genre',
+  color: '#bdbdbd',
+  parent_id: '',
+  suffix: '',
+};
+const labelTypes = [
+  {
+    type: 'genre',
+    label: 'Genre',
+  },
+  {
+    type: 'subgenre',
+    label: 'Subgenre',
+  },
+  {
+    type: 'mood',
+    label: 'Mood',
+  },
+];

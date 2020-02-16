@@ -47,18 +47,10 @@ exports.init = () => {
       snapshot_id TEXT,
       updates INTEGER DEFAULT 1,
       added_at TEXT,
-      type INTEGER DEFAULT 1,
-      label_id INTEGER UNIQUE DEFAULT NULL,
-      FOREIGN KEY (type) REFERENCES playlist_types (id) ON DELETE SET NULL, 
+      type TEXT NOT NULL DEFAULT 'untracked',
+      label_id INTEGER UNIQUE DEFAULT NULL, 
       FOREIGN KEY (label_id) REFERENCES labels (id) ON DELETE SET NULL
     )`);
-    db.run(`CREATE TABLE IF NOT EXISTS playlist_types (
-      id INTEGER NOT NULL PRIMARY KEY,
-      type TEXT UNIQUE NOT NULL
-    )`);
-    db.run(`INSERT OR IGNORE INTO playlist_types (type) 
-      VALUES ('untracked'), ('mix'), ('label'), ('special')
-    `);
     db.run(`CREATE TABLE IF NOT EXISTS tracks_playlists (
       track_id TEXT NOT NULL,
       playlist_id TEXT NOT NULL,
