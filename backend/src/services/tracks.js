@@ -22,7 +22,9 @@ exports.refreshTracks = async (sync = false) => {
     // Add Tracks and PlaylistTracks
     await TrackModel.addTracks(responses.flat(Infinity));
     await PlaylistModel.addPlaylists(playlistTracks, sync);
-    await PlaylistModel.setNoChanges(playlists);
+    await PlaylistModel.updateMany(
+      playlists.map(pl => ({ id: pl.id, updates: 0 }))
+    );
   }
   // Update timestamps
   await UserModel.updateUser(sync ? 'sync' : 'refresh');

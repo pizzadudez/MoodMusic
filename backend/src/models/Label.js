@@ -151,9 +151,9 @@ exports.create = data => {
     data.type,
     data.name,
     data.color,
-    !!data.parent_id ? data.parent_id : null,
-    !!data.verbose ? data.verbose : null,
-    !!data.suffix ? data.suffix : null,
+    data.parent_id ? data.parent_id : null,
+    data.verbose ? data.verbose : null,
+    data.suffix ? data.suffix : null,
   ];
   const insertSql = `INSERT INTO labels
     (type, name, color, parent_id, verbose, suffix)
@@ -183,11 +183,11 @@ exports.create = data => {
 };
 exports.update = (id, data) => {
   const sanitizedData = {
-    ...(!!data.name && { name: data.name }),
-    ...(!!data.color && { color: data.color }),
-    ...(!!data.parent_id && { parent_id: data.parent_id }),
-    ...(!!data.verbose && { verbose: data.verbose }),
-    ...(!!data.suffix && { suffix: data.suffix }),
+    ...(data.name && { name: data.name }),
+    ...(data.color && { color: data.color }),
+    ...(data.parent_id && { parent_id: data.parent_id }),
+    ...(data.verbose && { verbose: data.verbose }),
+    ...(data.suffix && { suffix: data.suffix }),
   };
   const fields = Object.keys(sanitizedData)
     .map(key => key + '=?')

@@ -12,14 +12,14 @@ exports.addTracks = async data => {
   const responses = await Promise.all(requests);
   await PlaylistModel.addPlaylists(data);
 
-  const playlistsUpdates = responses.map(
-    ([snapshotId, newTrackCount], idx) => ({
-      playlist_id: data[idx].playlist_id,
+  const playlistsUpdates = responses
+    .filter(([snapshotId]) => snapshotId !== undefined)
+    .map(([snapshotId, newTrackCount], idx) => ({
+      id: data[idx].playlist_id,
       snapshot_id: snapshotId,
       track_count: newTrackCount,
-    })
-  );
-  await PlaylistModel.updateChanges(playlistsUpdates);
+    }));
+  await PlaylistModel.updateMany(playlistsUpdates);
 };
 exports.removeTracks = async data => {
   const requests = data.map(playlistTracks =>
@@ -28,15 +28,16 @@ exports.removeTracks = async data => {
   const responses = await Promise.all(requests);
   await PlaylistModel.removePlaylists(data);
 
-  const playlistsUpdates = responses.map(
-    ([snapshotId, newTrackCount], idx) => ({
-      playlist_id: data[idx].playlist_id,
+  const playlistsUpdates = responses
+    .filter(([snapshotId]) => snapshotId !== undefined)
+    .map(([snapshotId, newTrackCount], idx) => ({
+      id: data[idx].playlist_id,
       snapshot_id: snapshotId,
       track_count: newTrackCount,
-    })
-  );
-  await PlaylistModel.updateChanges(playlistsUpdates);
+    }));
+  await PlaylistModel.updateMany(playlistsUpdates);
 };
+
 // TODO: Handle label_id assoc (add tracks with that label to playlist)
 exports.createPlaylist = async data => {
   const { access_token: token, user_id: userId } = await UserModel.data();
@@ -58,7 +59,7 @@ exports.createPlaylist = async data => {
     snapshot_id: response.snapshot_id,
     added_at: new Date().toISOString(),
     type: data.type,
-    label_id: !!data.label_id ? data.label_id : null,
+    label_id: data.label_id ? data.label_id : null,
   };
   return PlaylistModel.create(playlistData);
 };
@@ -96,31 +97,36 @@ exports.updatePlaylist = async (id, data) => {
       }
       // sync/import
       await TrackModel.addTracks(tracks);
-      await PlaylistModel.addPlaylists([{ playlist_id: id, tracks }]);
+      await PlaylistModel.addPlaylists([{ playlist_id: id, tracks }], true);
       await LabelModel.addLabels([
         { label_id: data.label_id, track_ids: tracks.map(t => t.id) },
       ]);
 
       // Add all tracks with label_id (not in playlist) to playlist
       const labelTracks = await LabelModel.getTracks(data.label_id);
-      const newPlaylistTracks = {
-        playlist_id: id,
-        track_ids: labelTracks,
-      };
-      await addPlaylistTracks(newPlaylistTracks);
-      await PlaylistModel.addPlaylists([newPlaylistTracks], true);
+      if (labelTracks.length) {
+        const newPlaylistTracks = {
+          playlist_id: id,
+          track_ids: labelTracks,
+        };
+        const [snapshotId, newTrackCount] = await addPlaylistTracks(
+          newPlaylistTracks
+        );
+        data.snapshot_id = snapshotId;
+        data.track_count = newTrackCount;
+        await PlaylistModel.addPlaylists([newPlaylistTracks], true);
+      }
       break;
     }
   }
-
   // Spotify request
   if (data.name || data.description) {
     await request.put({
       url: 'https://api.spotify.com/v1/playlists/' + id,
       headers: { Authorization: 'Bearer ' + token },
       body: {
-        ...(!!data.name && { name: data.name }),
-        ...(!!data.description && { description: data.description }),
+        ...(data.name && { name: data.name }),
+        ...(data.description && { description: data.description }),
       },
       json: true,
     });
@@ -144,20 +150,14 @@ exports.syncTracks = async id => {
     },
   ];
   await TrackModel.addTracks(tracks);
-
-  const addPlaylist =
-    type !== 'untracked' && PlaylistModel.addPlaylists(associations, true);
-  const addLabels = type === 'label' && LabelModel.addLabels(associations);
-  await Promise.all([addPlaylist, addLabels]);
-  return TrackModel.getAllById();
-
-  // if (type !== 'untracked') {
-  //   const addPlaylist = PlaylistModel.addPlaylists(associations, true);
-  //   if (type === 'label') {
-  //     const addLabels = LabelModel.addLabels(associations);
-  //   }
-  // }
+  if (type !== 'untracked') {
+    await PlaylistModel.addPlaylists(associations, true);
+    if (type === 'label') {
+      await LabelModel.addLabels(associations);
+    }
+  }
 };
+// TODO: inverse of syncTracks (used mostly for label containers)
 exports.revertChanges = async id => {};
 
 // Helpers

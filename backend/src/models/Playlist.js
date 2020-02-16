@@ -160,11 +160,14 @@ exports.create = data => {
 };
 exports.update = (id, data) => {
   const sanitizedData = {
-    ...(!!data.name && { name: data.name }),
-    ...(!!data.description && { description: data.description }),
-    ...(!!data.type && { type: data.type }),
-    ...(!!data.label_id && { label_id: data.label_id }),
-    ...(!!data.type && data.type !== 'label' && { label_id: null }),
+    ...(data.name && { name: data.name }),
+    ...(data.description && { description: data.description }),
+    ...(data.type && { type: data.type }),
+    ...(data.type && data.label_id && { label_id: data.label_id }),
+    ...(data.type && data.type !== 'label' && { label_id: null }),
+    ...(data.type && { updates: 0 }), // type changed => already synced
+    ...(data.snapshot_id && { snapshot_id: data.snapshot_id }),
+    ...(data.track_count && { track_count: data.track_count }),
   };
   const fields = Object.keys(sanitizedData)
     .map(key => key + '=?')
@@ -182,66 +185,20 @@ exports.update = (id, data) => {
     });
   });
 };
-exports.delete = id => {};
-
-// Upsert playlits and return list of tracked playlists with changes
-exports.refresh = (data, sync = false) => {
-  const added_at = new Date().toISOString();
-  const insertSql = `INSERT INTO playlists
-    (id, name, description, track_count,
-    snapshot_id, added_at)
-    VALUES (?, ?, ?, ?, ?, ?)`;
-  const updateSql = `UPDATE playlists
-    SET snapshot_id=?, updates=?, track_count=?
-    WHERE id=? AND snapshot_id!=?`;
-
+// Update multiple playlists with changed fields [{id, ...changes}]
+exports.updateMany = list => {
   return new Promise((resolve, reject) => {
     db.serialize(() => {
       db.run('BEGIN TRANSACTION');
-      data.forEach(pl => {
-        const values = [
-          pl.id,
-          pl.name,
-          pl.description,
-          pl.track_count,
-          pl.snapshot_id,
-          added_at,
-        ];
-        db.run(insertSql, values, err => {
-          if (err && err.code !== 'SQLITE_CONSTRAINT') {
-            reject(new Error(err.message));
-          } else if (err) {
-            const values = [
-              pl.snapshot_id,
-              1,
-              pl.track_count,
-              pl.id,
-              pl.snapshot_id,
-            ];
-            db.run(updateSql, values, err => {
-              if (err) reject(new Error(err.message));
-            });
-          }
-        });
-      });
-      db.run('COMMIT TRANSACTION', err => {
-        if (err) {
-          reject(new Error(err.message));
-        } else {
-          resolve(sync ? getTracked() : getTracked(true));
-        }
-      });
-    });
-  });
-};
-// Used after Tracks refresh
-exports.setNoChanges = playlists => {
-  return new Promise((resolve, reject) => {
-    const sql = `UPDATE playlists SET updates=0 WHERE id=?`;
-    db.serialize(() => {
-      db.run('BEGIN TRANSACTION');
-      playlists.forEach(({ id }) => {
-        db.run(sql, [id], err => {
+      list.forEach(({ id, ...changes }) => {
+        const fields = Object.keys(changes)
+          .filter(key => key !== undefined)
+          .map(key => key + '=?')
+          .join(', ');
+        const values = Object.values(changes).filter(val => val !== undefined);
+        const sql = 'UPDATE playlists SET ' + fields + ' WHERE id=?';
+        console.log(sql, values);
+        db.run(sql, [...values, id], err => {
           if (err) reject(new Error(err.message));
         });
       });
@@ -255,25 +212,66 @@ exports.setNoChanges = playlists => {
     });
   });
 };
-// Update snapshot_ids and track_count after adding/removing tracks
-exports.updateChanges = list => {
+exports.delete = id => {};
+
+// Upsert playlits and return which playlists to refresh/sync tracks from
+exports.refresh = (data, sync = false) => {
+  const insertSql = `INSERT INTO playlists
+    (id, name, description, track_count,
+    snapshot_id, added_at)
+    VALUES (?, ?, ?, ?, ?, ?)`;
+  const updateSql = `UPDATE playlists
+    SET snapshot_id=?, updates=1, track_count=?
+    WHERE id=? AND snapshot_id!=?`;
+  const added_at = new Date().toISOString();
+
   return new Promise((resolve, reject) => {
-    const sql = `UPDATE playlists SET snapshot_id=?, track_count=? WHERE id=?`;
     db.serialize(() => {
       db.run('BEGIN TRANSACTION');
-      list.forEach(({ playlist_id, snapshot_id, track_count }) => {
-        // snapshot_id can be undefined when no changes have actually been made
-        if (snapshot_id) {
-          db.run(sql, [snapshot_id, track_count, playlist_id], err => {
-            if (err) reject(new Error(err.message));
-          });
-        }
+      data.forEach(pl => {
+        const values = [
+          pl.id,
+          pl.name,
+          pl.description,
+          pl.track_count,
+          pl.snapshot_id,
+          added_at,
+        ];
+        // INSERT
+        db.run(insertSql, values, err => {
+          if (err && err.code !== 'SQLITE_CONSTRAINT') {
+            reject(new Error(err.message));
+          } else if (err) {
+            const values = [
+              pl.snapshot_id,
+              pl.track_count,
+              pl.id,
+              pl.snapshot_id,
+            ];
+            // id conflict => UPDATE
+            db.run(updateSql, values, err => {
+              if (err) reject(new Error(err.message));
+            });
+          }
+        });
       });
       db.run('COMMIT TRANSACTION', err => {
         if (err) {
           reject(new Error(err.message));
         } else {
-          resolve();
+          // Return playlists that match the criteria to be refreshed/synced
+          const sql =
+            'SELECT id, track_count FROM playlists WHERE ' +
+            (sync
+              ? `type IN ('mix', 'label')`
+              : `type IN ('mix') AND updates=1`);
+          db.all(sql, (err, rows) => {
+            if (err) {
+              reject(new Error(err.message));
+            } else {
+              resolve(rows);
+            }
+          });
         }
       });
     });
@@ -281,19 +279,6 @@ exports.updateChanges = list => {
 };
 
 // Helpers
-const getTracked = (withChanges = false) => {
-  return new Promise((resolve, reject) => {
-    const sql = `SELECT id, track_count FROM playlists 
-      WHERE type IN ('mix') ${withChanges ? 'AND updates=1' : ''}`;
-    db.all(sql, (err, rows) => {
-      if (err) {
-        reject(new Error(err.message));
-      } else {
-        resolve(rows);
-      }
-    });
-  });
-};
 const getLastPositions = () => {
   return new Promise((resolve, reject) => {
     const sql = `SELECT playlist_id, 
