@@ -1,11 +1,10 @@
-import React, { memo, useMemo } from 'react';
+import React, { memo, useMemo, useCallback } from 'react';
 import styled from 'styled-components';
 import { Formik, Form, Field } from 'formik';
 import { createSelector } from 'reselect';
 import { useDispatch, useSelector } from 'react-redux';
 import * as yup from 'yup';
 
-import { fetchTracks, fetchLabels } from '../../actions/dataActions';
 import { createPlaylist, updatePlaylist } from '../../actions/playlistActions';
 import Button from '../common/Button';
 import TextField from '../common/TextField';
@@ -43,6 +42,34 @@ export default memo(({ playlist, onClose: closeForm }) => {
     }
     return defaultValues;
   }, [playlist]);
+  const submitHandler = useCallback(
+    (data, { resetForm }) => {
+      if (data !== initialValues) {
+        if (playlist) {
+          const sanitizedData = {
+            ...(data.name !== initialValues.name && { name: data.name }),
+            ...(data.description !== initialValues.description && {
+              description: data.description,
+            }),
+            ...(data.type !== initialValues.type && {
+              type: data.type,
+            }),
+            ...(data.type === 'label' &&
+              data.label_id !== initialValues.label_id && {
+                type: 'label',
+                label_id: data.label_id,
+              }),
+          };
+          dispatch(updatePlaylist(playlist.id, sanitizedData));
+        } else {
+          dispatch(createPlaylist(data));
+        }
+      }
+      resetForm();
+      closeForm();
+    },
+    [playlist, closeForm, initialValues, dispatch]
+  );
 
   return (
     <Wrapper>
@@ -50,35 +77,9 @@ export default memo(({ playlist, onClose: closeForm }) => {
         initialValues={initialValues}
         enableReinitialize
         validationSchema={validationSchema}
-        onSubmit={(data, { setSubmitting, resetForm }) => {
-          setSubmitting(true);
-          if (data !== initialValues) {
-            if (playlist) {
-              const sanitizedData = {
-                ...(data.name !== initialValues.name && { name: data.name }),
-                ...(data.description !== initialValues.description && {
-                  description: data.description,
-                }),
-                ...(data.type !== initialValues.type && {
-                  type: data.type,
-                }),
-                ...(data.type === 'label' &&
-                  data.label_id !== initialValues.label_id && {
-                    type: 'label',
-                    label_id: data.label_id,
-                  }),
-              };
-              dispatch(updatePlaylist(playlist.id, sanitizedData));
-            } else {
-              dispatch(createPlaylist(data));
-            }
-          }
-          setSubmitting(false);
-          resetForm();
-          closeForm();
-        }}
+        onSubmit={submitHandler}
       >
-        {({ values, isSubmitting, handleSubmit }) => (
+        {({ values, handleSubmit }) => (
           <StyledForm>
             <Field
               name="type"

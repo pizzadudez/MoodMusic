@@ -1,7 +1,7 @@
 import React, { memo, useCallback } from 'react';
 import styled from 'styled-components';
 
-import { syncPlaylist } from '../../actions/playlistActions';
+import { syncPlaylist, revertChanges } from '../../actions/playlistActions';
 import Button from '../common/Button';
 import PlaylistForm from './PlaylistForm';
 import { useDispatch } from 'react-redux';
@@ -12,6 +12,11 @@ export default memo(({ playlist, isOpen, setOpen }) => {
   const close = useCallback(() => setOpen(null), [setOpen]);
   const sync = useCallback(() => dispatch(syncPlaylist(playlist.id)), [
     playlist.id,
+    dispatch,
+  ]);
+  const revert = useCallback(() => dispatch(revertChanges(playlist.id)), [
+    playlist.id,
+    dispatch,
   ]);
 
   return (
@@ -22,13 +27,22 @@ export default memo(({ playlist, isOpen, setOpen }) => {
           <Temp>{playlist.name}</Temp>
           <Temp>{playlist.description.slice(0, 30)}</Temp>
           <Temp>{playlist.type + ' ' + (playlist.label_id || '')}</Temp>
-          <Button onClick={open}>Update</Button>
-          <Button
-            onClick={sync}
-            disabled={playlist.type === 'untracked' && playlist.updates === 0}
-          >
-            {playlist.type === 'untracked' ? 'Import Tracks' : 'Sync Playlist'}
-          </Button>
+          <div style={{ display: 'flex' }}>
+            <Button onClick={open}>Update</Button>
+            <Button
+              onClick={sync}
+              disabled={playlist.type === 'untracked' && playlist.updates === 0}
+            >
+              {playlist.type === 'untracked'
+                ? 'Import Tracks'
+                : 'Sync Playlist'}
+            </Button>
+            {playlist.type === 'label' && (
+              <Button onClick={revert} disabled={!playlist.updates}>
+                Revert Changes
+              </Button>
+            )}
+          </div>
         </Slide>
       )}
     </Container>

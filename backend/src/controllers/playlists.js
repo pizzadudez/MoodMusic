@@ -68,8 +68,8 @@ exports.syncTracks = async (req, res, next) => {
 };
 exports.revertChanges = async (req, res, next) => {
   try {
-    await PlaylistsService.revertChanges(req.params.id);
-    res.status(200).send('Success.');
+    const playlist = await PlaylistsService.revertChanges(req.params.id);
+    res.status(200).send(playlist);
   } catch (err) {
     console.log(err);
     res.sendStatus(500);

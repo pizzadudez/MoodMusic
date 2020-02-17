@@ -54,3 +54,8 @@ export const syncPlaylist = id => dispatch => {
     dispatch(fetchTracks());
   });
 };
+export const revertChanges = id => dispatch => {
+  axios.get('/api/playlist/' + id + '/revert').then(res => {
+    dispatch({ type: UPDATE_PLAYLIST, playlist: res.data });
+  });
+};

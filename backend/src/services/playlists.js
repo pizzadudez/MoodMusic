@@ -160,8 +160,40 @@ exports.syncTracks = async id => {
   await PlaylistModel.updateMany([{ id, updates: 0 }]);
   return PlaylistModel.getOne(id);
 };
-// TODO: inverse of syncTracks (used mostly for label containers)
-exports.revertChanges = async id => {};
+exports.revertChanges = async playlistId => {
+  const { access_token: token } = await UserModel.data();
+  const trackIds = await PlaylistModel.getTracks(playlistId);
+  let uris = trackIds.map(id => 'spotify:track:' + id);
+
+  let replace = true; // first 100 tracks use the replace endpoint
+  let snapshotId;
+  while (uris.length) {
+    const batch = uris.splice(0, 100);
+    const options = {
+      url: 'https://api.spotify.com/v1/playlists/' + playlistId + '/tracks',
+      headers: { Authorization: 'Bearer ' + token },
+      body: { uris: batch },
+      json: true,
+    };
+    if (replace) {
+      const response = await request.put(options);
+      snapshotId = response.snapshot_id;
+      replace = false;
+    } else {
+      const response = await request.post(options);
+      snapshotId = response.snapshot_id;
+    }
+  }
+  await PlaylistModel.updateMany([
+    {
+      id: playlistId,
+      updates: 0,
+      track_count: trackIds.length,
+      snapshot_id: snapshotId,
+    },
+  ]);
+  return PlaylistModel.getOne(playlistId);
+};
 
 // Helpers
 const addPlaylistTracks = async ({ playlist_id, track_ids }) => {
