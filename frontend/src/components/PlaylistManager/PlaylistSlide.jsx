@@ -29,14 +29,13 @@ export default memo(({ playlist, isOpen, setOpen }) => {
           <Temp>{playlist.type + ' ' + (playlist.label_id || '')}</Temp>
           <div style={{ display: 'flex' }}>
             <Button onClick={open}>Update</Button>
-            <Button
-              onClick={sync}
-              disabled={playlist.type === 'untracked' && playlist.updates === 0}
-            >
-              {playlist.type === 'untracked'
-                ? 'Import Tracks'
-                : 'Sync Playlist'}
-            </Button>
+            {['untracked', 'label'].includes(playlist.type) && (
+              <Button onClick={sync} disabled={playlist.updates === 0}>
+                {playlist.type === 'untracked'
+                  ? 'Import Tracks'
+                  : 'Sync Playlist'}
+              </Button>
+            )}
             {playlist.type === 'label' && (
               <Button onClick={revert} disabled={!playlist.updates}>
                 Revert Changes

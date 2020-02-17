@@ -7,6 +7,7 @@ import {
   SET_TRACK_CHANGES,
   CLEAR_TRACK_CHANGES,
   UPDATE_TRACKS,
+  TOGGLE_TRACK_LIKE,
 } from '../actions/types';
 
 const initialState = {
@@ -67,6 +68,17 @@ export default function(state = initialState, action) {
           labelsToRemove: {},
           playlistsToAdd: {},
           playlistsToRemove: {},
+        },
+      };
+    case TOGGLE_TRACK_LIKE:
+      return {
+        ...state,
+        tracksById: {
+          ...state.tracksById,
+          [action.id]: {
+            ...state.tracksById[action.id],
+            liked: +action.toggle,
+          },
         },
       };
     default:

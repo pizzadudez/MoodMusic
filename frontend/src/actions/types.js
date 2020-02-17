@@ -20,7 +20,7 @@ export const FILTER_BY_PLAYLIST = 'FILTER_BY_PLAYLIST';
 export const FILTER_BY_LABEL = 'FILTER_BY_LABEL';
 
 // ============================================================================
-// Label / Playlist Managing
+// Label / Playlist / Track Managing
 // ============================================================================
 export const CREATE_LABEL = 'CREATE_LABEL';
 export const UPDATE_LABEL = 'UPDATE_LABEL';
@@ -30,6 +30,8 @@ export const DELETE_LABEL = 'DELETE_LABEL';
 export const CREATE_PLAYLIST = 'CREATE_PLAYLIST';
 export const UPDATE_PLAYLIST = 'UPDATE_PLAYLIST';
 export const DELETE_PLAYLIST = 'DELETE_PLAYLIST';
+
+export const TOGGLE_TRACK_LIKE = 'TOGGLE_TRACK_LIKE';
 
 // ============================================================================
 // Track selection

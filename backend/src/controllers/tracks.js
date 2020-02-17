@@ -29,6 +29,14 @@ exports.syncTracks = async (req, res, next) => {
   }
 };
 
-exports.delete = async (req, res, next) => {};
+exports.toggleLike = async (req, res, next) => {
+  try {
+    await TracksService.toggleLike(req.params.id, req.body.toggle);
+    res.sendStatus(200);
+  } catch (err) {
+    console.log(err);
+    res.sendStatus(500);
+  }
+};
 exports.rate = async (req, res, next) => {};
-exports.like = async (req, res, next) => {};
+exports.delete = async (req, res, next) => {};

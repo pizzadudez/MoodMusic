@@ -7,8 +7,7 @@ import Checkbox from '@material-ui/core/Checkbox';
 import Chip from '@material-ui/core/Chip';
 import FavoriteIcon from '@material-ui/icons/Favorite';
 import FavoriteBorderIcon from '@material-ui/icons/FavoriteBorder';
-import { modifyTrackSelection } from '../../actions/trackActions';
-import Button from '../common/Button';
+import { modifyTrackSelection, toggleLike } from '../../actions/trackActions';
 
 const stateSelector = createSelector(
   state => state.playlists.playlistsById,
@@ -33,6 +32,10 @@ export default memo(({ track, checked, widthRestriction, setOpenTrack }) => {
   const openTrackModal = useCallback(() => {
     setOpenTrack(track.id);
   }, [setOpenTrack, track]);
+  const toggleLikeHandler = useCallback(
+    () => dispatch(toggleLike(track.id, !track.liked)),
+    [track.liked]
+  );
 
   return (
     <Slide widthRestriction={widthRestriction}>
@@ -42,7 +45,9 @@ export default memo(({ track, checked, widthRestriction, setOpenTrack }) => {
       <Column>
         <span>{track.name}</span>
       </Column>
-      <Column>{track.liked ? <FavoriteIcon /> : <FavoriteBorderIcon />}</Column>
+      <Column style={{ cursor: 'pointer' }} onClick={toggleLikeHandler}>
+        {track.liked ? <FavoriteIcon /> : <FavoriteBorderIcon />}
+      </Column>
       <Column>
         <span>{track.artist}</span>
       </Column>

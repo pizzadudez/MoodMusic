@@ -34,6 +34,16 @@ exports.refreshTracks = async (sync = false) => {
     tracks: await TrackModel.getAllById(),
   };
 };
+exports.toggleLike = async (id, toggle = true) => {
+  const { access_token: token } = await UserModel.data();
+  await request[toggle ? 'put' : 'delete']({
+    url: 'https://api.spotify.com/v1/me/tracks',
+    headers: { Authorization: 'Bearer ' + token },
+    body: { ids: [id] },
+    json: true,
+  });
+  await TrackModel.update(id, { liked: toggle });
+};
 
 // Helpers
 const getLikedTracks = async (sync = false) => {

@@ -97,6 +97,19 @@ exports.getAll = async (byId = false) => {
 exports.getAllById = () => {
   return exports.getAll(true);
 };
+exports.getAllIds = (hashMap = false) => {
+  return new Promise((resolve, reject) => {
+    db.all('SELECT id FROM tracks', (err, rows) => {
+      if (err) {
+        reject(new Error(err.message));
+      } else {
+        hashMap
+          ? resolve(Object.fromEntries(rows.map(row => [row.id, true])))
+          : resolve(rows.map(row => row.id));
+      }
+    });
+  });
+};
 
 exports.addTracks = async (list, liked = false, sync = false) => {
   const albumSql = `INSERT OR IGNORE INTO albums
@@ -106,7 +119,7 @@ exports.addTracks = async (list, liked = false, sync = false) => {
     (id, name, artist, album_id, added_at, liked)
     VALUES(?, ?, ?, ?, ?, ?)`;
 
-  const hashMap = await tracksHashMap();
+  const hashMap = await exports.getAllIds(true);
   const newTracks = list.filter(track => !hashMap[track.id]);
   if (!newTracks.length) {
     if (liked && sync) {
@@ -158,6 +171,22 @@ exports.addTracks = async (list, liked = false, sync = false) => {
     });
   });
 };
+exports.update = (id, changes) => {
+  return new Promise((resolve, reject) => {
+    const fields = Object.keys(changes)
+      .map(key => key + '=?')
+      .join(', ');
+    const values = Object.values(changes);
+    const sql = 'UPDATE tracks SET ' + fields + ' WHERE id=?';
+    db.run(sql, [...values, id], err => {
+      if (err) {
+        reject(new Error(err.message));
+      } else {
+        resolve();
+      }
+    });
+  });
+};
 
 // Helpers
 const syncLikedTracks = async tracks => {
@@ -193,18 +222,6 @@ const syncLikedTracks = async tracks => {
           resolve();
         }
       });
-    });
-  });
-};
-const tracksHashMap = () => {
-  return new Promise((resolve, reject) => {
-    db.all('SELECT id FROM tracks', (err, rows) => {
-      if (err) {
-        reject(new Error(err.message));
-      } else {
-        const hashMap = Object.fromEntries(rows.map(row => [row.id, true]));
-        resolve(hashMap);
-      }
     });
   });
 };

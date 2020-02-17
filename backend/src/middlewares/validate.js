@@ -80,6 +80,9 @@ const validate = field => {
         otherwise: Joi.forbidden(),
       }),
     }),
+    toggleLike: Joi.object().keys({
+      toggle: Joi.boolean().required(),
+    }),
   };
 
   return (req, res, next) => {

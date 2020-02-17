@@ -7,7 +7,7 @@ import {
   SET_TRACK_CHANGES,
   UPDATE_TRACKS,
   CLEAR_TRACK_CHANGES,
-  FILTER_BY_PLAYLIST,
+  TOGGLE_TRACK_LIKE,
 } from './types';
 
 // Track Selecting
@@ -73,6 +73,12 @@ export const submitChanges = () => async (dispatch, getState) => {
   } catch (err) {
     console.log(err);
   }
+};
+
+export const toggleLike = (id, toggle) => dispatch => {
+  axios
+    .patch('/api/track/' + id + '/like', { toggle })
+    .then(() => dispatch({ type: TOGGLE_TRACK_LIKE, id, toggle }));
 };
 
 // Helpers
