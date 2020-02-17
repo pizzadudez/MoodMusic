@@ -14,21 +14,30 @@ export const fetchData = () => async dispatch => {
     dispatch({ type: SET_AUTHORIZED, payload: authorized });
     if (!authorized) return;
 
-    const tracks = axios.get('/api/tracks/refresh');
+    const tracks = await axios.get('/api/tracks/refresh');
+    dispatch({ type: FETCH_TRACKS, payload: tracks.data.tracks });
+
     const playlists = axios.get('/api/playlists');
     const labels = axios.get('/api/labels');
-    const [tracksRes, playlistsRes, labelsRes] = await Promise.all([
-      tracks,
-      playlists,
-      labels,
-    ]);
-    dispatch({ type: FETCH_TRACKS, payload: tracksRes.data.tracks });
+    const [playlistsRes, labelsRes] = await Promise.all([playlists, labels]);
     dispatch({ type: FETCH_PLAYLISTS, payload: playlistsRes.data });
     dispatch({ type: FETCH_LABELS, payload: labelsRes.data });
     dispatch({ type: LOADING_FINISHED });
   } catch (err) {
     console.log(err);
   }
+};
+export const fetchTracks = () => async dispatch => {
+  const response = await axios.get('/api/tracks');
+  dispatch({ type: FETCH_TRACKS, payload: response.data });
+};
+export const fetchPlaylists = () => async dispatch => {
+  const response = await axios.get('/api/playlists');
+  dispatch({ type: FETCH_PLAYLISTS, payload: response.data });
+};
+export const fetchLabels = () => async dispatch => {
+  const response = await axios.get('/api/labels');
+  dispatch({ type: FETCH_LABELS, payload: response.data });
 };
 
 export const syncData = () => async (dispatch, getState) => {

@@ -23,7 +23,10 @@ export default memo(({ playlist, isOpen, setOpen }) => {
           <Temp>{playlist.description.slice(0, 30)}</Temp>
           <Temp>{playlist.type + ' ' + (playlist.label_id || '')}</Temp>
           <Button onClick={open}>Update</Button>
-          <Button onClick={sync}>
+          <Button
+            onClick={sync}
+            disabled={playlist.type === 'untracked' && playlist.updates === 0}
+          >
             {playlist.type === 'untracked' ? 'Import Tracks' : 'Sync Playlist'}
           </Button>
         </Slide>

@@ -1,6 +1,5 @@
 const PlaylistModel = require('../models/Playlist');
 const PlaylistsService = require('../services/playlists');
-const TrackModel = require('../models/Track');
 
 exports.getAll = async (req, res, next) => {
   try {
@@ -32,7 +31,7 @@ exports.removePlaylists = async (req, res, next) => {
 
 exports.create = async (req, res, next) => {
   try {
-    const playlist = await PlaylistsService.createPlaylist(req.body);
+    const playlist = await PlaylistsService.create(req.body);
     res.status(200).json(playlist);
   } catch (err) {
     console.log(err);
@@ -41,10 +40,7 @@ exports.create = async (req, res, next) => {
 };
 exports.update = async (req, res, next) => {
   try {
-    const playlist = await PlaylistsService.updatePlaylist(
-      req.params.id,
-      req.body
-    );
+    const playlist = await PlaylistsService.update(req.params.id, req.body);
     res.status(200).json(playlist);
   } catch (err) {
     console.log(err);
@@ -53,7 +49,7 @@ exports.update = async (req, res, next) => {
 };
 exports.delete = async (req, res, next) => {
   try {
-    await PlaylistsService.deletePlaylist(req.params.id);
+    await PlaylistsService.delete(req.params.id);
     res.status(200).send('Successfully deleted.');
   } catch (err) {
     console.log(err);
@@ -63,9 +59,8 @@ exports.delete = async (req, res, next) => {
 
 exports.syncTracks = async (req, res, next) => {
   try {
-    await PlaylistsService.syncTracks(req.params.id);
-    const tracksById = TrackModel.getAllById();
-    res.status(200).json(tracksById);
+    const playlist = await PlaylistsService.syncTracks(req.params.id);
+    res.status(200).json(playlist);
   } catch (err) {
     console.log(err);
     res.sendStatus(500);

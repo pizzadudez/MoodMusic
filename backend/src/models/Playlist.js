@@ -3,7 +3,7 @@ const db = require('./db').conn();
 exports.getAll = (byId = false) => {
   return new Promise((resolve, reject) => {
     const sql = `SELECT id, name, description, 
-      track_count, added_at, type, label_id
+      track_count, updates, added_at, type, label_id
       FROM playlists ORDER BY added_at DESC`;
     db.all(sql, (err, rows) => {
       if (err) {
@@ -22,7 +22,7 @@ exports.getAllById = () => {
 exports.getOne = id => {
   return new Promise((resolve, reject) => {
     const sql = `SELECT id, name, description, 
-      track_count, added_at, type, label_id
+      track_count, updates, added_at, type, label_id
       FROM playlists WHERE id=?`;
     db.get(sql, [id], (err, row) => {
       if (err) {
@@ -197,7 +197,6 @@ exports.updateMany = list => {
           .join(', ');
         const values = Object.values(changes).filter(val => val !== undefined);
         const sql = 'UPDATE playlists SET ' + fields + ' WHERE id=?';
-        console.log(sql, values);
         db.run(sql, [...values, id], err => {
           if (err) reject(new Error(err.message));
         });

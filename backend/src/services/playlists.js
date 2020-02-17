@@ -39,7 +39,7 @@ exports.removeTracks = async data => {
 };
 
 // TODO: Handle label_id assoc (add tracks with that label to playlist)
-exports.createPlaylist = async data => {
+exports.create = async data => {
   const { access_token: token, user_id: userId } = await UserModel.data();
   const response = await request.post({
     url: 'https://api.spotify.com/v1/users/' + userId + '/playlists',
@@ -63,7 +63,7 @@ exports.createPlaylist = async data => {
   };
   return PlaylistModel.create(playlistData);
 };
-exports.updatePlaylist = async (id, data) => {
+exports.update = async (id, data) => {
   const { access_token: token } = await UserModel.data();
   const { type, label_id } = await PlaylistModel.getOne(id);
 
@@ -133,7 +133,7 @@ exports.updatePlaylist = async (id, data) => {
   }
   return PlaylistModel.update(id, data);
 };
-exports.deletePlaylist = id => {};
+exports.delete = id => {};
 
 exports.syncTracks = async id => {
   const { type, label_id } = await PlaylistModel.getOne(id);
@@ -153,9 +153,12 @@ exports.syncTracks = async id => {
   if (type !== 'untracked') {
     await PlaylistModel.addPlaylists(associations, true);
     if (type === 'label') {
+      await LabelModel.removeLabelTracks(label_id);
       await LabelModel.addLabels(associations);
     }
   }
+  await PlaylistModel.updateMany([{ id, updates: 0 }]);
+  return PlaylistModel.getOne(id);
 };
 // TODO: inverse of syncTracks (used mostly for label containers)
 exports.revertChanges = async id => {};
