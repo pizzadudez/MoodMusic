@@ -1,7 +1,12 @@
 import React, { memo, useCallback } from 'react';
 import styled from 'styled-components';
 
-import { syncPlaylist, revertChanges } from '../../actions/playlistActions';
+import {
+  syncPlaylist,
+  revertChanges,
+  deletePlaylist,
+  restorePlaylist,
+} from '../../actions/playlistActions';
 import Button from '../common/Button';
 import PlaylistForm from './PlaylistForm';
 import { useDispatch } from 'react-redux';
@@ -10,37 +15,55 @@ export default memo(({ playlist, isOpen, setOpen }) => {
   const dispatch = useDispatch();
   const open = useCallback(() => setOpen(playlist.id), [setOpen, playlist.id]);
   const close = useCallback(() => setOpen(null), [setOpen]);
-  const sync = useCallback(() => dispatch(syncPlaylist(playlist.id)), [
+
+  const syncHandler = useCallback(() => dispatch(syncPlaylist(playlist.id)), [
     playlist.id,
     dispatch,
   ]);
-  const revert = useCallback(() => dispatch(revertChanges(playlist.id)), [
-    playlist.id,
-    dispatch,
-  ]);
+  const revertHandler = useCallback(
+    () => dispatch(revertChanges(playlist.id)),
+    [playlist.id, dispatch]
+  );
+  const deleteHandler = useCallback(
+    () => dispatch(deletePlaylist(playlist.id, playlist.type)),
+    [playlist, dispatch]
+  );
+  const restoreHandler = useCallback(
+    () => dispatch(restorePlaylist(playlist.id)),
+    [playlist.id, dispatch]
+  );
 
   return (
     <Container isOpen={isOpen}>
       {isOpen && <PlaylistForm playlist={playlist} onClose={close} />}
       {!isOpen && (
         <Slide>
-          <Temp>{playlist.name}</Temp>
-          <Temp>{playlist.description.slice(0, 30)}</Temp>
-          <Temp>{playlist.type + ' ' + (playlist.label_id || '')}</Temp>
+          <div>
+            <Temp>{playlist.name}</Temp>
+            {/* <Temp>{playlist.description.slice(0, 30)}</Temp> */}
+            <Temp>{playlist.type + ' ' + (playlist.label_id || '')}</Temp>
+          </div>
           <div style={{ display: 'flex' }}>
             <Button onClick={open}>Update</Button>
             {['untracked', 'label'].includes(playlist.type) && (
-              <Button onClick={sync} disabled={playlist.updates === 0}>
+              <Button onClick={syncHandler} disabled={playlist.updates === 0}>
                 {playlist.type === 'untracked'
                   ? 'Import Tracks'
                   : 'Sync Playlist'}
               </Button>
             )}
             {playlist.type === 'label' && (
-              <Button onClick={revert} disabled={!playlist.updates}>
+              <Button onClick={revertHandler} disabled={!playlist.updates}>
                 Revert Changes
               </Button>
             )}
+            <Button
+              onClick={
+                playlist.type === 'deleted' ? restoreHandler : deleteHandler
+              }
+            >
+              {playlist.type === 'deleted' ? 'Restore' : 'Delete'}
+            </Button>
           </div>
         </Slide>
       )}

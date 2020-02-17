@@ -2,7 +2,6 @@ const request = require('request-promise-native');
 const UserModel = require('../models/User');
 const PlaylistModel = require('../models/Playlist');
 const TrackModel = require('../models/Track');
-const LabelModel = require('../models/Label');
 
 exports.refreshTracks = async (sync = false) => {
   // Liked Tracks (last 50 / all)
@@ -12,7 +11,7 @@ exports.refreshTracks = async (sync = false) => {
   const playlists = await refreshPlaylists(sync);
   if (playlists.length) {
     const requests = playlists.map(({ id, track_count }) =>
-      getPlaylistTracks(id, sync, track_count)
+      exports.getPlaylistTracks(id, sync, track_count)
     );
     const responses = await Promise.all(requests);
     const playlistTracks = playlists.map(({ id }, idx) => ({
@@ -34,6 +33,42 @@ exports.refreshTracks = async (sync = false) => {
     tracks: await TrackModel.getAllById(),
   };
 };
+exports.getPlaylistTracks = async (id, sync = false, track_count) => {
+  const { access_token: token } = await UserModel.data();
+  const response = await request.get({
+    url:
+      'https://api.spotify.com/v1/playlists/' +
+      id +
+      '/tracks' +
+      (!sync ? '?offset=' + (track_count > 100 ? track_count - 100 : 0) : ''),
+    headers: { Authorization: 'Bearer ' + token },
+    json: true,
+  });
+  const totalTracks = response.total;
+
+  if (!sync) {
+    return parseTracks(response.items);
+  } else {
+    const requests = [];
+    for (let offset = 1; offset <= totalTracks / 50; offset++) {
+      const req = async () => {
+        const response = await request.get({
+          url:
+            'https://api.spotify.com/v1/playlists/' +
+            id +
+            '/tracks?offset=' +
+            offset * 100,
+          headers: { Authorization: 'Bearer ' + token },
+          json: true,
+        });
+        return response.items;
+      };
+      requests.push(req());
+    }
+    const otherTracks = (await Promise.all(requests)).flat(Infinity);
+    return parseTracks([...response.items, ...otherTracks]);
+  }
+};
 exports.toggleLike = async (id, toggle = true) => {
   const { access_token: token } = await UserModel.data();
   await request[toggle ? 'put' : 'delete']({
@@ -54,7 +89,10 @@ const getLikedTracks = async (sync = false) => {
     json: true,
   });
 
-  if (sync) {
+  if (!sync) {
+    // Get only first 50 tracks
+    return parseTracks(response.items);
+  } else {
     // Get all liked tracks (parallel requests)
     const totalTracks = response.total;
     const requests = [];
@@ -73,9 +111,6 @@ const getLikedTracks = async (sync = false) => {
     }
     const otherTracks = (await Promise.all(requests)).flat(Infinity);
     return parseTracks([...response.items, ...otherTracks]);
-  } else {
-    // Get only first 50 tracks
-    return parseTracks(response.items);
   }
 };
 const refreshPlaylists = async (sync = false) => {
@@ -111,45 +146,8 @@ const refreshPlaylists = async (sync = false) => {
     );
   }
 };
-const getPlaylistTracks = async (id, sync = false, track_count) => {
-  const { access_token: token } = await UserModel.data();
-  const response = await request.get({
-    url:
-      'https://api.spotify.com/v1/playlists/' +
-      id +
-      '/tracks' +
-      (!sync ? '?offset=' + (track_count > 100 ? track_count - 100 : 0) : ''),
-    headers: { Authorization: 'Bearer ' + token },
-    json: true,
-  });
-  const totalTracks = response.total;
 
-  if (sync) {
-    const requests = [];
-    for (let offset = 1; offset <= totalTracks / 50; offset++) {
-      const req = async () => {
-        const response = await request.get({
-          url:
-            'https://api.spotify.com/v1/playlists/' +
-            id +
-            '/tracks?offset=' +
-            offset * 100,
-          headers: { Authorization: 'Bearer ' + token },
-          json: true,
-        });
-        return response.items;
-      };
-      requests.push(req());
-    }
-    const otherTracks = (await Promise.all(requests)).flat(Infinity);
-    return parseTracks([...response.items, ...otherTracks]);
-  } else {
-    return parseTracks(response.items);
-  }
-};
-exports.getPlaylistTracks = getPlaylistTracks;
-
-// Data Parsing
+// Data Parsers
 const parseTracks = list => {
   return list.map(obj => ({
     id: obj.track.id,

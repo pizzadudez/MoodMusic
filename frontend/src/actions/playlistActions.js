@@ -36,16 +36,23 @@ export const updatePlaylist = (id, data) => dispatch => {
     })
     .catch(err => console.log(err));
 };
-export const deletePlaylist = id => dispatch => {
+export const deletePlaylist = (id, type) => dispatch => {
   axios.delete('/api/playlist/' + id).then(res => {
     if (res.status === 200) {
       dispatch({
-        type: DELETE_PLAYLIST,
-        id,
+        type: UPDATE_PLAYLIST,
+        playlist: res.data,
       });
-      dispatch(fetchLabels());
-      dispatch(fetchTracks());
+      if (['mix', 'label'].includes(type)) {
+        dispatch(fetchLabels());
+        dispatch(fetchTracks());
+      }
     }
+  });
+};
+export const restorePlaylist = id => dispatch => {
+  axios.get('/api/playlist/' + id + '/restore').then(res => {
+    dispatch({ type: UPDATE_PLAYLIST, playlist: res.data });
   });
 };
 export const syncPlaylist = id => dispatch => {

@@ -133,7 +133,29 @@ exports.update = async (id, data) => {
   }
   return PlaylistModel.update(id, data);
 };
-exports.delete = id => {};
+exports.delete = async id => {
+  const { access_token: token } = await UserModel.data();
+  await request.delete({
+    url: 'https://api.spotify.com/v1/playlists/' + id + '/followers',
+    headers: { Authorization: 'Bearer ' + token },
+    json: true,
+  });
+  await PlaylistModel.removePlaylistTracks(id);
+  await PlaylistModel.updateMany([{ id, type: 'deleted', label_id: null }]);
+
+  return PlaylistModel.getOne(id);
+};
+exports.restore = async id => {
+  const { access_token: token } = await UserModel.data();
+  await request.put({
+    url: 'https://api.spotify.com/v1/playlists/' + id + '/followers',
+    headers: { Authorization: 'Bearer ' + token },
+    json: true,
+  });
+  await PlaylistModel.updateMany([{ id, type: 'untracked' }]);
+
+  return PlaylistModel.getOne(id);
+};
 
 exports.syncTracks = async id => {
   const { type, label_id } = await PlaylistModel.getOne(id);
@@ -160,7 +182,7 @@ exports.syncTracks = async id => {
   await PlaylistModel.updateMany([{ id, updates: 0 }]);
   return PlaylistModel.getOne(id);
 };
-exports.revertChanges = async playlistId => {
+exports.revertTracks = async playlistId => {
   const { access_token: token } = await UserModel.data();
   const trackIds = await PlaylistModel.getTracks(playlistId);
   let uris = trackIds.map(id => 'spotify:track:' + id);
