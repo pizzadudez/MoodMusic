@@ -211,8 +211,6 @@ exports.updateMany = list => {
     });
   });
 };
-// TODO + removed field in playlists
-exports.delete = id => {};
 
 // Upsert playlits and return which playlists to refresh/sync tracks from
 exports.refresh = (data, sync = false) => {

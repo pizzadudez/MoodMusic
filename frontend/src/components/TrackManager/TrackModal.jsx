@@ -12,13 +12,17 @@ const stateSelector = createSelector(
   state => state.tracks.tracksById,
   state => state.labels,
   state => state.playlists,
-  (tracksById, labels, { playlistsById, ids: playlists }) => ({
+  (
     tracksById,
-    labelsById: labels.labelsById,
-    genreIds: labels.ids.filter(id => labels.labelsById[id].type === 'genre'),
-    moodIds: labels.ids.filter(id => labels.labelsById[id].type === 'mood'),
+    { labelsById, ids: labels },
+    { playlistsById, ids: playlists }
+  ) => ({
+    tracksById,
+    labelsById,
     playlistsById,
-    playlists,
+    genreIds: labels.filter(id => labelsById[id].type === 'genre'),
+    moodIds: labels.filter(id => labelsById[id].type === 'mood'),
+    playlists: playlists.filter(id => playlistsById[id].type === 'mix'),
   })
 );
 
@@ -27,9 +31,9 @@ export default memo(({ open: trackId, setOpen }) => {
   const {
     tracksById,
     labelsById,
+    playlistsById,
     genreIds,
     moodIds,
-    playlistsById,
     playlists,
   } = useSelector(stateSelector);
 
@@ -115,60 +119,83 @@ export default memo(({ open: trackId, setOpen }) => {
   return (
     <StyledDialog open={!!track} onClose={updateAndClose}>
       <Container>
-        Genres
-        {genreIds.map(id => (
-          <React.Fragment key={'genreFragment_' + id}>
+        {track && (
+          <div>
+            <h1 style={{ textAlign: 'center' }}>{track.name}</h1>
+            <h2 style={{ textAlign: 'center' }}>{track.artist}</h2>
+          </div>
+        )}
+        <div>
+          <h3>Genres</h3>
+          {genreIds.map(id => (
+            <React.Fragment key={'genreFragment_' + id}>
+              <Button
+                key={id}
+                id={id}
+                color={labelsById[id].color}
+                original={trackLabels[id]}
+                select={selectLabel}
+              >
+                {labelsById[id].name}
+              </Button>
+              {labelsById[id].subgenre_ids &&
+                labelsById[id].subgenre_ids.map(id => (
+                  <Button
+                    key={id}
+                    id={id}
+                    color={labelsById[id].color}
+                    original={trackLabels[id]}
+                    select={selectLabel}
+                  >
+                    {labelsById[id].name}
+                  </Button>
+                ))}
+            </React.Fragment>
+          ))}
+        </div>
+        <div>
+          <h3>Moods</h3>
+          {moodIds.map(id => (
             <Button
               key={id}
               id={id}
+              color={labelsById[id].color}
               original={trackLabels[id]}
               select={selectLabel}
             >
               {labelsById[id].name}
             </Button>
-            {labelsById[id].subgenre_ids &&
-              labelsById[id].subgenre_ids.map(id => (
-                <Button
-                  key={id}
-                  id={id}
-                  original={trackLabels[id]}
-                  select={selectLabel}
-                >
-                  {labelsById[id].name}
-                </Button>
-              ))}
-          </React.Fragment>
-        ))}
-        Moods
-        {moodIds.map(id => (
-          <Button
-            key={id}
-            id={id}
-            original={trackLabels[id]}
-            select={selectLabel}
-          >
-            {labelsById[id].name}
-          </Button>
-        ))}
-        Playlists
-        {playlists.map(id => (
-          <Button
-            key={id}
-            id={id}
-            original={trackPlaylists[id]}
-            select={selectPlaylist}
-          >
-            {playlistsById[id].name}
-          </Button>
-        ))}
+          ))}
+        </div>
+        <div>
+          <h3>Playlists</h3>
+          {playlists.map(id => (
+            <Button
+              key={id}
+              id={id}
+              original={trackPlaylists[id]}
+              select={selectPlaylist}
+            >
+              {playlistsById[id].name}
+            </Button>
+          ))}
+        </div>
       </Container>
     </StyledDialog>
   );
 });
 
-const StyledDialog = styled(Dialog)``;
+const StyledDialog = styled(Dialog)`
+  .MuiPaper-root {
+    background-color: #444;
+
+    border-radius: 4px;
+  }
+`;
 const Container = styled.div`
   width: 500px;
   height: 600px;
-  /* display: flex; */
+  background-color: #1f1f1f;
+  color: white;
+  padding: 0 8px;
 `;
