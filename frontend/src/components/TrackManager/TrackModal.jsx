@@ -188,7 +188,6 @@ export default memo(({ open: trackId, setOpen }) => {
 const StyledDialog = styled(Dialog)`
   .MuiPaper-root {
     background-color: #444;
-
     border-radius: 4px;
   }
 `;

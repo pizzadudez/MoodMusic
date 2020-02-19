@@ -19,7 +19,7 @@ const stateSelector = createSelector(
 );
 
 export default memo(({ track, checked, widthRestriction, setOpenTrack }) => {
-  // console.log('TrackSlide');
+  console.log('TrackSlide');
   const dispatch = useDispatch();
   const { playlistsById, labelsById } = useSelector(stateSelector);
 

@@ -15,6 +15,7 @@ import _ from 'lodash';
 import TrackSlide from './TrackSlide';
 import TrackToolBar from './TrackToolBar';
 import TrackModal from './TrackModal';
+import LabelModal from './LabelModal';
 
 const stateSelector = createSelector(
   state => state.tracks.tracksById,
@@ -27,10 +28,9 @@ export default memo(() => {
   // console.log('TrackManager');
   const dispatch = useDispatch();
   const { tracksById, tracks, selected } = useSelector(stateSelector);
-  const [widthRestriction, setWidthRestriction] = useState(false);
-  const [filter, setFilter] = useState('');
-  const sizeRef = useRef(null);
 
+  // Track Filtering
+  const [filter, setFilter] = useState('');
   const filtered = useMemo(
     () =>
       tracks.filter(id => {
@@ -41,51 +41,47 @@ export default memo(() => {
       }),
     [filter, tracks]
   );
-  const handleWidthChange = useCallback(() => {
-    if (sizeRef.current) {
-      const width = sizeRef.current.getBoundingClientRect().width;
-      width >= 900 ? setWidthRestriction(false) : setWidthRestriction(true);
-    }
-  }, [setWidthRestriction]);
   const searchFilter = useCallback(
     e => {
       setFilter(e.target.value.toLowerCase());
     },
     [setFilter]
   );
-  // Track Modal
-  const [openTrack, setOpenTrack] = useState(false);
-  const closeTrackModal = useCallback(
-    e => data => {
-      console.log(data);
-      setOpenTrack(false);
-    },
-    [setOpenTrack]
-  );
 
+  // TrackList responsiveness
+  const [widthRestriction, setWidthRestriction] = useState(false);
+  const sizeRef = useRef(null);
+  const handleWidthChange = useCallback(() => {
+    if (sizeRef.current) {
+      const width = sizeRef.current.getBoundingClientRect().width;
+      width >= 900 ? setWidthRestriction(false) : setWidthRestriction(true);
+    }
+  }, [setWidthRestriction]);
   useEffect(() => {
     if (sizeRef.current) {
       window.addEventListener('resize', _.throttle(handleWidthChange, 500));
     }
   }, [sizeRef.current, handleWidthChange]);
 
-  const rowRenderer = ({ key, index, isScrolling, isVisible, style }) => {
-    return (
-      <div key={key} style={style}>
-        <TrackSlide
-          track={tracksById[filtered[index]]}
-          checked={selected[filtered[index]] || false}
-          widthRestriction={widthRestriction}
-          setOpenTrack={setOpenTrack}
-        />
-      </div>
-    );
-  };
+  // Modals
+  const [trackModalOpen, setTrackModalOpen] = useState(false);
+  const [labelModalOpen, setLabelModalOpen] = useState(false);
+  const [playlistModalOpen, setPlaylistModalOpen] = useState(false);
+  const openLabelModal = useCallback(() => setLabelModalOpen(true), [
+    setLabelModalOpen,
+  ]);
+  const openPlaylistModal = useCallback(() => setPlaylistModalOpen(true), [
+    setPlaylistModalOpen,
+  ]);
 
   return (
     <Wrapper>
-      <TrackModal open={openTrack} setOpen={setOpenTrack} />
-      <TrackToolBar searchFilter={searchFilter} />
+      <TrackModal open={trackModalOpen} setOpen={setTrackModalOpen} />
+      <LabelModal open={labelModalOpen} setOpen={setLabelModalOpen} />
+      <TrackToolBar
+        searchFilter={searchFilter}
+        openLabelModal={openLabelModal}
+      />
       <div ref={sizeRef}>
         <AutoSizer>
           {({ height, width }) => (
@@ -94,7 +90,16 @@ export default memo(() => {
               width={width}
               rowCount={filtered.length}
               rowHeight={48}
-              rowRenderer={rowRenderer}
+              rowRenderer={({ key, index, style, isScrolling, isVisible }) => (
+                <div key={key} style={style}>
+                  <TrackSlide
+                    track={tracksById[filtered[index]]}
+                    checked={selected[filtered[index]] || false}
+                    widthRestriction={widthRestriction}
+                    setOpenTrack={setTrackModalOpen}
+                  />
+                </div>
+              )}
               style={{ outline: 'none' }}
             />
           )}
