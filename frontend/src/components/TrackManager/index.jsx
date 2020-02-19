@@ -16,6 +16,7 @@ import TrackSlide from './TrackSlide';
 import TrackToolBar from './TrackToolBar';
 import TrackModal from './TrackModal';
 import LabelModal from './LabelModal';
+import PlaylistModal from './PlaylistModal';
 
 const stateSelector = createSelector(
   state => state.tracks.tracksById,
@@ -78,9 +79,11 @@ export default memo(() => {
     <Wrapper>
       <TrackModal open={trackModalOpen} setOpen={setTrackModalOpen} />
       <LabelModal open={labelModalOpen} setOpen={setLabelModalOpen} />
+      <PlaylistModal open={playlistModalOpen} setOpen={setPlaylistModalOpen} />
       <TrackToolBar
         searchFilter={searchFilter}
         openLabelModal={openLabelModal}
+        openPlaylistModal={openPlaylistModal}
       />
       <div ref={sizeRef}>
         <AutoSizer>

@@ -5,8 +5,9 @@ import { useSelector, useDispatch } from 'react-redux';
 import styled from 'styled-components';
 import _ from 'lodash';
 
-import Button from './Button';
 import { updateTracks } from '../../actions/trackActions';
+import Button from './Button';
+import ActionButton from '../common/Button';
 
 const stateSelector = createSelector(
   state => state.tracks.tracksById,
@@ -41,19 +42,15 @@ export default memo(({ open: trackId, setOpen }) => {
   const track = useMemo(() => {
     return tracksById[trackId];
   }, [tracksById, trackId]);
-  const trackLabels = useMemo(() => {
+  const [trackLabels, trackPlaylists] = useMemo(() => {
     if (track) {
-      return Object.fromEntries(track.label_ids.map(id => [id, true]));
-    } else {
-      return {};
+      const labels = Object.fromEntries(track.label_ids.map(id => [id, true]));
+      const playlists = Object.fromEntries(
+        track.playlist_ids.map(id => [id, true])
+      );
+      return [labels, playlists];
     }
-  }, [track]);
-  const trackPlaylists = useMemo(() => {
-    if (track) {
-      return Object.fromEntries(track.playlist_ids.map(id => [id, true]));
-    } else {
-      return {};
-    }
+    return [{}, {}];
   }, [track]);
   // Select
   const [selectedLabels, setSelectedLabels] = useState({});
@@ -78,34 +75,33 @@ export default memo(({ open: trackId, setOpen }) => {
   );
   // Close / Done selecting
   const [update, setUpdate] = useState(false);
+  const close = useCallback(() => {
+    setOpen(false);
+  }, [setOpen]);
   const updateAndClose = useCallback(() => {
     setUpdate(true);
   }, [setUpdate]);
   useEffect(() => {
     if (update) {
-      const labelsToAdd = Object.entries(selectedLabels)
-        .filter(([k, v]) => !trackLabels[k] && v)
-        .map(([k]) => k);
-      const labelsToRemove = Object.entries(selectedLabels)
-        .filter(([k, v]) => trackLabels[k] && v)
-        .map(([k]) => k);
-      const playlistsToAdd = Object.entries(selectedPlaylists)
-        .filter(([k, v]) => !trackPlaylists[k] && v)
-        .map(([k]) => k);
-      const playlistsToRemove = Object.entries(selectedPlaylists)
-        .filter(([k, v]) => trackPlaylists[k] && v)
-        .map(([k]) => k);
+      const labels = Object.keys(_.pickBy(selectedLabels)).reduce(
+        (obj, id) => {
+          obj[trackLabels[id] ? 'toRemove' : 'toAdd'][id] = true;
+          return obj;
+        },
+        { toAdd: {}, toRemove: {} }
+      );
+      const playlists = Object.keys(_.pickBy(selectedPlaylists)).reduce(
+        (obj, id) => {
+          obj[trackPlaylists[id] ? 'toRemove' : 'toAdd'][id] = true;
+          return obj;
+        },
+        { toAdd: {}, toRemove: {} }
+      );
       dispatch(
         updateTracks({
-          tracks: [trackId],
-          labels: {
-            toAdd: labelsToAdd,
-            toRemove: labelsToRemove,
-          },
-          playlists: {
-            toAdd: playlistsToAdd,
-            toRemove: playlistsToRemove,
-          },
+          trackId,
+          labels,
+          playlists,
         })
       );
       // Reset modal state and close
@@ -117,84 +113,86 @@ export default memo(({ open: trackId, setOpen }) => {
   }, [update, setOpen]);
 
   return (
-    <StyledDialog open={!!track} onClose={updateAndClose}>
-      <Container>
-        {track && (
-          <div>
-            <h1 style={{ textAlign: 'center' }}>{track.name}</h1>
-            <h2 style={{ textAlign: 'center' }}>{track.artist}</h2>
-          </div>
-        )}
+    <StyledDialog open={!!track} onClose={close}>
+      <div
+        style={{
+          display: 'flex',
+          justifyContent: 'flex-end',
+          alignItems: 'flex-start',
+        }}
+      >
+        <ActionButton onClick={close}>X</ActionButton>
+      </div>
+      {track && (
         <div>
-          <h3>Genres</h3>
-          {genreIds.map(id => (
-            <React.Fragment key={'genreFragment_' + id}>
-              <Button
-                key={id}
-                id={id}
-                color={labelsById[id].color}
-                original={trackLabels[id]}
-                select={selectLabel}
-              >
-                {labelsById[id].name}
-              </Button>
-              {labelsById[id].subgenre_ids &&
-                labelsById[id].subgenre_ids.map(id => (
-                  <Button
-                    key={id}
-                    id={id}
-                    color={labelsById[id].color}
-                    original={trackLabels[id]}
-                    select={selectLabel}
-                  >
-                    {labelsById[id].name}
-                  </Button>
-                ))}
-            </React.Fragment>
-          ))}
+          <h1 style={{ textAlign: 'center' }}>{track.name}</h1>
+          <h2 style={{ textAlign: 'center' }}>{track.artist}</h2>
         </div>
-        <div>
-          <h3>Moods</h3>
-          {moodIds.map(id => (
+      )}
+      <div>
+        <h3>Genres</h3>
+        {genreIds.map(id =>
+          [id, ...(labelsById[id].subgenre_ids || [])].map(id => (
             <Button
               key={id}
-              id={id}
+              itemId={id}
               color={labelsById[id].color}
               original={trackLabels[id]}
               select={selectLabel}
             >
               {labelsById[id].name}
             </Button>
-          ))}
-        </div>
-        <div>
-          <h3>Playlists</h3>
-          {playlists.map(id => (
-            <Button
-              key={id}
-              id={id}
-              original={trackPlaylists[id]}
-              select={selectPlaylist}
-            >
-              {playlistsById[id].name}
-            </Button>
-          ))}
-        </div>
-      </Container>
+          ))
+        )}
+      </div>
+      <div>
+        <h3>Moods</h3>
+        {moodIds.map(id => (
+          <Button
+            key={id}
+            itemId={id}
+            color={labelsById[id].color}
+            original={trackLabels[id]}
+            select={selectLabel}
+          >
+            {labelsById[id].name}
+          </Button>
+        ))}
+      </div>
+      <div>
+        <h3>Playlists</h3>
+        {playlists.map(id => (
+          <Button
+            key={id}
+            itemId={id}
+            original={trackPlaylists[id]}
+            select={selectPlaylist}
+          >
+            {playlistsById[id].name}
+          </Button>
+        ))}
+      </div>
+      <div
+        style={{
+          display: 'flex',
+          flex: '1 1 0',
+          justifyContent: 'flex-end',
+          alignItems: 'flex-end',
+        }}
+      >
+        <ActionButton onClick={updateAndClose}>Update</ActionButton>
+      </div>
     </StyledDialog>
   );
 });
 
 const StyledDialog = styled(Dialog)`
   .MuiPaper-root {
-    background-color: #444;
+    background-color: #1f1f1f;
     border-radius: 4px;
+    min-width: 600px;
+    min-height: 700px;
+    padding: 8px 10px;
+    color: white;
   }
-`;
-const Container = styled.div`
-  width: 500px;
-  height: 600px;
-  background-color: #1f1f1f;
-  color: white;
-  padding: 0 8px;
 `;

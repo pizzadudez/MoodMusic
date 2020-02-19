@@ -32,27 +32,52 @@ export const deselectAllTracks = () => dispatch => {
 };
 
 // Local update and set changes for api call
-export const updateTracks = data => dispatch => {
-  const { labels, playlists } = data;
-  // Handle string labelIds (track.label_ids = [int])
-  data.labels = {
-    toAdd: data.labels.toAdd.map(Number),
-    toRemove: data.labels.toRemove.map(Number),
-  };
-  const labelChanges = Object.values(labels).some(val => val.length);
-  const playlistChanges = Object.values(playlists).some(val => val.length);
+export const updateTracks = data => (dispatch, getState) => {
+  const { labels, playlists, trackId } = data;
+  const labelsById = getState().labels.labelsById;
+  const tracks = trackId
+    ? [trackId]
+    : Object.keys(_.pickBy(getState().tracks.selected));
 
-  if (labelChanges || playlistChanges) {
+  const parsedLabels = {
+    toAdd: Object.keys(_.pickBy(labels && labels.toAdd)).map(Number),
+    toRemove: Object.keys(_.pickBy(labels && labels.toRemove)).map(Number),
+  };
+  const parsedPlaylists = {
+    toAdd: [
+      ...Object.keys(_.pickBy(playlists && playlists.toAdd)),
+      ...parsedLabels.toAdd
+        .map(id => labelsById[id].playlist_id)
+        .filter(Boolean),
+    ],
+    toRemove: [
+      ...Object.keys(_.pickBy(playlists && playlists.toRemove)),
+      ...parsedLabels.toRemove
+        .map(id => labelsById[id].playlist_id)
+        .filter(Boolean),
+    ],
+  };
+  const parsedData = {
+    labels: parsedLabels,
+    playlists: parsedPlaylists,
+    tracks,
+  };
+
+  const changes =
+    Object.values(parsedLabels).some(val => val.length) ||
+    Object.values(parsedPlaylists).some(val => val.length);
+  if (changes) {
     dispatch({
       type: SET_TRACK_CHANGES,
-      data,
+      data: parsedData,
     });
     dispatch({
       type: UPDATE_TRACKS,
-      data,
+      data: parsedData,
     });
   }
 };
+
 // Request backend to implement track changes (label + playlist)
 export const submitChanges = () => async (dispatch, getState) => {
   try {

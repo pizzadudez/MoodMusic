@@ -9,17 +9,16 @@ import Button from './Button2';
 import ActionButton from '../common/Button';
 
 const stateSelector = createSelector(
-  state => state.labels,
-  ({ labelsById, ids: labelIds }) => ({
-    labelsById,
-    genreIds: labelIds.filter(id => labelsById[id].type === 'genre'),
-    moodIds: labelIds.filter(id => labelsById[id].type === 'mood'),
+  state => state.playlists,
+  ({ playlistsById, ids: playlistIds }) => ({
+    playlistsById,
+    playlists: playlistIds.filter(id => playlistsById[id].type === 'mix'),
   })
 );
 
 export default memo(({ open, setOpen }) => {
   const dispatch = useDispatch();
-  const { labelsById, genreIds, moodIds } = useSelector(stateSelector);
+  const { playlistsById, playlists } = useSelector(stateSelector);
 
   // Select
   const [toAdd, setToAdd] = useState({});
@@ -52,7 +51,7 @@ export default memo(({ open, setOpen }) => {
     if (update) {
       dispatch(
         updateTracks({
-          labels: {
+          playlists: {
             toAdd,
             toRemove,
           },
@@ -78,32 +77,10 @@ export default memo(({ open, setOpen }) => {
         <ActionButton onClick={close}>X</ActionButton>
       </div>
       <div>
-        <h3>Genres</h3>
-        {genreIds.map(id =>
-          [id, ...(labelsById[id].subgenre_ids || [])].map(id => (
-            <Button
-              key={id}
-              itemId={id}
-              color={labelsById[id].color}
-              add={add}
-              remove={remove}
-            >
-              {labelsById[id].name}
-            </Button>
-          ))
-        )}
-      </div>
-      <div>
-        <h3>Moods</h3>
-        {moodIds.map(id => (
-          <Button
-            key={id}
-            itemId={id}
-            color={labelsById[id].color}
-            add={add}
-            remove={remove}
-          >
-            {labelsById[id].name}
+        <h3>Mix Playlists</h3>
+        {playlists.map(id => (
+          <Button key={id} itemId={id} add={add} remove={remove}>
+            {playlistsById[id].name}
           </Button>
         ))}
       </div>

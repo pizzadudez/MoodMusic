@@ -6,39 +6,37 @@ import RemoveCircleIcon from '@material-ui/icons/RemoveCircle';
 import AddCircleIcon from '@material-ui/icons/AddCircle';
 import CheckCircleIcon from '@material-ui/icons/CheckCircle';
 
-export default memo(({ id, color, select, original, children }) => {
+export default memo(({ itemId, color, select, original, children }) => {
   console.log('>ModalBtn');
   const [selected, setSelected] = useState(false);
   const click = useCallback(() => {
-    select(id);
+    select(itemId);
     setSelected(selected => !selected);
-  }, [id, select]);
+  }, [select, setSelected, itemId]);
 
   return (
     <StyledButton
       variant="contained"
       onClick={click}
       color={color}
-      original={original ? 1 : 0} // fix styled-components, react-router confict
+      original={original}
       selected={selected}
     >
-      {selected ? (
-        original ? (
+      {selected &&
+        (original ? (
           <RemoveCircleIcon style={{ color: '#ff4646' }} />
         ) : (
           <AddCircleIcon style={{ color: '#57ff57' }} />
-        )
-      ) : original ? (
+        ))}
+      {!selected && original && (
         <CheckCircleIcon style={{ color: '#3ba5ff' }} />
-      ) : (
-        undefined
       )}
       {children}
     </StyledButton>
   );
 });
 
-const _StyledButton = ({ original, selected, color, ...rest }) => (
+const _StyledButton = ({ color, original, selected, ...rest }) => (
   <Button {...rest} />
 );
 const StyledButton = styled(_StyledButton)`
@@ -55,7 +53,7 @@ const StyledButton = styled(_StyledButton)`
   &.MuiButtonBase-root {
     background-color: #272727;
     padding: 8px 12px;
-    border: 0.8px solid ${props => props.color2 + 80 || '#171717'};
+    border: 0.8px solid #171717;
     border-radius: 3px;
     box-shadow: 0px 3px 1px -2px rgba(0, 0, 0, 0.2),
       0px 2px 2px 0px rgba(0, 0, 0, 0.14),

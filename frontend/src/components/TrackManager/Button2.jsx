@@ -8,34 +8,37 @@ import AddCircleIcon from '@material-ui/icons/AddCircle';
 export default memo(({ itemId, color, add, remove, children }) => {
   console.log('>ModalBtn');
   const [selected, setSelected] = useState(false);
-  const [isAdding, setIsAdding] = useState(true);
   const onClick = useCallback(() => {
     setSelected(selected => {
-      if (selected) {
+      if (selected === 'add') {
         add(itemId, false);
+        return false;
+      } else if (selected === 'remove') {
+        add(itemId);
         remove(itemId, false);
       } else {
         add(itemId);
       }
-      return !selected;
+      return 'add';
     });
-    setIsAdding(true);
-  }, [setSelected, setIsAdding, add, remove]);
+  }, [setSelected, add, remove, itemId]);
   const onContextMenu = useCallback(
     e => {
       e.preventDefault();
       setSelected(selected => {
-        if (selected) {
-          add(itemId, false);
+        if (selected === 'remove') {
           remove(itemId, false);
+          return false;
+        } else if (selected === 'add') {
+          remove(itemId);
+          add(itemId, false);
         } else {
           remove(itemId);
         }
-        return !selected;
+        return 'remove';
       });
-      setIsAdding(false);
     },
-    [setSelected, setIsAdding, add, remove]
+    [setSelected, add, remove, itemId]
   );
 
   return (
@@ -47,7 +50,7 @@ export default memo(({ itemId, color, add, remove, children }) => {
       selected={selected}
     >
       {selected &&
-        (isAdding ? (
+        (selected === 'add' ? (
           <AddCircleIcon style={{ color: '#57ff57' }} />
         ) : (
           <RemoveCircleIcon style={{ color: '#ff4646' }} />
@@ -83,33 +86,3 @@ const StyledButton = styled(_StyledButton)`
     }
   }
 `;
-
-// const StyledButton = styled(Button)`
-//   margin: 2px 3px;
-//   letter-spacing: normal;
-//   text-transform: none;
-//   &.MuiButtonBase-root .MuiButton-label {
-//     color: white;
-//     text-shadow: 1px 1px 0.5px ${props => props.color + 47 || '#000000d4'};
-//   }
-//   &.MuiButtonBase-root {
-//     background-color: #444444;
-//     border: 1.2px solid ${props => props.color + 80 || 'black'};
-//     border-radius: 3px;
-//     box-shadow:  0px 3px 1px -2px rgba(0,0,0,0.2),
-//           0px 2px 2px 0px rgba(0,0,0,0.14),
-//           inset -1px -1px 10px 2px rgba(0, 0, 0, 0.41);
-//     /* box-shadow: ${props => {
-//       if (props.selected) {
-//         return (
-//           `0px 3px 1px -2px rgba(0,0,0,0.2),
-//           0px 2px 2px 0px rgba(0,0,0,0.14),
-//           inset -1px -1px 10px 2px rgba(0, 0, 0, 0.41),
-//           0px 1px 8px 0px  ` + (props.original ? '#d23333' : '#3fe479')
-//         );
-//       } else {
-//         return 'none';
-//       }
-//     }}; */
-//   }
-// `;
