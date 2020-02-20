@@ -5,8 +5,8 @@ import { createSelector } from 'reselect';
 
 import { updateTracks } from '../../actions/trackActions';
 import Dialog from '@material-ui/core/Dialog';
-import Button from './Button2';
-import ActionButton from '../common/Button';
+import LabelButton from '../common/LabelButton';
+import Button from '../common/Button';
 
 const stateSelector = createSelector(
   state => state.labels,
@@ -75,13 +75,13 @@ export default memo(({ open, setOpen }) => {
           alignItems: 'flex-start',
         }}
       >
-        <ActionButton onClick={close}>X</ActionButton>
+        <Button onClick={close}>X</Button>
       </div>
       <div>
         <h3>Genres</h3>
         {genreIds.map(id =>
           [id, ...(labelsById[id].subgenre_ids || [])].map(id => (
-            <Button
+            <LabelButton
               key={id}
               itemId={id}
               color={labelsById[id].color}
@@ -89,14 +89,14 @@ export default memo(({ open, setOpen }) => {
               remove={remove}
             >
               {labelsById[id].name}
-            </Button>
+            </LabelButton>
           ))
         )}
       </div>
       <div>
         <h3>Moods</h3>
         {moodIds.map(id => (
-          <Button
+          <LabelButton
             key={id}
             itemId={id}
             color={labelsById[id].color}
@@ -104,7 +104,7 @@ export default memo(({ open, setOpen }) => {
             remove={remove}
           >
             {labelsById[id].name}
-          </Button>
+          </LabelButton>
         ))}
       </div>
       <div
@@ -115,7 +115,7 @@ export default memo(({ open, setOpen }) => {
           alignItems: 'flex-end',
         }}
       >
-        <ActionButton onClick={updateAndClose}>Update</ActionButton>
+        <Button onClick={updateAndClose}>Update</Button>
       </div>
     </StyledDialog>
   );

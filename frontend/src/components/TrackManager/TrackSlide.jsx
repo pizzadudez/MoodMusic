@@ -3,8 +3,8 @@ import { createSelector } from 'reselect';
 import { useSelector, useDispatch } from 'react-redux';
 import styled from 'styled-components';
 
-import Checkbox from '@material-ui/core/Checkbox';
-import Chip from '@material-ui/core/Chip';
+import Checkbox from '../common/Checkbox';
+import Label from '../common/Label';
 import FavoriteIcon from '@material-ui/icons/Favorite';
 import FavoriteBorderIcon from '@material-ui/icons/FavoriteBorder';
 import { modifyTrackSelection, toggleLike } from '../../actions/trackActions';
@@ -62,15 +62,15 @@ export default memo(({ track, checked, widthRestriction, setOpenTrack }) => {
         {/* <button style={{ width: 20 }} onClick={openTrackModal}>
           Open
         </button> */}
-        {track.playlist_ids.map(id => (
-          <StyledChip key={'playlist_' + id} label={playlistsById[id].name} />
-        ))}
         {track.label_ids.map(id => (
-          <StyledChip
+          <Label
             key={'label' + id}
-            label={labelsById[id].name}
-            style={{ backgroundColor: 'tomato' }}
+            name={labelsById[id].name}
+            color={labelsById[id].color}
           />
+        ))}
+        {track.playlist_ids.map(id => (
+          <Label key={'playlist_' + id} name={playlistsById[id].name} />
         ))}
         {/* <div
           style={{ background: '#353535', width: '100%', height: '100%' }}
@@ -88,13 +88,13 @@ const Slide = styled.div`
          minmax(180px, 190px)
          30px
          minmax(100px, 120px)
-         minmax(300px, 40%)`
+         minmax(320px, 448px)`
       : `min-content
          minmax(200px, 280px)
          30px
          minmax(150px, 200px)
          minmax(150px, 250px)
-         minmax(300px, 40%)`};
+         minmax(320px, 448px)`};
   justify-content: start;
   align-items: center;
   height: 40px;
@@ -122,10 +122,4 @@ const ChipColumn = styled.div`
   align-items: center;
   height: 100%;
   cursor: pointer;
-`;
-const StyledChip = styled(Chip)`
-  cursor: pointer;
-  span {
-    padding: 0;
-  }
 `;

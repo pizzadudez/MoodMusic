@@ -6,8 +6,8 @@ import styled from 'styled-components';
 import _ from 'lodash';
 
 import { updateTracks } from '../../actions/trackActions';
-import Button from './Button';
-import ActionButton from '../common/Button';
+import LabelButton from '../common/LabelButton2';
+import Button from '../common/Button';
 
 const stateSelector = createSelector(
   state => state.tracks.tracksById,
@@ -121,7 +121,7 @@ export default memo(({ open: trackId, setOpen }) => {
           alignItems: 'flex-start',
         }}
       >
-        <ActionButton onClick={close}>X</ActionButton>
+        <Button onClick={close}>X</Button>
       </div>
       {track && (
         <div>
@@ -133,7 +133,7 @@ export default memo(({ open: trackId, setOpen }) => {
         <h3>Genres</h3>
         {genreIds.map(id =>
           [id, ...(labelsById[id].subgenre_ids || [])].map(id => (
-            <Button
+            <LabelButton
               key={id}
               itemId={id}
               color={labelsById[id].color}
@@ -141,14 +141,14 @@ export default memo(({ open: trackId, setOpen }) => {
               select={selectLabel}
             >
               {labelsById[id].name}
-            </Button>
+            </LabelButton>
           ))
         )}
       </div>
       <div>
         <h3>Moods</h3>
         {moodIds.map(id => (
-          <Button
+          <LabelButton
             key={id}
             itemId={id}
             color={labelsById[id].color}
@@ -156,20 +156,20 @@ export default memo(({ open: trackId, setOpen }) => {
             select={selectLabel}
           >
             {labelsById[id].name}
-          </Button>
+          </LabelButton>
         ))}
       </div>
       <div>
         <h3>Playlists</h3>
         {playlists.map(id => (
-          <Button
+          <LabelButton
             key={id}
             itemId={id}
             original={trackPlaylists[id]}
             select={selectPlaylist}
           >
             {playlistsById[id].name}
-          </Button>
+          </LabelButton>
         ))}
       </div>
       <div
@@ -180,7 +180,7 @@ export default memo(({ open: trackId, setOpen }) => {
           alignItems: 'flex-end',
         }}
       >
-        <ActionButton onClick={updateAndClose}>Update</ActionButton>
+        <Button onClick={updateAndClose}>Update</Button>
       </div>
     </StyledDialog>
   );

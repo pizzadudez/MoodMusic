@@ -5,8 +5,8 @@ import { createSelector } from 'reselect';
 
 import { updateTracks } from '../../actions/trackActions';
 import Dialog from '@material-ui/core/Dialog';
-import Button from './Button2';
-import ActionButton from '../common/Button';
+import LabelButton from '../common/LabelButton';
+import Button from '../common/Button';
 
 const stateSelector = createSelector(
   state => state.playlists,
@@ -74,14 +74,14 @@ export default memo(({ open, setOpen }) => {
           alignItems: 'flex-start',
         }}
       >
-        <ActionButton onClick={close}>X</ActionButton>
+        <Button onClick={close}>X</Button>
       </div>
       <div>
         <h3>Mix Playlists</h3>
         {playlists.map(id => (
-          <Button key={id} itemId={id} add={add} remove={remove}>
+          <LabelButton key={id} itemId={id} add={add} remove={remove}>
             {playlistsById[id].name}
-          </Button>
+          </LabelButton>
         ))}
       </div>
       <div
@@ -92,7 +92,7 @@ export default memo(({ open, setOpen }) => {
           alignItems: 'flex-end',
         }}
       >
-        <ActionButton onClick={updateAndClose}>Update</ActionButton>
+        <Button onClick={updateAndClose}>Update</Button>
       </div>
     </StyledDialog>
   );

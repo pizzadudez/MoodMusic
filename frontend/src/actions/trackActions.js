@@ -35,9 +35,6 @@ export const deselectAllTracks = () => dispatch => {
 export const updateTracks = data => (dispatch, getState) => {
   const { labels, playlists, trackId } = data;
   const labelsById = getState().labels.labelsById;
-  const tracks = trackId
-    ? [trackId]
-    : Object.keys(_.pickBy(getState().tracks.selected));
 
   const parsedLabels = {
     toAdd: Object.keys(_.pickBy(labels && labels.toAdd)).map(Number),
@@ -60,7 +57,7 @@ export const updateTracks = data => (dispatch, getState) => {
   const parsedData = {
     labels: parsedLabels,
     playlists: parsedPlaylists,
-    tracks,
+    trackId,
   };
 
   const changes =

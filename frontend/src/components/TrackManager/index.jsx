@@ -61,6 +61,7 @@ export default memo(() => {
   useEffect(() => {
     if (sizeRef.current) {
       window.addEventListener('resize', _.throttle(handleWidthChange, 500));
+      handleWidthChange();
     }
   }, [sizeRef.current, handleWidthChange]);
 

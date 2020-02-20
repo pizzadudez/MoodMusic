@@ -87,10 +87,8 @@ export default function(state = initialState, action) {
 }
 
 const updateTracks = (state, action) => {
-  const { labels, playlists } = action.data;
-  const tracks = Object.keys(_.pickBy(state.selected)).length
-    ? Object.keys(_.pickBy(state.selected))
-    : action.data.tracks;
+  const { labels, playlists, trackId } = action.data;
+  const tracks = trackId ? [trackId] : Object.keys(_.pickBy(state.selected));
   const { tracksById } = state;
 
   return {
@@ -128,10 +126,8 @@ const updateTracks = (state, action) => {
 };
 
 const setTrackChanges = (state, action) => {
-  const { labels, playlists } = action.data;
-  const tracks = Object.keys(_.pickBy(state.selected)).length
-    ? Object.keys(_.pickBy(state.selected))
-    : action.data.tracks;
+  const { labels, playlists, trackId } = action.data;
+  const tracks = trackId ? [trackId] : Object.keys(_.pickBy(state.selected));
   const {
     tracksById,
     changes: { labelsToAdd, labelsToRemove, playlistsToAdd, playlistsToRemove },
