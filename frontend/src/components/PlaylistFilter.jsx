@@ -10,11 +10,13 @@ import { showAll, showLiked, filterByPlaylist } from '../actions/filterActions';
 const stateSelector = createSelector(
   state => state.playlists,
   state => state.filter,
-  (playlists, filter) => ({
-    playlistsById: playlists.playlistsById,
-    playlists: playlists.ids,
-    filtered: filter.playlists,
-    filterType: filter.filterType,
+  ({ playlistsById, ids: playlistIds }, { playlists, filterType }) => ({
+    playlistsById: playlistsById,
+    playlists: playlistIds.filter(
+      id => !['deleted', 'untracked'].includes(playlistsById[id].type)
+    ),
+    filtered: playlists,
+    filterType,
   })
 );
 

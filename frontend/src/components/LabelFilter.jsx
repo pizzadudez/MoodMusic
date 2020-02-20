@@ -1,79 +1,84 @@
-import React, { memo, useCallback } from 'react';
+import React, { memo, useCallback, useState, useEffect } from 'react';
 import { createSelector } from 'reselect';
 import { useDispatch, useSelector } from 'react-redux';
 import styled from 'styled-components';
 
-import FilterButton from './common/FilterButton';
+import LabelButton from './common/LabelButtonControlled';
 import { filterByLabel, removeLabelFilter } from '../actions/filterActions';
 
 const stateSelector = createSelector(
   state => state.labels,
-  state => state.filter,
-  (labels, filter) => ({
-    labelsById: labels.labelsById,
-    filtered: filter.labels,
-    genreIds: labels.ids.filter(id => labels.labelsById[id].type === 'genre'),
-    moodIds: labels.ids.filter(id => labels.labelsById[id].type === 'mood'),
+  state => state.filter.labels,
+  ({ labelsById, ids: labelIds }, filter) => ({
+    labelsById,
+    genreIds: labelIds.filter(id => labelsById[id].type === 'genre'),
+    moodIds: labelIds.filter(id => labelsById[id].type === 'mood'),
+    filter,
   })
 );
 
 export default memo(() => {
-  // console.log('LabelFilter');
   const dispatch = useDispatch();
-  const { labelsById, filtered, genreIds, moodIds } = useSelector(
-    stateSelector
-  );
+  const { labelsById, genreIds, moodIds, filter } = useSelector(stateSelector);
 
-  const filter = useCallback(
-    id => e => {
-      dispatch(filterByLabel(id));
-    },
-    [dispatch]
-  );
-  const noFilter = useCallback(() => {
+  const include = useCallback(id => dispatch(filterByLabel(id, 'include')), [
+    dispatch,
+  ]);
+  const exclude = useCallback(id => dispatch(filterByLabel(id, 'exclude')), [
+    dispatch,
+  ]);
+  const resetFilter = useCallback(() => {
     dispatch(removeLabelFilter());
   }, [dispatch]);
 
   return (
     <Wrapper>
-      <button onClick={noFilter}>NO FILTER</button>
-      Genres
-      {genreIds.map(id => (
-        <React.Fragment key={'genreGroup_' + id}>
-          <FilterButton
+      <button onClick={resetFilter}>NO FILTER</button>
+      <div>
+        <h3>Genres</h3>
+        {genreIds.map(id =>
+          [id, ...(labelsById[id].subgenre_ids || [])].map(id => (
+            <LabelButton
+              key={id}
+              itemId={id}
+              color={labelsById[id].color}
+              left={include}
+              right={exclude}
+              state={
+                filter.include[id]
+                  ? 'add'
+                  : filter.exclude[id]
+                  ? 'remove'
+                  : false
+              }
+            >
+              {labelsById[id].name}
+            </LabelButton>
+          ))
+        )}
+      </div>
+      <div>
+        <h3>Moods</h3>
+        {moodIds.map(id => (
+          <LabelButton
             key={id}
-            id={id}
-            text={labelsById[id].name}
-            onClick={filter}
-            filter={filtered[id]}
-          />
-          {labelsById[id].subgenre_ids &&
-            labelsById[id].subgenre_ids.map(id => (
-              <FilterButton
-                key={id}
-                id={id}
-                text={labelsById[id].name}
-                onClick={filter}
-                filter={filtered[id]}
-              />
-            ))}
-        </React.Fragment>
-      ))}
-      Moods
-      {moodIds.map(id => (
-        <FilterButton
-          key={id}
-          id={id}
-          text={labelsById[id].name}
-          onClick={filter}
-          filter={filtered[id]}
-        />
-      ))}
+            itemId={id}
+            color={labelsById[id].color}
+            left={include}
+            right={exclude}
+            state={
+              filter.include[id] ? 'add' : filter.exclude[id] ? 'remove' : false
+            }
+          >
+            {labelsById[id].name}
+          </LabelButton>
+        ))}
+      </div>
     </Wrapper>
   );
 });
 
 const Wrapper = styled.div`
-  display: grid;
-  grid-template-columns: repeat(auto-fill, 60px);
+  display: flex;
+  flex-direction: column;
 `;

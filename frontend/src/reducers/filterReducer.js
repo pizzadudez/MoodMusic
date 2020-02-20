@@ -14,7 +14,10 @@ const initialState = {
   ids: [],
   byPlaylists: [],
   playlists: {},
-  labels: {},
+  labels: {
+    include: {},
+    exclude: {},
+  },
   filterType: 'all',
 };
 
@@ -47,7 +50,10 @@ export default (state = initialState, action) => {
       return {
         ...state,
         ids: state.byPlaylists,
-        labels: {},
+        labels: {
+          include: {},
+          exclude: {},
+        },
       };
     case FILTER_BY_PLAYLIST:
       return filterByPlaylist(state, action);
@@ -63,28 +69,29 @@ export default (state = initialState, action) => {
         filterType: 'playlist',
       };
     case MODIFY_LABEL_FILTER: {
-      const { labels } = state;
-      const { id, subgenreIds } = action;
+      const { include, exclude } = state.labels;
+      const { operation, id, subgenreIds } = action;
 
-      let newValue = undefined;
-      if (labels[id] === true) newValue = false;
-      else if (labels[id] === undefined) newValue = true;
-      const changeIds = Object.fromEntries(
-        [id, ...subgenreIds].map(id => [id, true])
-      );
+      const includeVal =
+        operation === 'include' ? (include[id] ? false : true) : false;
+      const excludeVal =
+        operation === 'exclude' ? (exclude[id] ? false : true) : false;
 
       return {
         ...state,
         labels: {
-          ...Object.fromEntries(
-            Object.keys(labels)
-              .filter(id => !changeIds[id])
-              .map(id => [id, labels[id]])
-          ),
-          ...(newValue !== undefined &&
-            Object.fromEntries(
-              Object.keys(changeIds).map(id => [id, newValue])
-            )),
+          include: {
+            ...include,
+            ...Object.fromEntries(
+              [id, ...subgenreIds].map(id => [id, includeVal])
+            ),
+          },
+          exclude: {
+            ...exclude,
+            ...Object.fromEntries(
+              [id, ...subgenreIds].map(id => [id, excludeVal])
+            ),
+          },
         },
       };
     }
@@ -106,8 +113,16 @@ const filterByPlaylist = (state, action) => {
   return filterByLabel(newState, action);
 };
 const filterByLabel = (state, action) => {
-  const { labels, byPlaylists } = state;
-  if (_.isEmpty(labels)) {
+  const {
+    labels: { include, exclude },
+    byPlaylists,
+  } = state;
+  const includeIsEmpty = _.isEmpty(_.pickBy(include));
+  const excludeIsEmpty = _.isEmpty(_.pickBy(exclude));
+  const includeOnly = !includeIsEmpty && excludeIsEmpty;
+  const excludeOnly = !excludeIsEmpty && includeIsEmpty;
+
+  if (includeIsEmpty && excludeIsEmpty) {
     return {
       ...state,
       ids: byPlaylists,
@@ -116,14 +131,12 @@ const filterByLabel = (state, action) => {
 
   const { tracksById } = action;
   let filtered = [];
-  const inclusiveOnly = !Object.values(labels).some(val => !val);
-  const exclusiveOnly = !Object.values(labels).some(val => val);
-  if (inclusiveOnly || exclusiveOnly) {
+  if (includeOnly || excludeOnly) {
     filtered = byPlaylists.filter(id => {
       const trackLabels = tracksById[id].label_ids;
-      return exclusiveOnly
-        ? !trackLabels.some(id => labels[id] === false)
-        : trackLabels.some(id => labels[id] === true);
+      return includeOnly
+        ? trackLabels.some(id => include[id])
+        : !trackLabels.some(id => exclude[id]);
     });
   } else {
     filtered = byPlaylists.filter(id => {
@@ -131,10 +144,10 @@ const filterByLabel = (state, action) => {
       let excludes = false;
       const trackLabels = tracksById[id].label_ids;
       for (let i = 0; i < trackLabels.length; i++) {
-        if (labels[trackLabels[i]] === false) {
+        if (exclude[trackLabels[i]]) {
           excludes = true;
           break;
-        } else if (labels[trackLabels[i]] === true) {
+        } else if (include[trackLabels[i]]) {
           includes = true;
         }
       }

@@ -42,9 +42,10 @@ export const showLiked = () => (dispatch, getState) => {
   });
 };
 // Label Filter
-export const filterByLabel = id => (dispatch, getState) => {
+export const filterByLabel = (id, operation) => (dispatch, getState) => {
   dispatch({
     type: MODIFY_LABEL_FILTER,
+    operation,
     id: parseInt(id),
     subgenreIds: getState().labels.labelsById[id].subgenre_ids || [],
   });
