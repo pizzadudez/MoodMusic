@@ -11,7 +11,9 @@ export default (state = initialState, action) => {
       return {
         ...state,
         labelsById: action.payload,
-        ids: Object.keys(action.payload),
+        ids: Object.entries(action.payload)
+          .sort((a, b) => b[1].track_count - a[1].track_count)
+          .map(([key, val]) => key),
       };
     case CREATE_LABEL: {
       const label = action.label;

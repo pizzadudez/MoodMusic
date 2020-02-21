@@ -1,7 +1,11 @@
 const db = require('./db').conn();
 
 exports.getAll = (byId = false) => {
-  const selectSql = `SELECT l.*, p.id as playlist_id
+  const selectSql = `SELECT l.*, p.id as playlist_id, (
+      SELECT count(label_id) 
+      FROM tracks_labels tl
+      WHERE tl.label_id = l.id
+    ) as track_count
     FROM labels l LEFT JOIN playlists p
     ON l.id = p.label_id
     ORDER BY l.id`;

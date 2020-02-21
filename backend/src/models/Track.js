@@ -87,7 +87,6 @@ exports.getAll = async (byId = false) => {
         const order = Object.fromEntries(
           rows.map((row, idx) => [row.label_id, idx])
         );
-        console.log(order);
         db.all(labelSQL, (err, rows) => {
           if (err) {
             reject(new Error(err.message));
