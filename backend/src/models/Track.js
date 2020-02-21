@@ -2,24 +2,28 @@ const db = require('./db').conn();
 
 exports.getAll = async (byId = false) => {
   const trackSQL = `SELECT id, name, artist, added_at, 
-                    rating, liked, album_id as album
-                    FROM tracks ORDER BY added_at DESC`;
+    rating, liked, album_id as album
+    FROM tracks ORDER BY added_at DESC`;
   const playlistSQL = `SELECT DISTINCT track_id, 
-                       group_concat(playlist_id) OVER (
-                         PARTITION BY track_id 
-                         ORDER BY added_at ASC 
-                         ROWS BETWEEN UNBOUNDED PRECEDING 
-                         AND UNBOUNDED FOLLOWING
-                       ) as playlists
-                       FROM tracks_playlists`;
+    group_concat(playlist_id) OVER (
+      PARTITION BY track_id 
+      ORDER BY added_at ASC 
+      ROWS BETWEEN UNBOUNDED PRECEDING 
+      AND UNBOUNDED FOLLOWING
+    ) as playlists
+    FROM tracks_playlists`;
   const labelSQL = `SELECT DISTINCT track_id, 
-                    group_concat(label_id) OVER (
-                      PARTITION BY track_id 
-                      ORDER BY added_at ASC 
-                      ROWS BETWEEN UNBOUNDED PRECEDING 
-                      AND UNBOUNDED FOLLOWING
-                    ) as labels
-                    FROM tracks_labels`;
+    group_concat(label_id) OVER (
+      PARTITION BY track_id 
+      ORDER BY added_at ASC 
+      ROWS BETWEEN UNBOUNDED PRECEDING 
+      AND UNBOUNDED FOLLOWING
+    ) as labels
+    FROM tracks_labels`;
+  const playlistOrderSql = `SELECT id, track_count FROM playlists
+    ORDER BY track_count DESC`;
+  const labelOrderSql = `SELECT label_id FROM tracks_labels
+    GROUP BY label_id ORDER BY count(label_id) DESC`;
 
   const tracks = new Promise((resolve, reject) => {
     db.all(trackSQL, (err, rows) => {
@@ -54,26 +58,52 @@ exports.getAll = async (byId = false) => {
     });
   });
   const playlists = new Promise((resolve, reject) => {
-    db.all(playlistSQL, (err, rows) => {
+    db.all(playlistOrderSql, (err, rows) => {
       if (err) {
         reject(new Error(err.message));
       } else {
-        const trackPlaylists = Object.fromEntries(
-          rows.map(row => [row.track_id, row.playlists.split(',')])
-        );
-        resolve(trackPlaylists);
+        const order = Object.fromEntries(rows.map((row, idx) => [row.id, idx]));
+        db.all(playlistSQL, (err, rows) => {
+          if (err) {
+            reject(new Error(err.message));
+          } else {
+            const trackPlaylists = Object.fromEntries(
+              rows.map(row => [
+                row.track_id,
+                row.playlists.split(',').sort((a, b) => order[a] - order[b]),
+              ])
+            );
+            resolve(trackPlaylists);
+          }
+        });
       }
     });
   });
   const labels = new Promise((resolve, reject) => {
-    db.all(labelSQL, (err, rows) => {
+    db.all(labelOrderSql, (err, rows) => {
       if (err) {
         reject(new Error(err.message));
       } else {
-        const trackLabels = Object.fromEntries(
-          rows.map(row => [row.track_id, row.labels.split(',').map(Number)])
+        const order = Object.fromEntries(
+          rows.map((row, idx) => [row.label_id, idx])
         );
-        resolve(trackLabels);
+        console.log(order);
+        db.all(labelSQL, (err, rows) => {
+          if (err) {
+            reject(new Error(err.message));
+          } else {
+            const trackLabels = Object.fromEntries(
+              rows.map(row => [
+                row.track_id,
+                row.labels
+                  .split(',')
+                  .map(Number)
+                  .sort((a, b) => order[a] - order[b]),
+              ])
+            );
+            resolve(trackLabels);
+          }
+        });
       }
     });
   });

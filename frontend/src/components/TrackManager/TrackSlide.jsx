@@ -69,9 +69,11 @@ export default memo(({ track, checked, widthRestriction, setOpenTrack }) => {
             color={labelsById[id].color}
           />
         ))}
-        {track.playlist_ids.map(id => (
-          <Label key={'playlist_' + id} name={playlistsById[id].name} />
-        ))}
+        {track.playlist_ids
+          .filter(id => playlistsById[id].type === 'mix')
+          .map(id => (
+            <Label key={'playlist_' + id} name={playlistsById[id].name} />
+          ))}
         {/* <div
           style={{ background: '#353535', width: '100%', height: '100%' }}
         ></div> */}

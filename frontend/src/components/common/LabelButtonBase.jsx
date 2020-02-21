@@ -7,12 +7,7 @@ import AddCircleIcon from '@material-ui/icons/AddCircle';
 import CheckCircleIcon from '@material-ui/icons/CheckCircle';
 
 export default memo(({ leftClick, rightClick, color, state, children }) => (
-  <StyledButton
-    onClick={leftClick}
-    onContextMenu={rightClick}
-    color={color}
-    state={state}
-  >
+  <StyledButton onClick={leftClick} onContextMenu={rightClick} color={color}>
     {
       {
         add: <AddCircleIcon style={{ color: '#57ff57' }} />,
@@ -25,7 +20,7 @@ export default memo(({ leftClick, rightClick, color, state, children }) => (
   </StyledButton>
 ));
 
-const _StyledButton = ({ state, color, ...rest }) => (
+const _StyledButton = ({ color, ...rest }) => (
   <Button variant="contained" {...rest} />
 );
 const StyledButton = styled(_StyledButton)`
