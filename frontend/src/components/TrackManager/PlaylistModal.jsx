@@ -5,7 +5,7 @@ import { createSelector } from 'reselect';
 
 import { updateTracks } from '../../actions/trackActions';
 import Dialog from '@material-ui/core/Dialog';
-import LabelButton from '../common/LabelButton';
+import LabelButton from './LabelButton';
 import Button from '../common/Button';
 
 const stateSelector = createSelector(

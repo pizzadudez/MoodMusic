@@ -3,8 +3,8 @@ import { createSelector } from 'reselect';
 import { useDispatch, useSelector } from 'react-redux';
 import styled from 'styled-components';
 
-import LabelButton from './common/LabelButtonControlled';
-import { filterByLabel, removeLabelFilter } from '../actions/filterActions';
+import LabelButton from './LabelButton';
+import { filterByLabel, removeLabelFilter } from '../../actions/filterActions';
 
 const stateSelector = createSelector(
   state => state.labels,
@@ -42,8 +42,8 @@ export default memo(() => {
               key={id}
               itemId={id}
               color={labelsById[id].color}
-              left={include}
-              right={exclude}
+              include={include}
+              exclude={exclude}
               state={
                 filter.include[id]
                   ? 'add'

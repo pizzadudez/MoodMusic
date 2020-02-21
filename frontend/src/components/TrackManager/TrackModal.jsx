@@ -6,7 +6,7 @@ import styled from 'styled-components';
 import _ from 'lodash';
 
 import { updateTracks } from '../../actions/trackActions';
-import LabelButton from '../common/LabelButton2';
+import LabelButton from './LabelButtonTrack';
 import Button from '../common/Button';
 
 const stateSelector = createSelector(
