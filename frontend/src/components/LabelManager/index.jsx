@@ -30,11 +30,7 @@ export default memo(() => {
       <div>Search bar and buttons here</div>
       <LabelContainer>
         {labels.map(id => (
-          <LabelCard
-            key={id}
-            label={labelsById[id]}
-            updateLabel={updateLabel}
-          />
+          <LabelCard key={id} label={labelsById[id]} update={updateLabel} />
         ))}
       </LabelContainer>
     </Wrapper>

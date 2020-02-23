@@ -9,13 +9,21 @@ import { useState } from 'react';
 import { useCallback } from 'react';
 import { Transition } from 'react-transition-group';
 
-export default memo(({ label }) => {
+export default memo(({ label, update }) => {
+  console.log('>LabelCard');
   const [formOpen, setFormOpen] = useState(false);
-  const toggle = useCallback(() => setFormOpen(open => !open), []);
+  const toggle = useCallback(() => setFormOpen(open => !open), [setFormOpen]);
+  const close = useCallback(
+    e => {
+      e.preventDefault();
+      setFormOpen(false);
+    },
+    [setFormOpen]
+  );
 
   return (
     <Paper>
-      <InfoContainer>
+      <Container>
         <div style={{ display: 'flex', flexWrap: 'nowrap' }}>
           <StyledLabel color={label.color} name={label.name} />
           <span>{label.verbose || label.name}</span>
@@ -29,7 +37,7 @@ export default memo(({ label }) => {
           {label.parent_id && <li>Genre: {label.parent_id}</li>}
           {label.subgenre_ids && <li>subgenres: {label.subgenre_ids}</li>}
         </div>
-      </InfoContainer>
+      </Container>
       <Transition in={formOpen} timeout={500}>
         {state => (
           <FormContainer state={state}>
@@ -43,28 +51,20 @@ export default memo(({ label }) => {
 
 const Paper = styled.div`
   display: flex;
-  height: 311px;
   background-color: #353535;
   color: white;
+  min-height: 280px;
+  min-width: 340px;
+  transition: width 0.15s ease-in-out;
+  padding: 6px;
   margin: 4px;
   border-radius: 4px;
   box-shadow: 0px 2px 1px -1px rgba(0, 0, 0, 0.2),
     0px 1px 1px 0px rgba(0, 0, 0, 0.14), 0px 1px 3px 0px rgba(0, 0, 0, 0.12);
 `;
-const InfoContainer = styled.div`
+const Container = styled.div`
   display: flex;
   flex-direction: column;
-  width: 300px;
-  padding: 6px;
-`;
-const FormContainer = styled.div`
-  padding: 6px;
-  background: #3e3e3e;
-  overflow: hidden;
-  transition: 0.5s;
-  opacity: ${props => (props.state === 'exited' ? 0 : 1)};
-  width: ${props =>
-    ['entering', 'entered'].includes(props.state) ? 500 : 0}px;
 `;
 const StyledLabel = styled(Label)`
   cursor: default;
@@ -74,4 +74,12 @@ const StyledLabel = styled(Label)`
   span {
     padding: 0 12px;
   }
+`;
+const FormContainer = styled.div`
+  transition: 0.5s;
+  overflow: hidden;
+  background: green;
+  padding: ${props => (props.state === 'exited' ? 0 : 3)}px;
+  width: ${props =>
+    ['entering', 'entered'].includes(props.state) ? 400 : 0}px;
 `;

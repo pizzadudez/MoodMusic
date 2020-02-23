@@ -20,10 +20,9 @@ exports.getAll = async (byId = false) => {
       AND UNBOUNDED FOLLOWING
     ) as labels
     FROM tracks_labels`;
-  const playlistOrderSql = `SELECT id, track_count FROM playlists
-    ORDER BY track_count DESC`;
-  const labelOrderSql = `SELECT label_id FROM tracks_labels
-    GROUP BY label_id ORDER BY count(label_id) DESC`;
+  const playlistOrderSql = 'SELECT id, track_count FROM playlists';
+  const labelOrderSql = `SELECT label_id, count(label_id) as track_count
+    FROM tracks_labels GROUP BY label_id`;
 
   const tracks = new Promise((resolve, reject) => {
     db.all(trackSQL, (err, rows) => {
@@ -62,7 +61,9 @@ exports.getAll = async (byId = false) => {
       if (err) {
         reject(new Error(err.message));
       } else {
-        const order = Object.fromEntries(rows.map((row, idx) => [row.id, idx]));
+        const trackCount = Object.fromEntries(
+          rows.map(row => [row.id, row.track_count])
+        );
         db.all(playlistSQL, (err, rows) => {
           if (err) {
             reject(new Error(err.message));
@@ -70,7 +71,9 @@ exports.getAll = async (byId = false) => {
             const trackPlaylists = Object.fromEntries(
               rows.map(row => [
                 row.track_id,
-                row.playlists.split(',').sort((a, b) => order[a] - order[b]),
+                row.playlists
+                  .split(',')
+                  .sort((a, b) => trackCount[b] - trackCount[a]),
               ])
             );
             resolve(trackPlaylists);
@@ -84,8 +87,8 @@ exports.getAll = async (byId = false) => {
       if (err) {
         reject(new Error(err.message));
       } else {
-        const order = Object.fromEntries(
-          rows.map((row, idx) => [row.label_id, idx])
+        const trackCount = Object.fromEntries(
+          rows.map(row => [row.label_id, row.track_count])
         );
         db.all(labelSQL, (err, rows) => {
           if (err) {
@@ -97,7 +100,7 @@ exports.getAll = async (byId = false) => {
                 row.labels
                   .split(',')
                   .map(Number)
-                  .sort((a, b) => order[a] - order[b]),
+                  .sort((a, b) => trackCount[b] - trackCount[a]),
               ])
             );
             resolve(trackLabels);

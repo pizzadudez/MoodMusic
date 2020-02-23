@@ -18,6 +18,7 @@ export default memo(({ label, options, ...props }) => {
       variant="outlined"
       size="small"
       label={label}
+      fullWidth
     >
       {options.map(option => (
         <MenuItem key={option.id} value={option.id}>
@@ -29,7 +30,7 @@ export default memo(({ label, options, ...props }) => {
 });
 
 const StyledTextField = styled(TextField)`
-  /* width: 100%; */
+  min-width: 200px;
   .MuiInputBase-root {
     color: white;
   }

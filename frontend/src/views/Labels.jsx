@@ -8,9 +8,9 @@ import LabelForm from '../components/LabelForm';
 export default memo(() => {
   return (
     <Content>
-      <ContainerColumn>
+      {/* <ContainerColumn>
         <LabelForm />
-      </ContainerColumn>
+      </ContainerColumn> */}
       <ContainerColumn>
         <LabelManager />
       </ContainerColumn>
@@ -21,7 +21,7 @@ export default memo(() => {
 const Content = styled.div`
   min-height: 0;
   display: grid;
-  grid-template-columns: minmax(370px, 430px) minmax(700px, 60%);
+  grid-template-columns: minmax(700px, 80%) minmax(370px, 430px);
   column-gap: 10px;
   margin: 0 4px;
 `;

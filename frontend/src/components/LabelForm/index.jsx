@@ -10,6 +10,7 @@ import ColorPicker from './ColorPicker';
 import TextField from '../common/TextField';
 import RadioGroup from '../common/RadioGroup';
 import Select from '../common/Select';
+import Label from '../common/Label';
 import { createLabel, updateLabel } from '../../actions/labelActions';
 
 const validationSchema = yup.object().shape({
@@ -30,14 +31,14 @@ const stateSelector = createSelector(
   })
 );
 
-export default memo(() => {
+export default memo(({ id }) => {
   console.log('LabelForm');
   const dispatch = useDispatch();
   const { updatingLabelId, labelsById, genres } = useSelector(stateSelector);
 
   const initialValues = useMemo(() => {
-    if (updatingLabelId) {
-      const l = labelsById[updatingLabelId];
+    if (id || updatingLabelId) {
+      const l = labelsById[id || updatingLabelId];
       return {
         name: l.name,
         verbose: l.verbose || '',
@@ -48,30 +49,31 @@ export default memo(() => {
       };
     }
     return defaultValues;
-  }, [updatingLabelId, labelsById]);
+  }, [id, updatingLabelId, labelsById]);
 
   return (
-    <Wrapper>
-      <Formik
-        initialValues={initialValues}
-        enableReinitialize
-        validationSchema={validationSchema}
-        onSubmit={async (data, { setSubmitting, resetForm }) => {
-          setSubmitting(true);
-          if (updatingLabelId) {
-            await dispatch(updateLabel(updatingLabelId, data));
-          } else {
-            await dispatch(createLabel(data));
-          }
-          setSubmitting(false);
-          resetForm();
-        }}
-      >
-        {({ values, isSubmitting, handleSubmit }) => (
-          <StyledForm>
+    <Formik
+      initialValues={initialValues}
+      enableReinitialize
+      validationSchema={validationSchema}
+      onSubmit={async (data, { setSubmitting, resetForm }) => {
+        setSubmitting(true);
+        if (id || updatingLabelId) {
+          await dispatch(updateLabel(id || updatingLabelId, data));
+        } else {
+          await dispatch(createLabel(data));
+        }
+        setSubmitting(false);
+        resetForm();
+      }}
+    >
+      {({ values, isSubmitting, handleSubmit }) => (
+        <StyledForm>
+          <Grid>
+            <StyledLabel color={values.color} name={values.name} />
             <Field name="name" label="Name" as={TextField} />
             <Field name="verbose" label="Verbose" as={TextField} />
-            {!updatingLabelId && (
+            {!id && !updatingLabelId && (
               <Field name="type" options={labelTypes} as={RadioGroup} />
             )}
             {values.type === 'subgenre' && (
@@ -85,28 +87,36 @@ export default memo(() => {
                 <Field name="suffix" label="Suffix" as={TextField} />
               </>
             )}
-            <Field name="color" as={ColorPicker} />
+
             <Button type="submit" onClick={handleSubmit}>
               {isSubmitting ? 'Submitting...' : 'Submit'}
             </Button>
-            {/* <div>
+          </Grid>
+          <Field name="color" as={ColorPicker} />
+          {/* <div>
               <pre>{JSON.stringify(values, null, 2)}</pre>
               <pre>{JSON.stringify(errors, null, 2)}</pre>
             </div> */}
-          </StyledForm>
-        )}
-      </Formik>
-    </Wrapper>
+        </StyledForm>
+      )}
+    </Formik>
   );
 });
 
 const StyledForm = styled(Form)`
   display: grid;
-  grid-template-rows: repeat(auto-fit, auto);
-  grid-row-gap: 12px;
+  grid-template-columns: 1fr min-content;
+  column-gap: 6px;
 `;
-const Wrapper = styled.div`
-  height: 100%;
+const Grid = styled.div``;
+const StyledLabel = styled(Label)`
+  cursor: default;
+  height: 56px;
+  min-width: 86px;
+  font-size: 1rem;
+  span {
+    padding: 0 12px;
+  }
 `;
 
 const defaultValues = {

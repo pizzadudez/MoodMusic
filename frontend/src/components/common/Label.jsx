@@ -3,7 +3,9 @@ import styled from 'styled-components';
 
 import Chip from '@material-ui/core/Chip';
 
-export default memo(({ color, name }) => <Label label={name} color={color} />);
+export default memo(({ className, color, name }) => (
+  <Label className={className} label={name} color={color} />
+));
 
 const _Label = ({ color, name, ...rest }) => <Chip {...rest} />;
 const Label = styled(_Label)`
