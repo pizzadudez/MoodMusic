@@ -2,36 +2,30 @@ import React, { memo } from 'react';
 import styled from 'styled-components';
 
 import TextField from '@material-ui/core/TextField';
-import MenuItem from '@material-ui/core/MenuItem';
 import { useField } from 'formik';
 
-export default memo(({ label, options, ...props }) => {
-  const [field, meta] = useField(props);
+export default memo(({ className, label, ...props }) => {
+  const [_, meta] = useField(props);
   const errorText = meta.error && meta.touched ? meta.error : '';
 
   return (
     <StyledTextField
-      {...props}
+      fullWidth
+      className={className}
+      label={label}
       helperText={errorText}
       error={!!errorText}
-      select
       variant="outlined"
       size="small"
-      label={label}
-      fullWidth
-    >
-      {options.map(option => (
-        <MenuItem key={option.id} value={option.id}>
-          {option.name}
-        </MenuItem>
-      ))}
-    </StyledTextField>
+      autoComplete="off"
+      {...props}
+    />
   );
 });
 
 const StyledTextField = styled(TextField)`
-  /* min-width: 200px; */
-  .MuiInputBase-root {
+  margin-top: 10px;
+  input {
     color: white;
   }
   label {
@@ -51,7 +45,9 @@ const StyledTextField = styled(TextField)`
       border-color: lightgray;
     }
   }
-  input {
-    color: white;
+  .MuiFormHelperText-contained {
+    margin: 4px 0 0;
+    display: flex;
+    justify-content: flex-end;
   }
 `;

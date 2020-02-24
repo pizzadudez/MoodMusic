@@ -4,14 +4,13 @@ import styled from 'styled-components';
 import Button from '../common/Button';
 import ExpandButton from '../common/ExpandButton';
 import Label from '../common/Label';
-import LabelForm from '../LabelForm';
+import LabelForm from './LabelForm';
 import { useState } from 'react';
 import { useCallback } from 'react';
 import { Transition } from 'react-transition-group';
 
-export default memo(({ label }) => {
-  const [formOpen, setFormOpen] = useState(false);
-  const toggle = useCallback(() => setFormOpen(open => !open), []);
+export default memo(({ label, update, formOpen }) => {
+  const toggle = useCallback(() => update(label.id), [update, label.id]);
 
   return (
     <Paper>
@@ -30,20 +29,15 @@ export default memo(({ label }) => {
           {label.subgenre_ids && <li>subgenres: {label.subgenre_ids}</li>}
         </div>
       </InfoContainer>
-      <Transition in={formOpen} timeout={500}>
-        {state => (
-          <FormContainer state={state}>
-            {!(state === 'exited') && <LabelForm id={label.id} />}
-          </FormContainer>
-        )}
-      </Transition>
+      <LabelForm id={label.id} close={toggle} isOpen={formOpen} />
     </Paper>
   );
 });
 
 const Paper = styled.div`
+  height: 350px;
   display: flex;
-  height: 311px;
+  overflow: hidden;
   background-color: #353535;
   color: white;
   margin: 4px;
@@ -56,15 +50,6 @@ const InfoContainer = styled.div`
   flex-direction: column;
   width: 300px;
   padding: 6px;
-`;
-const FormContainer = styled.div`
-  padding: 6px;
-  background: #3e3e3e;
-  overflow: hidden;
-  transition: 0.5s;
-  opacity: ${props => (props.state === 'exited' ? 0 : 1)};
-  width: ${props =>
-    ['entering', 'entered'].includes(props.state) ? 500 : 0}px;
 `;
 const StyledLabel = styled(Label)`
   cursor: default;

@@ -1,9 +1,11 @@
-import React, { memo, useCallback } from 'react';
+import React, { memo, useCallback, useState } from 'react';
 import { createSelector } from 'reselect';
 import { useSelector, useDispatch } from 'react-redux';
 import styled from 'styled-components';
 
+import Button from '../common/Button';
 import LabelCard from './LabelCard';
+import LabelForm from './LabelForm';
 import { selectLabelToUpdate } from '../../actions/labelActions';
 
 const stateSelector = createSelector(
@@ -14,23 +16,39 @@ const stateSelector = createSelector(
 );
 
 export default memo(() => {
-  console.log('LabelManager');
   const dispatch = useDispatch();
   const { labelsById, labels, tracksById } = useSelector(stateSelector);
 
-  const updateLabel = useCallback(
-    id => e => {
-      dispatch(selectLabelToUpdate(id));
-    },
-    [dispatch]
-  );
+  const [createForm, setCreateForm] = useState(false);
+  const [updateForm, setUpdateForm] = useState(false);
+  const update = useCallback(id => {
+    setCreateForm(false);
+    setUpdateForm(prev => (prev === id ? false : id));
+  }, []);
+  const create = useCallback(() => {
+    setUpdateForm(false);
+    setCreateForm(true);
+  }, []);
+  const close = useCallback(() => {
+    setCreateForm(false);
+    setUpdateForm(false);
+  }, []);
 
   return (
     <Wrapper>
-      <div>Search bar and buttons here</div>
+      <div>
+        Search bar and buttons here
+        <Button onClick={create}>New Label</Button>
+      </div>
       <LabelContainer>
+        <LabelForm close={close} isOpen={createForm} />
         {labels.map(id => (
-          <LabelCard key={id} label={labelsById[id]} update={updateLabel} />
+          <LabelCard
+            key={id}
+            label={labelsById[id]}
+            update={update}
+            formOpen={updateForm === id}
+          />
         ))}
       </LabelContainer>
     </Wrapper>

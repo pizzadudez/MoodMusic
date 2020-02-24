@@ -13,7 +13,7 @@ export default (state = initialState, action) => {
         labelsById: action.payload,
         ids: Object.entries(action.payload)
           .sort((a, b) => b[1].track_count - a[1].track_count)
-          .map(([key, _]) => key),
+          .map(([key, _]) => parseInt(key)),
       };
     case CREATE_LABEL: {
       const label = action.label;

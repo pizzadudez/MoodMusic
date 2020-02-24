@@ -15,14 +15,13 @@ export default memo(({ onClick, highlight, children, disabled }) => (
 
 const StyledButton = styled(Button)`
   color: #000;
-  margin: 0 4px;
   font-size: 1em;
   letter-spacing: normal;
   text-transform: none;
   &.MuiButton-contained {
-    background-color: ${props => (props.highlight ? '#94ff5d' : '#5dff5d')};
+    background-color: ${props => (props.highlight ? '#94ff5d' : '#04ff58')};
   }
   &.MuiButton-contained:hover {
-    background-color: ${props => (props.highlight ? '#67e824' : '#34d434')};
+    background-color: ${props => (props.highlight ? '#67e824' : '#35ff79')};
   }
 `;

@@ -5,20 +5,21 @@ import TextField from '@material-ui/core/TextField';
 import MenuItem from '@material-ui/core/MenuItem';
 import { useField } from 'formik';
 
-export default memo(({ label, options, ...props }) => {
-  const [field, meta] = useField(props);
+export default memo(({ className, label, options, ...props }) => {
+  const [_, meta] = useField(props);
   const errorText = meta.error && meta.touched ? meta.error : '';
 
   return (
     <StyledTextField
-      {...props}
+      fullWidth
+      className={className}
       helperText={errorText}
       error={!!errorText}
       select
       variant="outlined"
       size="small"
       label={label}
-      fullWidth
+      {...props}
     >
       {options.map(option => (
         <MenuItem key={option.id} value={option.id}>
@@ -30,7 +31,7 @@ export default memo(({ label, options, ...props }) => {
 });
 
 const StyledTextField = styled(TextField)`
-  /* min-width: 200px; */
+  margin-top: 10px;
   .MuiInputBase-root {
     color: white;
   }
@@ -53,5 +54,6 @@ const StyledTextField = styled(TextField)`
   }
   input {
     color: white;
+    min-width: 0;
   }
 `;
