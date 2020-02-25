@@ -64,8 +64,8 @@ export default memo(() => {
             key={id}
             itemId={id}
             color={labelsById[id].color}
-            left={include}
-            right={exclude}
+            include={include}
+            exclude={exclude}
             state={
               filter.include[id] ? 'add' : filter.exclude[id] ? 'remove' : false
             }

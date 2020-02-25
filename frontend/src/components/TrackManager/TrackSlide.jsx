@@ -103,7 +103,7 @@ const Slide = styled.div`
   width: 100%;
   outline: 1px solid #7777771f;
   padding: 4px 0;
-  padding-right: 15px;
+  /* padding-right: 15px; */
 `;
 const Column = styled.div`
   display: grid;

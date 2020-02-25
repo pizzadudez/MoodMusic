@@ -14,21 +14,23 @@ export default memo(({ label, update, formOpen }) => {
 
   return (
     <Paper>
-      <InfoContainer>
-        <div style={{ display: 'flex', flexWrap: 'nowrap' }}>
+      <Card>
+        <Header>
+          <h2 style={{ textAlign: 'center', margin: 0 }}>
+            {label.verbose || label.name}
+          </h2>
           <StyledLabel color={label.color} name={label.name} />
-          <span>{label.verbose || label.name}</span>
           <ExpandButton onClick={toggle} expanded={formOpen}>
             Update
           </ExpandButton>
-        </div>
-        <div>
+        </Header>
+        <Details>
           <li>Type: {label.type}</li>
           {label.playlist_id && <li>Playlist: {label.playlist_id}</li>}
           {label.parent_id && <li>Genre: {label.parent_id}</li>}
           {label.subgenre_ids && <li>subgenres: {label.subgenre_ids}</li>}
-        </div>
-      </InfoContainer>
+        </Details>
+      </Card>
       <LabelForm id={label.id} close={toggle} isOpen={formOpen} />
     </Paper>
   );
@@ -45,12 +47,20 @@ const Paper = styled.div`
   box-shadow: 0px 2px 1px -1px rgba(0, 0, 0, 0.2),
     0px 1px 1px 0px rgba(0, 0, 0, 0.14), 0px 1px 3px 0px rgba(0, 0, 0, 0.12);
 `;
-const InfoContainer = styled.div`
+const Card = styled.div`
+  width: 300px;
   display: flex;
   flex-direction: column;
-  width: 300px;
   padding: 6px;
 `;
+const Header = styled.div`
+  display: grid;
+  grid-template-columns: 1fr min-content min-content;
+  align-items: center;
+  margin-bottom: 12px;
+`;
+const Details = styled.div``;
+
 const StyledLabel = styled(Label)`
   cursor: default;
   height: 56px;

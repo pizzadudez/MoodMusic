@@ -9,7 +9,8 @@ import React, {
 import { createSelector } from 'reselect';
 import { useSelector, useDispatch } from 'react-redux';
 import styled from 'styled-components';
-import { AutoSizer, List } from 'react-virtualized';
+import { AutoSizer, List, WindowScroller } from 'react-virtualized';
+import { Scrollbars } from 'react-custom-scrollbars';
 import _ from 'lodash';
 
 import TrackSlide from './TrackSlide';
@@ -76,6 +77,16 @@ export default memo(() => {
     setPlaylistModalOpen,
   ]);
 
+  // React Custom Scrollbars
+  const listRef = useRef(null);
+  const handleScroll = useCallback(
+    ({ target: { scrollTop, scrollLeft } }) => {
+      // const { scrollTop, scrollLeft } = target;
+      listRef.current.Grid.handleScrollEvent({ scrollTop, scrollLeft });
+    },
+    [listRef.current]
+  );
+
   return (
     <Wrapper>
       <TrackModal open={trackModalOpen} setOpen={setTrackModalOpen} />
@@ -89,23 +100,29 @@ export default memo(() => {
       <div ref={sizeRef}>
         <AutoSizer>
           {({ height, width }) => (
-            <List
-              height={height}
-              width={width}
-              rowCount={filtered.length}
-              rowHeight={48}
-              rowRenderer={({ key, index, style, isScrolling, isVisible }) => (
-                <div key={key} style={style}>
-                  <TrackSlide
-                    track={tracksById[filtered[index]]}
-                    checked={selected[filtered[index]] || false}
-                    widthRestriction={widthRestriction}
-                    setOpenTrack={setTrackModalOpen}
-                  />
-                </div>
-              )}
-              style={{ outline: 'none' }}
-            />
+            <Scrollbars
+              style={{ height, width: width + 5 }}
+              onScroll={handleScroll}
+            >
+              <List
+                ref={listRef}
+                height={height}
+                width={width}
+                rowCount={filtered.length}
+                rowHeight={48}
+                rowRenderer={({ key, index, style }) => (
+                  <div key={key} style={style}>
+                    <TrackSlide
+                      track={tracksById[filtered[index]]}
+                      checked={selected[filtered[index]] || false}
+                      widthRestriction={widthRestriction}
+                      setOpenTrack={setTrackModalOpen}
+                    />
+                  </div>
+                )}
+                style={{ outline: 'none', overflowX: false, overflowY: false }}
+              />
+            </Scrollbars>
           )}
         </AutoSizer>
       </div>
