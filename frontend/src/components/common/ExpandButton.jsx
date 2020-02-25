@@ -30,6 +30,6 @@ const StyledButton = styled(_StyledButton)`
   }
   .MuiButton-label .MuiSvgIcon-root {
     transform: ${props => 'rotate(' + (props.expanded ? 90 : 270) + 'deg)'};
-    transition: transform 150ms cubic-bezier(0.4, 0, 0.2, 1) 0ms;
+    transition: transform 0.5s cubic-bezier(0.4, 0, 0.2, 1) 0ms;
   }
 `;

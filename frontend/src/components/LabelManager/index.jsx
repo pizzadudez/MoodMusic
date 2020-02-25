@@ -2,6 +2,9 @@ import React, { memo, useCallback, useState } from 'react';
 import { createSelector } from 'reselect';
 import { useSelector, useDispatch } from 'react-redux';
 import styled from 'styled-components';
+import { Scrollbars } from 'react-custom-scrollbars';
+import { Scrollbar } from 'react-scrollbars-custom';
+import { AutoSizer } from 'react-virtualized';
 
 import Button from '../common/Button';
 import LabelCard from './LabelCard';
@@ -56,7 +59,7 @@ export default memo(() => {
 });
 
 const Wrapper = styled.div`
-  max-height: 100%;
+  height: 100%;
   display: grid;
   grid-template-rows: 50px calc(100% - 56px);
   grid-row-gap: 6px;

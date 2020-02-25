@@ -38,7 +38,7 @@ export default memo(({ label, update, formOpen }) => {
 
 const Paper = styled.div`
   height: 350px;
-  display: flex;
+  display: inline-flex;
   overflow: hidden;
   background-color: #353535;
   color: white;

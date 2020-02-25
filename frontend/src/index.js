@@ -11,12 +11,27 @@ const GlobalStyle = createGlobalStyle`
     font-family: "Raleway","Proxima Nova","Montserrat",
     "Segoe UI",Roboto,Oxygen-Sans,
     Ubuntu,Cantarell,"Helvetica Neue",sans-serif;
+    /* Scrollbar */
+    --scrollbarBG: #3838384a;
+    --thumbBG: #6aff6a;
   }
   body {
     margin: 0;
     padding: 0;
     background-color: #333;
     overflow: hidden;
+  }
+  /* Scrollbar */
+  ::-webkit-scrollbar {
+    width: 6px;
+  }
+  ::-webkit-scrollbar-track {
+    background: var(--scrollbarBG);
+  }
+  ::-webkit-scrollbar-thumb {
+    background-color: var(--thumbBG) ;
+    border-radius: 6px;
+    border: 3px solid var(--scrollbarBG);
   }
 `;
 

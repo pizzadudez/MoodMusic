@@ -59,9 +59,6 @@ export default memo(({ track, checked, widthRestriction, setOpenTrack }) => {
         </Column>
       )}
       <ChipColumn onClick={openTrackModal}>
-        {/* <button style={{ width: 20 }} onClick={openTrackModal}>
-          Open
-        </button> */}
         {track.label_ids.map(id => (
           <Label
             key={'label' + id}
@@ -74,9 +71,6 @@ export default memo(({ track, checked, widthRestriction, setOpenTrack }) => {
           .map(id => (
             <Label key={'playlist_' + id} name={playlistsById[id].name} />
           ))}
-        {/* <div
-          style={{ background: '#353535', width: '100%', height: '100%' }}
-        ></div> */}
       </ChipColumn>
     </Slide>
   );
@@ -103,7 +97,6 @@ const Slide = styled.div`
   width: 100%;
   outline: 1px solid #7777771f;
   padding: 4px 0;
-  /* padding-right: 15px; */
 `;
 const Column = styled.div`
   display: grid;
@@ -119,8 +112,7 @@ const Column = styled.div`
 `;
 const ChipColumn = styled.div`
   display: grid;
-  grid-template-columns: repeat(auto-fill, 64px);
-
+  grid-template-columns: repeat(auto-fit, 64px);
   align-items: center;
   height: 100%;
   cursor: pointer;

@@ -1,15 +1,16 @@
 import React, { memo } from 'react';
 import styled from 'styled-components';
 
+import Container from '../components/common/Container';
 import ContainerColumn from '../components/common/ContainerColumn';
 import LabelManager from '../components/LabelManager';
 
 export default memo(() => {
   return (
     <Content>
-      <ContainerColumn>
+      <Container>
         <LabelManager />
-      </ContainerColumn>
+      </Container>
     </Content>
   );
 });
