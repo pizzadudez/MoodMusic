@@ -77,9 +77,13 @@ export default memo(({ id, close: closeForm, isOpen }) => {
           {({ values, handleSubmit }) => (
             <StyledForm>
               <LeftContainer>
-                <Presentation>
+                <Header>
                   <StyledLabel color={values.color} name={values.name} />
-                </Presentation>
+                  <SpecialActions>
+                    <Button>P</Button>
+                    <Button>X</Button>
+                  </SpecialActions>
+                </Header>
                 <Field name="name" label="Name" as={TextField} />
                 <Field name="verbose" label="Verbose" as={TextField} />
                 {!id && (
@@ -142,8 +146,9 @@ const StyledForm = styled(Form)`
 const StyledLabel = styled(Label)`
   cursor: default;
   height: 56px;
-  min-width: 86px;
-  font-size: 1rem;
+  min-width: 90px;
+  max-width: 110px;
+  font-size: 1.1rem;
   span {
     padding: 0 12px;
   }
@@ -153,8 +158,15 @@ const LeftContainer = styled.div`
   display: flex;
   flex-direction: column;
 `;
-const Presentation = styled.div`
+const Header = styled.div`
+  display: flex;
   margin-bottom: 4px;
+`;
+const SpecialActions = styled.div`
+  width: 100%;
+  display: flex;
+  justify-content: space-around;
+  align-items: center;
 `;
 const InputRow = styled.div`
   display: grid;

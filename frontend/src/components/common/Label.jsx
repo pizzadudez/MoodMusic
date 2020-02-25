@@ -10,6 +10,8 @@ export default memo(({ className, color, name }) => (
 const _Label = ({ color, name, ...rest }) => <Chip {...rest} />;
 const Label = styled(_Label)`
   height: 38px;
+  min-width: 60px;
+  max-width: 72px;
   background-color: #272727;
   border: 0.8px solid #171717;
   border-radius: ${props => (props.color ? 12 : 3)}px;
@@ -22,6 +24,9 @@ const Label = styled(_Label)`
   text-shadow: 1px 1px 0.5px #000000d4;
   cursor: pointer;
   span {
-    padding: 0;
+    padding: 0 3px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
   }
 `;

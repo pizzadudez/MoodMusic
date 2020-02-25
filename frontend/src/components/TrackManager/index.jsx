@@ -38,7 +38,7 @@ export default memo(() => {
           field.toLowerCase().includes(filter)
         );
       }),
-    [filter, tracks]
+    [filter, tracks, tracksById]
   );
   const searchFilter = useCallback(
     e => {

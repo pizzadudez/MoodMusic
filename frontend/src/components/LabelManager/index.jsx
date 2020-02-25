@@ -6,6 +6,8 @@ import styled from 'styled-components';
 import Button from '../common/Button';
 import LabelCard from './LabelCard';
 import LabelForm from './LabelForm';
+import { useMemo } from 'react';
+import Toolbar from './Toolbar';
 
 const stateSelector = createSelector(
   state => state.labels.labelsById,
@@ -16,6 +18,24 @@ const stateSelector = createSelector(
 export default memo(() => {
   const { labelsById, labels } = useSelector(stateSelector);
 
+  // Card Filtering
+  const [filter, setFilter] = useState('');
+  const filtered = useMemo(
+    () =>
+      labels.filter(id => {
+        const { name, verbose, suffix } = labelsById[id];
+        return [name, verbose, suffix].some(
+          field => field && field.toLowerCase().includes(filter)
+        );
+      }),
+    [filter, labels, labelsById]
+  );
+  const searchFilter = useCallback(
+    e => setFilter(e.target.value.toLowerCase()),
+    []
+  );
+
+  // Form Handling
   const [createForm, setCreateForm] = useState(false);
   const [updateForm, setUpdateForm] = useState(false);
   const update = useCallback(id => {
@@ -33,13 +53,10 @@ export default memo(() => {
 
   return (
     <Wrapper>
-      <div>
-        Search bar and buttons here
-        <Button onClick={create}>New Label</Button>
-      </div>
+      <Toolbar searchFilter={searchFilter} openCreateForm={create} />
       <LabelContainer>
         <LabelForm close={close} isOpen={createForm} />
-        {labels.map(id => (
+        {filtered.map(id => (
           <LabelCard
             key={id}
             label={labelsById[id]}
