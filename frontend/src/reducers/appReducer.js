@@ -23,18 +23,6 @@ export default (state = initialState, action) => {
         ...state,
         loadingData: false,
       };
-
-    case SELECT_LABEL_TO_UPDATE:
-      return {
-        ...state,
-        updatingLabelId: action.id,
-      };
-    case UPDATE_LABEL: {
-      return {
-        ...state,
-        updatingLabelId: null,
-      };
-    }
     default:
       return state;
   }

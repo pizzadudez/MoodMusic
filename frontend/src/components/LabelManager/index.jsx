@@ -1,26 +1,20 @@
 import React, { memo, useCallback, useState } from 'react';
 import { createSelector } from 'reselect';
-import { useSelector, useDispatch } from 'react-redux';
+import { useSelector } from 'react-redux';
 import styled from 'styled-components';
-import { Scrollbars } from 'react-custom-scrollbars';
-import { Scrollbar } from 'react-scrollbars-custom';
-import { AutoSizer } from 'react-virtualized';
 
 import Button from '../common/Button';
 import LabelCard from './LabelCard';
 import LabelForm from './LabelForm';
-import { selectLabelToUpdate } from '../../actions/labelActions';
 
 const stateSelector = createSelector(
   state => state.labels.labelsById,
   state => state.labels.ids,
-  state => state.tracks.tracksById,
-  (labelsById, labels, tracksById) => ({ labelsById, labels, tracksById })
+  (labelsById, labels) => ({ labelsById, labels })
 );
 
 export default memo(() => {
-  const dispatch = useDispatch();
-  const { labelsById, labels, tracksById } = useSelector(stateSelector);
+  const { labelsById, labels } = useSelector(stateSelector);
 
   const [createForm, setCreateForm] = useState(false);
   const [updateForm, setUpdateForm] = useState(false);

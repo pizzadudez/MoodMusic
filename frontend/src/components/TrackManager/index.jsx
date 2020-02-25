@@ -7,11 +7,9 @@ import React, {
   useMemo,
 } from 'react';
 import { createSelector } from 'reselect';
-import { useSelector, useDispatch } from 'react-redux';
+import { useSelector } from 'react-redux';
 import styled from 'styled-components';
-import { AutoSizer, List, WindowScroller } from 'react-virtualized';
-import { Scrollbars } from 'react-custom-scrollbars';
-import { Scrollbar } from 'react-scrollbars-custom';
+import { AutoSizer, List } from 'react-virtualized';
 import _ from 'lodash';
 
 import TrackSlide from './TrackSlide';
@@ -28,8 +26,6 @@ const stateSelector = createSelector(
 );
 
 export default memo(() => {
-  console.log('TrackManager');
-  const dispatch = useDispatch();
   const { tracksById, tracks, selected } = useSelector(stateSelector);
 
   // Track Filtering
