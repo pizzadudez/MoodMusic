@@ -29,17 +29,21 @@ const Container = styled.div`
 
   min-width: 0;
   width: 0;
+  opacity: 0;
   transition: 0.5s;
   &.form-appear {
     transition: none;
     width: 100%;
+    opacity: 1;
   }
   &.form-enter-active,
   &.form-enter-done {
     width: 100%;
+    opacity: 1;
   }
   &.form-exit-active,
   &.form-exit-done {
     width: 1%;
+    opacity: 0;
   }
 `;

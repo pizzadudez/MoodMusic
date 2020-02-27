@@ -50,4 +50,7 @@ const StyledTextField = styled(TextField)`
     display: flex;
     justify-content: flex-end;
   }
+  .MuiInputBase-input {
+    height: auto;
+  }
 `;

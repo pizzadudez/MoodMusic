@@ -5,9 +5,9 @@ import Radio from '@material-ui/core/Radio';
 import RadioGroup from '@material-ui/core/RadioGroup';
 import FormControlLabel from '@material-ui/core/FormControlLabel';
 
-export default memo(({ field, name, options, ...props }) => {
+export default memo(({ row = false, name, options, ...props }) => {
   return (
-    <StyledRadioGroup {...field} {...props} name={name}>
+    <StyledRadioGroup {...props} name={name} row={row}>
       {options.map((option, idx) => (
         <FormControlLabel
           key={idx}
@@ -21,13 +21,19 @@ export default memo(({ field, name, options, ...props }) => {
 });
 
 const StyledRadioGroup = styled(RadioGroup)`
-  display: grid;
-  grid-template-columns: repeat(3, min-content);
+  /* display: grid;
+  ${props =>
+    `grid-template-${props.row ? 'rows' : 'columns'}: repeat(3, min-content);`}
+  grid-template-columns: repeat(3, min-content); */
+  display: flex;
+  flex-direction: ${props => (props.row ? 'row' : 'column')};
+  flex-wrap: nowrap;
   .MuiTypography-root.MuiFormControlLabel-label.MuiTypography-body1 {
-    margin-left: -5px;
+    /* margin-left: -5px; */
   }
   .MuiFormControlLabel-root {
-    margin-right: 11px;
+    margin-left: -5px;
+    margin-right: 6px;
   }
 `;
 const StyledRadio = styled(Radio)`
@@ -38,5 +44,8 @@ const StyledRadio = styled(Radio)`
     &:hover {
       background-color: #5dff5d08;
     }
+  }
+  &.MuiButtonBase-root {
+    padding: 5px;
   }
 `;

@@ -87,7 +87,7 @@ export default memo(({ id, close: closeForm, isOpen }) => {
                 <Field name="name" label="Name" as={TextField} />
                 <Field name="verbose" label="Verbose" as={TextField} />
                 {!id && (
-                  <Field name="type" options={labelTypes} as={RadioGroup} />
+                  <Field name="type" options={labelTypes} as={RadioGroup} row />
                 )}
                 {values.type === 'subgenre' && (
                   <InputRow>

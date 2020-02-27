@@ -41,7 +41,7 @@ export default memo(({ playlist, toggleUpdate, isUpdating }) => {
 });
 
 const Container = styled.div`
-  height: 100px;
+  height: 102px;
   width: calc(100% - 18px);
   display: grid;
   grid-template-columns: 210px 1fr;

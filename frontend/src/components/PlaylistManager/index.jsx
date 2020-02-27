@@ -50,17 +50,6 @@ export default memo(() => {
             ))}
           </React.Fragment>
         ))}
-        {/* <NewPlaylist isOpen={createOpen}>
-          {createOpen && <PlaylistForm onClose={toggleCreateForm} />}
-        </NewPlaylist> */}
-        {/* {playlists.map(id => (
-          <PlaylistSlide
-            key={id}
-            playlist={playlistsById[id]}
-            setOpen={setOpenFormId}
-            isOpen={id === openFormId && !createOpen}
-          />
-        ))} */}
       </SlidesContainer>
     </Wrapper>
   );
