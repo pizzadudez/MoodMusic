@@ -1,94 +1,87 @@
 import React, { memo, useCallback } from 'react';
 import styled from 'styled-components';
+import { useSelector } from 'react-redux';
+import { createSelector } from 'reselect';
 
-import {
-  syncPlaylist,
-  revertChanges,
-  deletePlaylist,
-  restorePlaylist,
-} from '../../actions/playlistActions';
-import Button from '../common/Button';
-import PlaylistForm from './PlaylistForm';
-import { useDispatch } from 'react-redux';
+import UpdateForm from './UpdateForm';
+import PlaylistActions from './PlaylistActions';
+import Label from '../common/Label';
 
-export default memo(({ playlist, isOpen, setOpen }) => {
-  const dispatch = useDispatch();
-  const open = useCallback(() => setOpen(playlist.id), [setOpen, playlist.id]);
-  const close = useCallback(() => setOpen(null), [setOpen]);
+const stateSelector = createSelector(
+  state => state.labels.labelsById,
+  labelsById => ({ labelsById })
+);
 
-  const syncHandler = useCallback(() => dispatch(syncPlaylist(playlist.id)), [
-    playlist.id,
-    dispatch,
-  ]);
-  const revertHandler = useCallback(
-    () => dispatch(revertChanges(playlist.id)),
-    [playlist.id, dispatch]
-  );
-  const deleteHandler = useCallback(
-    () => dispatch(deletePlaylist(playlist.id, playlist.type)),
-    [playlist, dispatch]
-  );
-  const restoreHandler = useCallback(
-    () => dispatch(restorePlaylist(playlist.id)),
-    [playlist.id, dispatch]
-  );
+export default memo(({ playlist, toggleUpdate, isUpdating }) => {
+  const { labelsById } = useSelector(stateSelector);
+
+  const toggle = useCallback(() => toggleUpdate(playlist.id), [playlist.id]);
 
   return (
-    <Container isOpen={isOpen}>
-      {isOpen && <PlaylistForm playlist={playlist} onClose={close} />}
-      {!isOpen && (
-        <Slide>
-          <div>
-            <Temp>{playlist.name}</Temp>
-            {/* <Temp>{playlist.description.slice(0, 30)}</Temp> */}
-            <Temp>{playlist.type + ' ' + (playlist.label_id || '')}</Temp>
-          </div>
-          <div style={{ display: 'flex' }}>
-            <Button onClick={open}>Update</Button>
-            {['untracked', 'label'].includes(playlist.type) && (
-              <Button onClick={syncHandler} disabled={playlist.updates === 0}>
-                {playlist.type === 'untracked'
-                  ? 'Import Tracks'
-                  : 'Sync Playlist'}
-              </Button>
-            )}
-            {playlist.type === 'label' && (
-              <Button onClick={revertHandler} disabled={!playlist.updates}>
-                Revert Changes
-              </Button>
-            )}
-            <Button
-              onClick={
-                playlist.type === 'deleted' ? restoreHandler : deleteHandler
-              }
-            >
-              {playlist.type === 'deleted' ? 'Restore' : 'Delete'}
-            </Button>
-          </div>
-        </Slide>
-      )}
+    <Container>
+      <Info>
+        <h2>{playlist.name}</h2>
+        <div>
+          <span>{playlist.type}</span>
+          {playlist.label_id && (
+            <TinyLabel
+              color={labelsById[playlist.label_id].color}
+              name={labelsById[playlist.label_id].name}
+            />
+          )}
+          <span>{playlist.track_count}</span>
+        </div>
+      </Info>
+      <SideEffects>
+        <PlaylistActions isOpen={!isUpdating} update={toggle} />
+        <UpdateForm playlist={playlist} isOpen={isUpdating} close={toggle} />
+      </SideEffects>
     </Container>
   );
 });
 
 const Container = styled.div`
-  height: ${props => (props.isOpen ? '170px' : '80px')};
+  height: 100px;
+  width: calc(100% - 18px);
+  display: grid;
+  grid-template-columns: 210px 1fr;
+  padding: 6px;
+  background-color: #353535;
+  color: white;
+  border-radius: 4px;
+  box-shadow: 0px 2px 1px -1px rgba(0, 0, 0, 0.2),
+    0px 1px 1px 0px rgba(0, 0, 0, 0.14), 0px 1px 3px 0px rgba(0, 0, 0, 0.12);
+`;
+const Info = styled.div`
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  padding: 8px 0;
+  > h2 {
+    margin: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    font-size: 1.7rem;
+  }
+  > div {
+    display: inline-grid;
+    grid-template-columns: repeat(3, min-content);
+    column-gap: 5px;
+    align-items: center;
+  }
+`;
+const SideEffects = styled.div`
+  display: flex;
   width: 100%;
-  padding: 4px 4px;
-  margin: 2px 0;
-  background-color: #444;
-  transition: height 0.15s ease;
+  overflow: hidden;
 `;
-const Slide = styled.div`
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(0px, 1fr));
-  justify-content: start;
-  align-items: center;
-  padding-right: 15px;
-  height: 100%;
-`;
-const Temp = styled.div`
-  display: grid;
-  align-items: center;
-  height: 100%;
+
+const TinyLabel = styled(Label)`
+  height: 32px;
+  min-width: 48px;
+  max-width: 66px;
+  cursor: default;
+  font-size: 0.8rem;
+  margin: 1px;
 `;

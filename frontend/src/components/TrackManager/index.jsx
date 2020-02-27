@@ -13,7 +13,7 @@ import { AutoSizer, List } from 'react-virtualized';
 import _ from 'lodash';
 
 import TrackSlide from './TrackSlide';
-import TrackToolBar from './TrackToolBar';
+import Toolbar from './Toolbar';
 import TrackModal from './TrackModal';
 import LabelModal from './LabelModal';
 import PlaylistModal from './PlaylistModal';
@@ -79,7 +79,7 @@ export default memo(() => {
       <TrackModal open={trackModalOpen} setOpen={setTrackModalOpen} />
       <LabelModal open={labelModalOpen} setOpen={setLabelModalOpen} />
       <PlaylistModal open={playlistModalOpen} setOpen={setPlaylistModalOpen} />
-      <TrackToolBar
+      <Toolbar
         searchFilter={searchFilter}
         openLabelModal={openLabelModal}
         openPlaylistModal={openPlaylistModal}

@@ -5,7 +5,7 @@ import { selectAllTracks, deselectAllTracks } from '../../actions/trackActions';
 
 import { submitChanges } from '../../actions/trackActions';
 import Button from '../common/Button';
-import TextField from '@material-ui/core/TextField';
+import SearchFilter from '../common/SearchFilter';
 
 export default memo(({ searchFilter, openLabelModal, openPlaylistModal }) => {
   const dispatch = useDispatch();
@@ -22,11 +22,7 @@ export default memo(({ searchFilter, openLabelModal, openPlaylistModal }) => {
 
   return (
     <Wrapper>
-      <StyledTextField
-        type="text"
-        onChange={searchFilter}
-        label="Search Tracks"
-      />
+      <SearchFilter type="text" onChange={searchFilter} label="Search Tracks" />
       <Button onClick={selectAll}>Select All</Button>
       <Button onClick={deselectAll}>Deselect All</Button>
       <Button onClick={openLabelModal}>Modify Labels</Button>
@@ -37,25 +33,3 @@ export default memo(({ searchFilter, openLabelModal, openPlaylistModal }) => {
 });
 
 const Wrapper = styled.div``;
-const StyledTextField = styled(TextField)`
-  label {
-    color: grey;
-    &.MuiInputLabel-shrink {
-      color: white;
-    }
-  }
-  .MuiOutlinedInput-root {
-    fieldset {
-      border-color: grey;
-    }
-    &:hover fieldset {
-      border-color: lightgray;
-    }
-    &.Mui-focused fieldset {
-      border-color: lightgray;
-    }
-  }
-  input {
-    color: white;
-  }
-`;

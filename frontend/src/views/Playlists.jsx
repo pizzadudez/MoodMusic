@@ -7,17 +7,17 @@ import PlaylistManager from '../components/PlaylistManager';
 
 export default memo(() => (
   <Content>
-    <ContainerColumn>hello</ContainerColumn>
     <Container>
       <PlaylistManager />
     </Container>
+    <ContainerColumn>hello</ContainerColumn>
   </Content>
 ));
 
 const Content = styled.div`
   min-height: 0;
   display: grid;
-  grid-template-columns: minmax(370px, 430px) minmax(700px, 60%);
+  grid-template-columns: minmax(850px, 1000px) minmax(400px, 440px);
   column-gap: 10px;
   margin: 0 4px;
 `;

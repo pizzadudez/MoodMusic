@@ -5,41 +5,62 @@ import styled from 'styled-components';
 
 import PlaylistSlide from './PlaylistSlide';
 import Button from '../common/Button';
-import PlaylistForm from './PlaylistForm';
 
 const stateSelector = createSelector(
   state => state.playlists.playlistsById,
   state => state.playlists.ids,
-  (playlistsById, playlists) => ({ playlistsById, playlists })
+  playlistsById => ({
+    playlistsById,
+    playlistIdsByType: Object.values(playlistsById).reduce(
+      (obj, pl) => ({
+        ...obj,
+        [pl.type]: [...(obj[pl.type] || []), pl.id],
+      }),
+      {}
+    ),
+  })
 );
 
 export default memo(() => {
   console.log('PlaylistManager');
-  const { playlistsById, playlists } = useSelector(stateSelector);
-  const [openFormId, setOpenFormId] = useState(null);
-  const [createOpen, setCreateOpen] = useState(false);
-  const toggleCreateForm = useCallback(() => {
-    setCreateOpen(open => !open);
-    setOpenFormId(null);
-  }, [setCreateOpen]);
+  const { playlistsById, playlistIdsByType } = useSelector(stateSelector);
+
+  const [updateForm, setUpdateForm] = useState(null);
+  const toggleUpdate = useCallback(
+    id => setUpdateForm(prev => (prev === id ? false : id)),
+    []
+  );
 
   return (
     <Wrapper>
       <div>
-        <Button onClick={toggleCreateForm}>New Playlist</Button>
+        <Button>New Playlist</Button>
       </div>
       <SlidesContainer>
-        <NewPlaylist isOpen={createOpen}>
+        {['label', 'mix', 'untracked', 'deleted'].map(type => (
+          <React.Fragment key={type}>
+            <h2>{type + ' playlists'}</h2>
+            {playlistIdsByType[type].map(id => (
+              <PlaylistSlide
+                key={id}
+                playlist={playlistsById[id]}
+                toggleUpdate={toggleUpdate}
+                isUpdating={id === updateForm}
+              />
+            ))}
+          </React.Fragment>
+        ))}
+        {/* <NewPlaylist isOpen={createOpen}>
           {createOpen && <PlaylistForm onClose={toggleCreateForm} />}
-        </NewPlaylist>
-        {playlists.map(id => (
+        </NewPlaylist> */}
+        {/* {playlists.map(id => (
           <PlaylistSlide
             key={id}
             playlist={playlistsById[id]}
             setOpen={setOpenFormId}
             isOpen={id === openFormId && !createOpen}
           />
-        ))}
+        ))} */}
       </SlidesContainer>
     </Wrapper>
   );
@@ -52,9 +73,14 @@ const Wrapper = styled.div`
   grid-row-gap: 6px;
 `;
 const SlidesContainer = styled.div`
-  display: flex;
-  flex-wrap: wrap;
-  overflow: auto;
+  display: grid;
+  grid-auto-flow: row;
+  row-gap: 6px;
+  overflow-y: auto;
+  overflow-x: hidden;
+  > h2 {
+    color: #c1c1c152;
+  }
 `;
 const NewPlaylist = styled.div`
   height: 0px;
