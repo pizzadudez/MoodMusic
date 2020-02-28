@@ -84,15 +84,16 @@ export default memo(({ id, close: closeForm, isOpen }) => {
                   <StyledLabel color={values.color} name={values.name} />
                   {!!id && (
                     <SpecialActions>
-                      <Tooltip
+                      {/* <Tooltip
                         title="Create label playlist."
                         aria-label="create-label-playlist"
-                      >
-                        <Button
-                          variant="special"
-                          startIcon={<PlaylistAddIcon />}
-                        />
-                      </Tooltip>
+                      > */}
+                      <Button
+                        variant="special"
+                        startIcon={<PlaylistAddIcon />}
+                        tooltip="Create label playlist."
+                      />
+                      {/* </Tooltip> */}
                       <Button variant="danger" startIcon={<DeleteIcon />} />
                     </SpecialActions>
                   )}

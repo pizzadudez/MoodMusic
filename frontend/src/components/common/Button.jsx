@@ -2,6 +2,7 @@ import React, { memo, forwardRef } from 'react';
 import styled from 'styled-components';
 
 import Button from '@material-ui/core/Button';
+import Tooltip from '@material-ui/core/Tooltip';
 /*
 import HistoryIcon from '@material-ui/icons/History';
 import LibraryMusicIcon from '@material-ui/icons/LibraryMusic';
@@ -17,16 +18,34 @@ import ShuffleIcon from '@material-ui/icons/Shuffle';
 import UpdateIcon from '@material-ui/icons/Update';
 */
 
-export default memo(
-  forwardRef(({ onClick, children, ...props }, ref) => (
-    <StyledButton onClick={onClick} iconOnly={!children} {...props} ref={ref}>
+export default memo(({ onClick, children, tooltip, ...props }) => {
+  const button = (
+    <StyledButton onClick={onClick} iconOnly={!children} {...props}>
       {children || ''}
     </StyledButton>
-  ))
-);
+  );
+  const withTooltip = (
+    <StyledTooltip title={tooltip} aria-label={tooltip} placement="bottom">
+      {button}
+    </StyledTooltip>
+  );
+  return tooltip ? withTooltip : button;
+});
 
+const StyledTooltip = styled(({ className, ...props }) => (
+  <Tooltip classes={{ popper: className }} {...props} />
+))`
+  margin-top: -8px;
+  & .MuiTooltip-tooltip {
+    font-size: 0.85rem;
+    background-color: #272727;
+    border: 1px solid grey;
+    box-shadow: 0px 3px 1px -2px rgba(0, 0, 0, 0.2),
+      0px 2px 2px 0px rgba(0, 0, 0, 0.14), 0px 1px 5px 0px rgba(0, 0, 0, 0.12);
+  }
+`;
 const StyledButton = styled(
-  forwardRef(({ variant, iconOnly, size, ...props }, ref) => (
+  forwardRef(({ variant, iconOnly, size, tooltip, ...props }, ref) => (
     <Button variant="contained" {...props} ref={ref} />
   ))
 )`
