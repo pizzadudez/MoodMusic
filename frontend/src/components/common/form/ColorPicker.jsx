@@ -4,7 +4,7 @@ import { SketchPicker } from 'react-color';
 import { useField } from 'formik';
 
 export default memo(props => {
-  const [_, meta, helpers] = useField(props.name);
+  const [, meta, helpers] = useField(props.name);
   const { value } = meta;
   const { setValue } = helpers;
 

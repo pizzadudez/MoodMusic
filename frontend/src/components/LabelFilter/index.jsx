@@ -1,4 +1,4 @@
-import React, { memo, useCallback, useState, useEffect } from 'react';
+import React, { memo, useCallback } from 'react';
 import { createSelector } from 'reselect';
 import { useDispatch, useSelector } from 'react-redux';
 import styled from 'styled-components';

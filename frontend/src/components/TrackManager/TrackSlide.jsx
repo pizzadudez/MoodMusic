@@ -1,4 +1,4 @@
-import React, { memo, useCallback, useMemo } from 'react';
+import React, { memo, useCallback } from 'react';
 import { createSelector } from 'reselect';
 import { useSelector, useDispatch } from 'react-redux';
 import styled from 'styled-components';
@@ -31,10 +31,10 @@ export default memo(({ track, checked, widthRestriction, setOpenTrack }) => {
   );
   const openTrackModal = useCallback(() => {
     setOpenTrack(track.id);
-  }, [setOpenTrack, track]);
+  }, [setOpenTrack, track.id]);
   const toggleLikeHandler = useCallback(
     () => dispatch(toggleLike(track.id, !track.liked)),
-    [track.liked]
+    [dispatch, track.id, track.liked]
   );
 
   return (

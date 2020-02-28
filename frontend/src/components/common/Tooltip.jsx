@@ -1,0 +1,19 @@
+import React from 'react';
+import styled from 'styled-components';
+
+import Tooltip from '@material-ui/core/Tooltip';
+
+const StyledTooltip = styled(({ className, ...props }) => (
+  <Tooltip classes={{ popper: className }} {...props} />
+))`
+  margin-top: -8px;
+  & .MuiTooltip-tooltip {
+    font-size: 0.92rem;
+    background-color: #272727;
+    border: 1px solid grey;
+    box-shadow: 0px 3px 1px -2px rgba(0, 0, 0, 0.2),
+      0px 2px 2px 0px rgba(0, 0, 0, 0.14), 0px 1px 5px 0px rgba(0, 0, 0, 0.12);
+  }
+`;
+
+export default StyledTooltip;

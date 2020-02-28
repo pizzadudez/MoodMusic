@@ -64,7 +64,8 @@ export default memo(({ open, setOpen }) => {
       setUpdate(false);
       setOpen(false);
     }
-  }, [update, setOpen]);
+    // eslint-disable-next-line
+  }, [dispatch, update, setOpen]);
 
   return (
     <StyledDialog open={open} onClose={close}>

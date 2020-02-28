@@ -5,7 +5,7 @@ import TextField from '@material-ui/core/TextField';
 import { useField } from 'formik';
 
 export default memo(({ className, label, ...props }) => {
-  const [_, meta] = useField(props);
+  const [, meta] = useField(props);
   const errorText = meta.error && meta.touched ? meta.error : '';
 
   return (

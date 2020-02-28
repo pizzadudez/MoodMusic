@@ -1,11 +1,6 @@
 import axios from 'axios';
 import _ from 'lodash';
-import {
-  UPDATE_PLAYLIST,
-  CREATE_PLAYLIST,
-  DELETE_PLAYLIST,
-  FETCH_TRACKS,
-} from './types';
+import { UPDATE_PLAYLIST, CREATE_PLAYLIST } from './types';
 import { fetchLabels, fetchTracks } from './dataActions';
 
 export const createPlaylist = data => dispatch => {

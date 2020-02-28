@@ -1,9 +1,4 @@
-import {
-  LOADING_FINISHED,
-  SET_AUTHORIZED,
-  SELECT_LABEL_TO_UPDATE,
-  UPDATE_LABEL,
-} from '../actions/types';
+import { LOADING_FINISHED, SET_AUTHORIZED } from '../actions/types';
 
 const initialState = {
   authorized: false,

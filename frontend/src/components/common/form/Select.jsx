@@ -6,7 +6,7 @@ import MenuItem from '@material-ui/core/MenuItem';
 import { useField } from 'formik';
 
 export default memo(({ className, label, options, ...props }) => {
-  const [_, meta] = useField(props);
+  const [, meta] = useField(props);
   const errorText = meta.error && meta.touched ? meta.error : '';
 
   return (

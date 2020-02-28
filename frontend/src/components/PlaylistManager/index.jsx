@@ -1,6 +1,6 @@
 import React, { memo, useCallback, useState, useMemo } from 'react';
 import { createSelector } from 'reselect';
-import { useSelector, useDispatch } from 'react-redux';
+import { useSelector } from 'react-redux';
 import styled from 'styled-components';
 
 import PlaylistSlide from './PlaylistSlide';
@@ -94,16 +94,4 @@ const SlidesContainer = styled.div`
   > h2 {
     color: #c1c1c152;
   }
-`;
-const NewPlaylist = styled.div`
-  height: 0px;
-  ${props =>
-    props.isOpen
-      ? `height: 200px;
-         padding: 4px 4px;
-         margin: 2px 0;`
-      : ''};
-  width: 100%;
-  background-color: #444;
-  transition: height 0.15s ease;
 `;

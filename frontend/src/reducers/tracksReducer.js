@@ -23,7 +23,7 @@ const initialState = {
   },
 };
 
-export default function(state = initialState, action) {
+export default (state = initialState, action) => {
   switch (action.type) {
     case FETCH_TRACKS:
       return {
@@ -84,7 +84,7 @@ export default function(state = initialState, action) {
     default:
       return state;
   }
-}
+};
 
 const updateTracks = (state, action) => {
   const { labels, playlists, trackId } = action.data;
@@ -149,8 +149,8 @@ const setTrackChanges = (state, action) => {
                   return true;
                 } else if (!firstChange) {
                   otherMap[trackId][id] = false;
-                  return false;
                 }
+                return false;
               })
               .map(id => [id, true])
           ),

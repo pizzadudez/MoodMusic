@@ -3,13 +3,13 @@ import React, { memo, useCallback } from 'react';
 import LabelButtonBase from '../common/LabelButtonBase';
 
 export default memo(({ itemId, color, include, exclude, state, children }) => {
-  const leftClick = useCallback(() => include(itemId), [itemId]);
+  const leftClick = useCallback(() => include(itemId), [include, itemId]);
   const rightClick = useCallback(
     e => {
       e.preventDefault();
       exclude(itemId);
     },
-    [itemId]
+    [exclude, itemId]
   );
   return (
     <LabelButtonBase

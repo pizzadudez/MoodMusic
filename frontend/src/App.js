@@ -25,7 +25,7 @@ export default memo(() => {
 
   useEffect(() => {
     dispatch(fetchData());
-  }, []);
+  }, [dispatch]);
 
   return (
     <StylesProvider injectFirst>

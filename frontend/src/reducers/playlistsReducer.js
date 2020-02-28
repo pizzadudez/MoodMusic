@@ -9,7 +9,7 @@ const initialState = {
   ids: [],
 };
 
-export default function(state = initialState, action) {
+export default (state = initialState, action) => {
   switch (action.type) {
     case FETCH_PLAYLISTS:
       return {
@@ -37,4 +37,4 @@ export default function(state = initialState, action) {
     default:
       return state;
   }
-}
+};

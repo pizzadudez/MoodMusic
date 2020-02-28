@@ -1,6 +1,5 @@
 import React, { memo, useCallback } from 'react';
-import { useSelector, useDispatch } from 'react-redux';
-import { createSelector } from 'reselect';
+import { useDispatch } from 'react-redux';
 import { NavLink } from 'react-router-dom';
 import styled from 'styled-components';
 

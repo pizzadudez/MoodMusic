@@ -61,7 +61,7 @@ export default memo(() => {
       window.addEventListener('resize', _.throttle(handleWidthChange, 500));
       handleWidthChange();
     }
-  }, [sizeRef.current, handleWidthChange]);
+  }, [handleWidthChange]);
 
   // Modals
   const [trackModalOpen, setTrackModalOpen] = useState(false);

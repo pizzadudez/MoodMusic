@@ -15,7 +15,10 @@ const stateSelector = createSelector(
 export default memo(({ playlist, toggleUpdate, isUpdating }) => {
   const { labelsById } = useSelector(stateSelector);
 
-  const toggle = useCallback(() => toggleUpdate(playlist.id), [playlist.id]);
+  const toggle = useCallback(() => toggleUpdate(playlist.id), [
+    toggleUpdate,
+    playlist.id,
+  ]);
 
   return (
     <Container>

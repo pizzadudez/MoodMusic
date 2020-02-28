@@ -3,7 +3,6 @@ import { createSelector } from 'reselect';
 import { useSelector } from 'react-redux';
 import styled from 'styled-components';
 
-import Button from '../common/Button';
 import LabelCard from './LabelCard';
 import LabelForm from './LabelForm';
 import { useMemo } from 'react';

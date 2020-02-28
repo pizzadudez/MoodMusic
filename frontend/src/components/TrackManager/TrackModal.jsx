@@ -111,7 +111,8 @@ export default memo(({ open: trackId, setOpen }) => {
       setUpdate(false);
       setOpen(false);
     }
-  }, [update, setOpen]);
+    // eslint-disable-next-line
+  }, [dispatch, update, setOpen]);
 
   return (
     <StyledDialog open={!!track} onClose={close}>
