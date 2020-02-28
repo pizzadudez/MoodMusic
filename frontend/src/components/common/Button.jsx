@@ -18,12 +18,12 @@ import UpdateIcon from '@material-ui/icons/Update';
 */
 
 export default memo(({ onClick, children, ...props }) => (
-  <StyledButton onClick={onClick} {...props}>
+  <StyledButton onClick={onClick} iconOnly={!children} {...props}>
     {children || ''}
   </StyledButton>
 ));
 
-const StyledButton = styled(({ variant, ...rest }) => (
+const StyledButton = styled(({ variant, iconOnly, size, ...rest }) => (
   <Button variant="contained" {...rest} />
 ))`
   border-radius: 5px;
@@ -68,7 +68,7 @@ const StyledButton = styled(({ variant, ...rest }) => (
     }
   }
   &.MuiButton-contained.Mui-disabled {
-    color: rgba(0, 0, 0, 0.7);
+    color: rgba(216, 216, 216, 0.67);
     box-shadow: 0px 3px 1px -2px rgba(0, 0, 0, 0.05),
       0px 2px 2px 0px rgba(0, 0, 0, 0.05), 0px 1px 5px 0px rgba(0, 0, 0, 0.03);
     background-color: ${props => {
@@ -91,4 +91,19 @@ const StyledButton = styled(({ variant, ...rest }) => (
   .MuiButton-label {
     white-space: nowrap;
   }
+  ${props => {
+    if (props.iconOnly) {
+      return `
+      padding: 3px 3px;
+      min-width: 24px;
+      border-radius: 10px;
+      .MuiButton-startIcon {
+        margin: 0;
+      }
+      .MuiButton-iconSizeMedium > *:first-child {
+        ${props.size !== 'small' ? 'width: 2.1rem; height: 2.1rem;' : ''}
+      }
+      `;
+    }
+  }}
 `;

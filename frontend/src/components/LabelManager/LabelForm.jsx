@@ -177,8 +177,11 @@ const Header = styled.div`
 const SpecialActions = styled.div`
   width: 100%;
   display: flex;
-  justify-content: space-around;
+  justify-content: flex-end;
   align-items: center;
+  > button {
+    margin-left: 10px;
+  }
 `;
 const InputRow = styled.div`
   display: grid;

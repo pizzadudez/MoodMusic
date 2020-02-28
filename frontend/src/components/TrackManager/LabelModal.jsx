@@ -7,6 +7,7 @@ import { updateTracks } from '../../actions/trackActions';
 import Dialog from '@material-ui/core/Dialog';
 import LabelButton from './LabelButton';
 import Button from '../common/Button';
+import CloseIcon from '@material-ui/icons/Close';
 
 const stateSelector = createSelector(
   state => state.labels,
@@ -75,9 +76,7 @@ export default memo(({ open, setOpen }) => {
           alignItems: 'flex-start',
         }}
       >
-        <Button variant="cancel" onClick={close}>
-          X
-        </Button>
+        <Button variant="cancel" onClick={close} startIcon={<CloseIcon />} />
       </div>
       <div>
         <h3>Genres</h3>

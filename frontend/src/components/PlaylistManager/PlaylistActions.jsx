@@ -4,7 +4,7 @@ import { CSSTransition } from 'react-transition-group';
 
 import Button from '../common/Button';
 import EditIcon from '@material-ui/icons/Edit';
-import DeleteIcon from '@material-ui/icons/Delete';
+import DeleteOutlineIcon from '@material-ui/icons/DeleteOutline';
 import ListIcon from '@material-ui/icons/List';
 
 export default memo(({ isOpen, update }) => {
@@ -19,10 +19,11 @@ export default memo(({ isOpen, update }) => {
       <Container>
         <div
           style={{
-            display: 'flex',
+            display: 'grid',
+            gridAutoFlow: 'column',
+            gridAutoColumns: 'min-content',
+            columnGap: 10,
             width: 500,
-            flexWrap: 'nowrap',
-            justifyContent: 'space-between',
           }}
         >
           <Button variant="open" onClick={update} startIcon={<EditIcon />}>
@@ -37,7 +38,7 @@ export default memo(({ isOpen, update }) => {
           <Button variant="special" disabled>
             Revert
           </Button>
-          <Button variant="danger" startIcon={<DeleteIcon />}></Button>
+          <Button variant="danger" startIcon={<DeleteOutlineIcon />} />
         </div>
       </Container>
     </CSSTransition>

@@ -8,6 +8,7 @@ import _ from 'lodash';
 import { updateTracks } from '../../actions/trackActions';
 import LabelButton from './LabelButtonTrack';
 import Button from '../common/Button';
+import CloseIcon from '@material-ui/icons/Close';
 
 const stateSelector = createSelector(
   state => state.tracks.tracksById,
@@ -121,9 +122,7 @@ export default memo(({ open: trackId, setOpen }) => {
           alignItems: 'flex-start',
         }}
       >
-        <Button variant="cancel" onClick={close}>
-          X
-        </Button>
+        <Button variant="cancel" onClick={close} startIcon={<CloseIcon />} />
       </div>
       {track && (
         <div>

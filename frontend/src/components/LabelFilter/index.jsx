@@ -75,7 +75,7 @@ export default memo(() => {
         ))}
       </div>
       <Button variant="cancel" onClick={resetFilter}>
-        Remove Filters
+        Reset Filters
       </Button>
     </Container>
   );
