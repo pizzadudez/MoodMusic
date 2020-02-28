@@ -1,4 +1,4 @@
-import React, { memo } from 'react';
+import React, { memo, forwardRef } from 'react';
 import styled from 'styled-components';
 
 import Button from '@material-ui/core/Button';
@@ -17,15 +17,19 @@ import ShuffleIcon from '@material-ui/icons/Shuffle';
 import UpdateIcon from '@material-ui/icons/Update';
 */
 
-export default memo(({ onClick, children, ...props }) => (
-  <StyledButton onClick={onClick} iconOnly={!children} {...props}>
-    {children || ''}
-  </StyledButton>
-));
+export default memo(
+  forwardRef(({ onClick, children, ...props }, ref) => (
+    <StyledButton onClick={onClick} iconOnly={!children} {...props} ref={ref}>
+      {children || ''}
+    </StyledButton>
+  ))
+);
 
-const StyledButton = styled(({ variant, iconOnly, size, ...rest }) => (
-  <Button variant="contained" {...rest} />
-))`
+const StyledButton = styled(
+  forwardRef(({ variant, iconOnly, size, ...props }, ref) => (
+    <Button variant="contained" {...props} ref={ref} />
+  ))
+)`
   border-radius: 5px;
   padding: 3px 13px;
   font-size: 1.2rem;

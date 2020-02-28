@@ -15,6 +15,7 @@ import Select from '../common/form/Select';
 import Label from '../common/Label';
 import DeleteIcon from '@material-ui/icons/Delete';
 import PlaylistAddIcon from '@material-ui/icons/PlaylistAdd';
+import Tooltip from '@material-ui/core/Tooltip';
 
 const validationSchema = yup.object().shape({
   name: yup.string().required('Required field.'),
@@ -83,14 +84,16 @@ export default memo(({ id, close: closeForm, isOpen }) => {
                   <StyledLabel color={values.color} name={values.name} />
                   {!!id && (
                     <SpecialActions>
-                      <Button
-                        variant="special"
-                        startIcon={<PlaylistAddIcon />}
-                      ></Button>
-                      <Button
-                        variant="danger"
-                        startIcon={<DeleteIcon />}
-                      ></Button>
+                      <Tooltip
+                        title="Create label playlist."
+                        aria-label="create-label-playlist"
+                      >
+                        <Button
+                          variant="special"
+                          startIcon={<PlaylistAddIcon />}
+                        />
+                      </Tooltip>
+                      <Button variant="danger" startIcon={<DeleteIcon />} />
                     </SpecialActions>
                   )}
                 </Header>
