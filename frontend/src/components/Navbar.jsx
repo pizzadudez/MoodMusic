@@ -16,43 +16,43 @@ export default memo(() => {
 
   return (
     <Nav>
-      <Links>
-        <li>
-          <NavLink to="/">
-            <Button>Tracks</Button>
-          </NavLink>
-        </li>
-        <li>
-          <NavLink to="/playlists">
-            <Button>Playlists</Button>
-          </NavLink>
-        </li>
-        <li>
-          <NavLink to="/labels">
-            <Button>Labels</Button>
-          </NavLink>
-        </li>
-      </Links>
-      <Button onClick={syncDataHandle}>Hard Sync</Button>
+      <Menu>
+        <NavLink to="/">
+          <Button>Tracks</Button>
+        </NavLink>
+        <NavLink to="/playlists">
+          <Button>Playlists</Button>
+        </NavLink>
+        <NavLink to="/labels">
+          <Button>Labels</Button>
+        </NavLink>
+      </Menu>
+      <Actions>
+        <Button onClick={syncDataHandle}>Hard Sync</Button>
+        <Button disabled>New Features</Button>
+      </Actions>
     </Nav>
   );
 });
 
 const Nav = styled.nav`
-  background-color: #212121;
-  /* height: 100%; */
   width: 100%;
   display: flex;
   align-items: center;
+  background-color: #212121;
 `;
-const Links = styled.ul`
-  display: flex;
-  flex-direction: row;
-  list-style-type: none;
-  li {
-    padding: 0 5px;
-  }
+const Menu = styled.div`
+  display: grid;
+  grid-auto-flow: column;
+  column-gap: 6px;
+  padding: 0 12px;
   a {
     text-decoration: none;
   }
+`;
+const Actions = styled.div`
+  display: grid;
+  grid-auto-flow: column;
+  column-gap: 6px;
+  padding: 0 12px;
 `;

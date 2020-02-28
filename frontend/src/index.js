@@ -13,7 +13,7 @@ const GlobalStyle = createGlobalStyle`
     Ubuntu,Cantarell,"Helvetica Neue",sans-serif;
     /* Scrollbar */
     --scrollbarBG: #3838384a;
-    --thumbBG: #6aff6a;
+    --thumbBG: #4bffb170;
   }
   body {
     margin: 0;

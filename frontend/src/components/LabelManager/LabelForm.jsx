@@ -6,13 +6,15 @@ import { useSelector, useDispatch } from 'react-redux';
 import { CSSTransition } from 'react-transition-group';
 import * as yup from 'yup';
 
+import { createLabel, updateLabel } from '../../actions/labelActions';
 import Button from '../common/Button';
 import ColorPicker from '../common/form/ColorPicker';
 import TextField from '../common/form/TextField';
 import RadioGroup from '../common/form/RadioGroup';
 import Select from '../common/form/Select';
 import Label from '../common/Label';
-import { createLabel, updateLabel } from '../../actions/labelActions';
+import DeleteIcon from '@material-ui/icons/Delete';
+import PlaylistAddIcon from '@material-ui/icons/PlaylistAdd';
 
 const validationSchema = yup.object().shape({
   name: yup.string().required('Required field.'),
@@ -79,10 +81,18 @@ export default memo(({ id, close: closeForm, isOpen }) => {
               <LeftContainer>
                 <Header>
                   <StyledLabel color={values.color} name={values.name} />
-                  <SpecialActions>
-                    <Button>P</Button>
-                    <Button>X</Button>
-                  </SpecialActions>
+                  {!!id && (
+                    <SpecialActions>
+                      <Button
+                        variant="special"
+                        startIcon={<PlaylistAddIcon />}
+                      ></Button>
+                      <Button
+                        variant="danger"
+                        startIcon={<DeleteIcon />}
+                      ></Button>
+                    </SpecialActions>
+                  )}
                 </Header>
                 <Field name="name" label="Name" as={TextField} />
                 <Field name="verbose" label="Verbose" as={TextField} />
@@ -101,8 +111,10 @@ export default memo(({ id, close: closeForm, isOpen }) => {
                   </InputRow>
                 )}
                 <Actions>
-                  <Button onClick={closeForm}>Cancel</Button>
-                  <Button type="submit" onClick={handleSubmit}>
+                  <Button variant="cancel" onClick={closeForm}>
+                    Cancel
+                  </Button>
+                  <Button variant="submit" type="submit" onClick={handleSubmit}>
                     Submit
                   </Button>
                 </Actions>

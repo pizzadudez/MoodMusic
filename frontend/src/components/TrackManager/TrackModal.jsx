@@ -121,7 +121,9 @@ export default memo(({ open: trackId, setOpen }) => {
           alignItems: 'flex-start',
         }}
       >
-        <Button onClick={close}>X</Button>
+        <Button variant="cancel" onClick={close}>
+          X
+        </Button>
       </div>
       {track && (
         <div>
@@ -180,7 +182,9 @@ export default memo(({ open: trackId, setOpen }) => {
           alignItems: 'flex-end',
         }}
       >
-        <Button onClick={updateAndClose}>Update</Button>
+        <Button variant="submit" onClick={updateAndClose}>
+          Apply Changes
+        </Button>
       </div>
     </StyledDialog>
   );

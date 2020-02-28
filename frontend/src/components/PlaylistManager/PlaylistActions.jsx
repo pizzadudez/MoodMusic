@@ -1,8 +1,11 @@
 import React, { memo } from 'react';
 import styled from 'styled-components';
+import { CSSTransition } from 'react-transition-group';
 
 import Button from '../common/Button';
-import { CSSTransition } from 'react-transition-group';
+import EditIcon from '@material-ui/icons/Edit';
+import DeleteIcon from '@material-ui/icons/Delete';
+import ListIcon from '@material-ui/icons/List';
 
 export default memo(({ isOpen, update }) => {
   return (
@@ -14,8 +17,27 @@ export default memo(({ isOpen, update }) => {
       unmountOnExit
     >
       <Container>
-        <div style={{ width: 400 }}>
-          <Button onClick={update}>Update</Button>
+        <div
+          style={{
+            display: 'flex',
+            width: 500,
+            flexWrap: 'nowrap',
+            justifyContent: 'space-between',
+          }}
+        >
+          <Button variant="open" onClick={update} startIcon={<EditIcon />}>
+            Modify
+          </Button>
+          <Button variant="open" disabled startIcon={<ListIcon />}>
+            Tracks
+          </Button>
+          <Button variant="special" disabled>
+            Sync
+          </Button>
+          <Button variant="special" disabled>
+            Revert
+          </Button>
+          <Button variant="danger" startIcon={<DeleteIcon />}></Button>
         </div>
       </Container>
     </CSSTransition>

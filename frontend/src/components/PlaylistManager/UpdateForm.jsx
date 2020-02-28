@@ -101,8 +101,10 @@ export default memo(({ playlist, isOpen, close }) => {
                 <Field name="description" label="Description" as={TextField} />
               </Inputs>
               <Actions>
-                <Button onClick={close}>Cancel</Button>
-                <Button type="submit" onClick={handleSubmit}>
+                <Button variant="cancel" onClick={close}>
+                  Cancel
+                </Button>
+                <Button variant="submit" type="submit" onClick={handleSubmit}>
                   Submit
                 </Button>
               </Actions>

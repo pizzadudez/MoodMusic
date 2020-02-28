@@ -3,8 +3,9 @@ import { createSelector } from 'reselect';
 import { useDispatch, useSelector } from 'react-redux';
 import styled from 'styled-components';
 
-import LabelButton from './LabelButton';
 import { filterByLabel, removeLabelFilter } from '../../actions/filterActions';
+import LabelButton from './LabelButton';
+import Button from '../common/Button';
 
 const stateSelector = createSelector(
   state => state.labels,
@@ -32,8 +33,7 @@ export default memo(() => {
   }, [dispatch]);
 
   return (
-    <Wrapper>
-      <button onClick={resetFilter}>NO FILTER</button>
+    <Container>
       <div>
         <h3>Genres</h3>
         {genreIds.map(id =>
@@ -74,11 +74,19 @@ export default memo(() => {
           </LabelButton>
         ))}
       </div>
-    </Wrapper>
+      <Button variant="cancel" onClick={resetFilter}>
+        Remove Filters
+      </Button>
+    </Container>
   );
 });
 
-const Wrapper = styled.div`
-  display: flex;
-  flex-direction: column;
+const Container = styled.div`
+  display: grid;
+  row-gap: 10px;
+  h3 {
+    margin-block-start: 6px;
+    margin-block-end: 6px;
+    margin-inline-start: 3px;
+  }
 `;

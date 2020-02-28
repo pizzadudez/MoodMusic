@@ -74,7 +74,9 @@ export default memo(({ open, setOpen }) => {
           alignItems: 'flex-start',
         }}
       >
-        <Button onClick={close}>X</Button>
+        <Button variant="cancel" onClick={close}>
+          X
+        </Button>
       </div>
       <div>
         <h3>Mix Playlists</h3>
@@ -92,7 +94,9 @@ export default memo(({ open, setOpen }) => {
           alignItems: 'flex-end',
         }}
       >
-        <Button onClick={updateAndClose}>Update</Button>
+        <Button variant="submit" onClick={updateAndClose}>
+          Apply Changes
+        </Button>
       </div>
     </StyledDialog>
   );

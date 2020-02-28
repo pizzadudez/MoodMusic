@@ -21,10 +21,6 @@ export default memo(({ row = false, name, options, ...props }) => {
 });
 
 const StyledRadioGroup = styled(RadioGroup)`
-  /* display: grid;
-  ${props =>
-    `grid-template-${props.row ? 'rows' : 'columns'}: repeat(3, min-content);`}
-  grid-template-columns: repeat(3, min-content); */
   display: flex;
   flex-direction: ${props => (props.row ? 'row' : 'column')};
   flex-wrap: nowrap;

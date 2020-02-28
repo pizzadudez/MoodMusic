@@ -103,7 +103,8 @@ const Column = styled.div`
   align-items: center;
   height: 100%;
   text-shadow: 0.7px 0.9px #00000099;
-  color: #6aff6a;
+  color: #00e481;
+  /* color: #6aff6a; */
   & span:not(.MuiButtonBase-root) {
     overflow: hidden;
     text-overflow: ellipsis;

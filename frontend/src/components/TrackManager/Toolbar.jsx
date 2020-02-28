@@ -6,6 +6,10 @@ import { selectAllTracks, deselectAllTracks } from '../../actions/trackActions';
 import { submitChanges } from '../../actions/trackActions';
 import Button from '../common/Button';
 import SearchFilter from '../common/SearchFilter';
+import CheckBoxIcon from '@material-ui/icons/CheckBox';
+import CheckBoxOutlineBlankIcon from '@material-ui/icons/CheckBoxOutlineBlank';
+import TuneIcon from '@material-ui/icons/Tune';
+import BackupIcon from '@material-ui/icons/Backup';
 
 export default memo(({ searchFilter, openLabelModal, openPlaylistModal }) => {
   const dispatch = useDispatch();
@@ -21,15 +25,42 @@ export default memo(({ searchFilter, openLabelModal, openPlaylistModal }) => {
   }, [dispatch]);
 
   return (
-    <Wrapper>
+    <Container>
       <SearchFilter type="text" onChange={searchFilter} label="Search Tracks" />
-      <Button onClick={selectAll}>Select All</Button>
-      <Button onClick={deselectAll}>Deselect All</Button>
-      <Button onClick={openLabelModal}>Modify Labels</Button>
-      <Button onClick={openPlaylistModal}>Modify Playlists</Button>
-      <Button onClick={submitChangesHandle}>Submit Changes</Button>
-    </Wrapper>
+      <Actions>
+        <Button onClick={selectAll} startIcon={<CheckBoxIcon />}>
+          All
+        </Button>
+        <Button onClick={deselectAll} startIcon={<CheckBoxOutlineBlankIcon />}>
+          All
+        </Button>
+        <Button onClick={openLabelModal} startIcon={<TuneIcon />}>
+          Labels
+        </Button>
+        <Button onClick={openPlaylistModal} startIcon={<TuneIcon />}>
+          Playlists
+        </Button>
+        <Button
+          variant="special"
+          onClick={submitChangesHandle}
+          startIcon={<BackupIcon />}
+        >
+          Submit Changes
+        </Button>
+      </Actions>
+    </Container>
   );
 });
 
-const Wrapper = styled.div``;
+const Container = styled.div`
+  display: grid;
+  grid-template-columns: 250px min-content;
+  align-items: center;
+  column-gap: 6px;
+`;
+const Actions = styled.div`
+  display: grid;
+  grid-auto-flow: column;
+  grid-auto-columns: min-content;
+  column-gap: 6px;
+`;
