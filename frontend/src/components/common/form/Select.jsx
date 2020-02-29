@@ -52,6 +52,11 @@ const StyledTextField = styled(TextField)`
       border-color: lightgray;
     }
   }
+  .MuiFormHelperText-contained {
+    margin: 4px 0 0;
+    display: flex;
+    justify-content: flex-end;
+  }
   input {
     color: white;
     min-width: 0;

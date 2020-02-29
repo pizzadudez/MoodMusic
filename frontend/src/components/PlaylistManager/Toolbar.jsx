@@ -8,7 +8,7 @@ export default memo(({ searchFilter }) => {
   return (
     <Container>
       <SearchFilter onChange={searchFilter} label="Filter Labels" />
-      <Button disabled>New Playlist</Button>
+      <Button disabled>Playlist Feature</Button>
     </Container>
   );
 });

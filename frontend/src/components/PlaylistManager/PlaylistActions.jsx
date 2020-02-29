@@ -38,7 +38,11 @@ export default memo(({ isOpen, update }) => {
           <Button variant="special" disabled>
             Revert
           </Button>
-          <Button variant="danger" startIcon={<DeleteOutlineIcon />} />
+          <Button
+            variant="danger"
+            startIcon={<DeleteOutlineIcon />}
+            tooltip="Delete playlist."
+          />
         </div>
       </Container>
     </CSSTransition>

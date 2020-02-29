@@ -1,4 +1,4 @@
-import React, { memo, useCallback } from 'react';
+import React, { memo, useCallback, useMemo } from 'react';
 import styled from 'styled-components';
 import { useSelector, useDispatch } from 'react-redux';
 import { createSelector } from 'reselect';
@@ -11,7 +11,6 @@ import Button from '../common/Button';
 import RadioGroup from '../common/form/RadioGroup';
 import TextField from '../common/form/TextField';
 import Select from '../common/form/Select';
-import { useMemo } from 'react';
 
 const validationSchema = yup.object().shape({
   name: yup.string().required('Required field.'),
