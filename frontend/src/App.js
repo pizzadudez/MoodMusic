@@ -5,13 +5,14 @@ import { useSelector, useDispatch } from 'react-redux';
 import { createSelector } from 'reselect';
 import styled from 'styled-components';
 
+import { fetchData } from './actions/dataActions';
 import LoadingSpinner from './components/LoadingSpinner';
 import Navbar from './components/Navbar';
 import Footer from './components/Footer';
+import ConfirmModal from './components/ConfirmModal';
 import Main from './views/Main';
 import Labels from './views/Labels';
 import Playlists from './views/Playlists';
-import { fetchData } from './actions/dataActions';
 
 const stateSelector = createSelector(
   state => state.app.authorized,
@@ -46,6 +47,7 @@ export default memo(() => {
             </Switch>
             <Footer />
           </Router>
+          <ConfirmModal />
         </Page>
       )}
       {authorized && loadingData && <LoadingSpinner />}

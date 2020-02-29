@@ -3,6 +3,10 @@
 // ============================================================================
 export const SET_AUTHORIZED = 'SET_AUTHORIZED';
 export const LOADING_FINISHED = 'LOADING_FINISHED';
+export const CONFIRM_ACTION_START = 'CONFIRM_ACTION_START';
+export const CONFIRM_ACTION_SUCCESS = 'CONFIRM_ACTION_SUCCESS';
+export const CONFIRM_ACTION_CANCEL = 'CONFIRM_ACTION_CANCEL';
+
 export const FETCH_TRACKS = 'FETCH_TRACKS';
 export const FETCH_PLAYLISTS = 'FETCH_PLAYLISTS';
 export const FETCH_LABELS = 'FETCH_LABELS';
