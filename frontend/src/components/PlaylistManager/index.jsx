@@ -61,19 +61,23 @@ export default memo(() => {
     <Wrapper>
       <Toolbar searchFilter={searchFilter} />
       <SlidesContainer>
-        {['label', 'mix', 'untracked', 'deleted'].map(type => (
-          <React.Fragment key={type}>
-            {!!filtered[type].length && <h2>{type + ' playlists'}</h2>}
-            {filtered[type].map(id => (
-              <PlaylistSlide
-                key={id}
-                playlist={playlistsById[id]}
-                toggleUpdate={toggleUpdate}
-                isUpdating={id === updateForm}
-              />
-            ))}
-          </React.Fragment>
-        ))}
+        {['label', 'mix', 'untracked', 'deleted'].map(
+          type =>
+            filtered[type] &&
+            !!filtered[type].length && (
+              <React.Fragment key={type}>
+                <h2>{type + ' playlists'}</h2>
+                {filtered[type].map(id => (
+                  <PlaylistSlide
+                    key={id}
+                    playlist={playlistsById[id]}
+                    toggleUpdate={toggleUpdate}
+                    isUpdating={id === updateForm}
+                  />
+                ))}
+              </React.Fragment>
+            )
+        )}
       </SlidesContainer>
     </Wrapper>
   );
@@ -87,7 +91,6 @@ const Wrapper = styled.div`
 `;
 const SlidesContainer = styled.div`
   display: grid;
-  grid-auto-flow: row;
   row-gap: 6px;
   overflow-y: auto;
   overflow-x: hidden;

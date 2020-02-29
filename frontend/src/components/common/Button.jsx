@@ -29,7 +29,7 @@ export default memo(({ onClick, children, tooltip, ...props }) => {
       {button}
     </Tooltip>
   );
-  return tooltip ? withTooltip : button;
+  return tooltip ? (props.disabled ? button : withTooltip) : button;
 });
 
 const StyledButton = styled(

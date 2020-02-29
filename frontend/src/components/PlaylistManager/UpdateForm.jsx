@@ -134,7 +134,7 @@ const Container = styled.div`
   }
 `;
 const StyledForm = styled(Form)`
-  min-width: 600px;
+  min-width: 530px;
   width: 100%;
   height: 100%;
   display: grid;
@@ -143,7 +143,6 @@ const StyledForm = styled(Form)`
   align-items: center;
 `;
 const Inputs = styled.div`
-  min-width: 400px;
   display: flex;
   flex-direction: column;
   justify-content: space-between;

@@ -1,4 +1,4 @@
-import React, { memo, useMemo, useCallback } from 'react';
+import React, { memo, useCallback } from 'react';
 import styled from 'styled-components';
 import { useDispatch, useSelector } from 'react-redux';
 import { createSelector } from 'reselect';
@@ -49,7 +49,7 @@ export default memo(() => {
       {({ values, handleSubmit, resetForm }) => (
         <StyledForm>
           <Header>
-            <span>Create new playlist</span>
+            <span>Create playlist</span>
             <Field name="type" options={playlistTypes} as={RadioGroup} row />
           </Header>
           <Inputs>
@@ -88,6 +88,7 @@ const Header = styled.div`
   justify-content: space-between;
   > span {
     font-size: 2rem;
+    font-weight: 600;
     margin-block-start: 6px;
     margin-block-end: 6px;
     margin-right: 12px;

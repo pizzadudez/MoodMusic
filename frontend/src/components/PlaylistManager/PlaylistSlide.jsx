@@ -36,7 +36,11 @@ export default memo(({ playlist, toggleUpdate, isUpdating }) => {
         </div>
       </Info>
       <SideEffects>
-        <PlaylistActions isOpen={!isUpdating} update={toggle} />
+        <PlaylistActions
+          playlist={playlist}
+          isOpen={!isUpdating}
+          update={toggle}
+        />
         <UpdateForm playlist={playlist} isOpen={isUpdating} close={toggle} />
       </SideEffects>
     </Container>
@@ -47,7 +51,7 @@ const Container = styled.div`
   height: 102px;
   width: calc(100% - 18px);
   display: grid;
-  grid-template-columns: 210px 1fr;
+  grid-template-columns: minmax(210px, 250px) minmax(530px, 1fr);
   padding: 6px;
   background-color: #353535;
   color: white;
