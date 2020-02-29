@@ -91,7 +91,7 @@ const Header = styled.div`
     font-weight: 600;
     margin-block-start: 6px;
     margin-block-end: 6px;
-    margin-right: 12px;
+    margin-right: 6px;
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;

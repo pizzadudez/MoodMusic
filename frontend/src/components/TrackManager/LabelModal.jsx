@@ -1,7 +1,7 @@
 import React, { memo, useCallback, useState, useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import styled from 'styled-components';
 import { createSelector } from 'reselect';
+import styled from 'styled-components';
 
 import { updateTracks } from '../../actions/trackActions';
 import Dialog from '@material-ui/core/Dialog';

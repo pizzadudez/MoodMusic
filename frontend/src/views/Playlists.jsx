@@ -20,7 +20,7 @@ export default memo(() => (
 const Content = styled.div`
   min-height: 0;
   display: grid;
-  grid-template-columns: minmax(780px, 880px) minmax(360px, 400px);
+  grid-template-columns: minmax(780px, 880px) minmax(370px, 400px);
   column-gap: 10px;
   margin: 0 4px;
 `;

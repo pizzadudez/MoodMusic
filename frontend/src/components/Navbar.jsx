@@ -27,7 +27,9 @@ export default memo(() => {
         </NavLink>
       </Menu>
       <Actions>
-        <Button onClick={syncDataHandle}>Hard Sync</Button>
+        <Button onClick={syncDataHandle} tooltip="Sync all tracked playlists.">
+          Hard Sync
+        </Button>
         <Button disabled>New Features</Button>
       </Actions>
     </Nav>

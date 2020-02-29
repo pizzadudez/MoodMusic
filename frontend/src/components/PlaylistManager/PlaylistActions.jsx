@@ -9,6 +9,7 @@ import {
   syncPlaylist,
   revertChanges,
 } from '../../actions/playlistActions';
+import ConfirmModal from '../common/ConfirmModal';
 import Button from '../common/Button';
 import EditIcon from '@material-ui/icons/Edit';
 import DeleteOutlineIcon from '@material-ui/icons/DeleteOutline';
@@ -17,8 +18,8 @@ import UpdateIcon from '@material-ui/icons/Update';
 import HistoryIcon from '@material-ui/icons/History';
 import RestoreFromTrashIcon from '@material-ui/icons/RestoreFromTrash';
 import LibraryMusicIcon from '@material-ui/icons/LibraryMusic';
-import ShuffleIcon from '@material-ui/icons/Shuffle';
 import QueueMusicIcon from '@material-ui/icons/QueueMusic';
+import { useState } from 'react';
 
 export default memo(({ playlist, isOpen, update }) => {
   const dispatch = useDispatch();
@@ -39,6 +40,14 @@ export default memo(({ playlist, isOpen, update }) => {
     () => dispatch(revertChanges(playlist.id)),
     [dispatch, playlist.id]
   );
+
+  // Confirmation Modal
+  const [confirm, setConfirm] = useState(false);
+  const [action, setAction] = useState(null);
+  const confirmDelete = useCallback(() => {
+    setConfirm(state => !state);
+    setAction(state => (state ? null : deleteHandler));
+  }, [deleteHandler]);
 
   const buttons = useMemo(() => {
     switch (playlist.type) {
@@ -117,7 +126,7 @@ export default memo(({ playlist, isOpen, update }) => {
               )}
             </MenuButtons>
             <Button
-              onClick={deleteHandler}
+              onClick={confirmDelete}
               variant="danger"
               startIcon={<DeleteOutlineIcon />}
               tooltip="Delete playlist."
@@ -145,6 +154,11 @@ export default memo(({ playlist, isOpen, update }) => {
       unmountOnExit
     >
       <Container>
+        <ConfirmModal
+          open={confirm}
+          action={action}
+          onClose={confirmDelete}
+        ></ConfirmModal>
         <ButtonsWrapper>{buttons}</ButtonsWrapper>
       </Container>
     </CSSTransition>

@@ -58,7 +58,7 @@ export default memo(() => {
   );
 
   return (
-    <Wrapper>
+    <Container>
       <Toolbar searchFilter={searchFilter} />
       <SlidesContainer>
         {['label', 'mix', 'untracked', 'deleted'].map(
@@ -66,7 +66,7 @@ export default memo(() => {
             filtered[type] &&
             !!filtered[type].length && (
               <React.Fragment key={type}>
-                <h2>{type + ' playlists'}</h2>
+                <h2>{type[0].toUpperCase() + type.slice(1) + ' playlists'}</h2>
                 {filtered[type].map(id => (
                   <PlaylistSlide
                     key={id}
@@ -79,11 +79,11 @@ export default memo(() => {
             )
         )}
       </SlidesContainer>
-    </Wrapper>
+    </Container>
   );
 });
 
-const Wrapper = styled.div`
+const Container = styled.div`
   max-height: 100%;
   display: grid;
   grid-template-rows: 50px calc(100% - 56px);
@@ -96,5 +96,7 @@ const SlidesContainer = styled.div`
   overflow-x: hidden;
   > h2 {
     color: #c1c1c152;
+    margin-block-end: 12px;
+    font-size: 2rem;
   }
 `;

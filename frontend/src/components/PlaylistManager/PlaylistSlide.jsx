@@ -5,7 +5,9 @@ import { createSelector } from 'reselect';
 
 import UpdateForm from './UpdateForm';
 import PlaylistActions from './PlaylistActions';
+import EllipsisTooltip from '../common/EllipsisTooltip';
 import Label from '../common/Label';
+import LibraryMusicIcon from '@material-ui/icons/LibraryMusic';
 
 const stateSelector = createSelector(
   state => state.labels.labelsById,
@@ -23,16 +25,21 @@ export default memo(({ playlist, toggleUpdate, isUpdating }) => {
   return (
     <Container>
       <Info>
-        <h2>{playlist.name}</h2>
+        <EllipsisTooltip title={playlist.name}>
+          <h2>{playlist.name}</h2>
+        </EllipsisTooltip>
         <div>
-          <span>{playlist.type}</span>
           {playlist.label_id && (
             <TinyLabel
               color={labelsById[playlist.label_id].color}
               name={labelsById[playlist.label_id].name}
             />
           )}
-          <span>{playlist.track_count}</span>
+          <span>
+            <LibraryMusicIcon />
+            {playlist.track_count}
+          </span>
+          {/* <span>{playlist.type}</span> */}
         </div>
       </Info>
       <SideEffects>
@@ -63,7 +70,7 @@ const Info = styled.div`
   display: flex;
   flex-direction: column;
   justify-content: space-between;
-  padding: 8px 0;
+  padding: 8px 6px 8px 0;
   > h2 {
     margin: 0;
     overflow: hidden;
@@ -72,18 +79,20 @@ const Info = styled.div`
     font-size: 1.7rem;
   }
   > div {
-    display: inline-grid;
-    grid-template-columns: repeat(3, min-content);
-    column-gap: 5px;
+    display: grid;
+    grid-auto-flow: column;
+    grid-auto-columns: max-content;
+    column-gap: 6px;
     align-items: center;
+    color: #b3b3b3;
+    span {
+      svg {
+        margin-bottom: -7px;
+        margin-right: 2px;
+      }
+    }
   }
 `;
-const SideEffects = styled.div`
-  display: flex;
-  width: 100%;
-  overflow: hidden;
-`;
-
 const TinyLabel = styled(Label)`
   height: 32px;
   min-width: 48px;
@@ -91,4 +100,9 @@ const TinyLabel = styled(Label)`
   cursor: default;
   font-size: 0.8rem;
   margin: 1px;
+`;
+const SideEffects = styled.div`
+  display: flex;
+  width: 100%;
+  overflow: hidden;
 `;

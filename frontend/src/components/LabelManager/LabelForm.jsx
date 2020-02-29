@@ -84,11 +84,17 @@ export default memo(({ id, close: closeForm, isOpen }) => {
                   {!!id && (
                     <SpecialActions>
                       <Button
+                        disabled
                         variant="special"
                         startIcon={<PlaylistAddIcon />}
                         tooltip="Create label playlist."
                       />
-                      <Button variant="danger" startIcon={<DeleteIcon />} />
+                      <Button
+                        disabled
+                        variant="danger"
+                        startIcon={<DeleteIcon />}
+                        tooltip="Delete Label permantenly."
+                      />
                     </SpecialActions>
                   )}
                 </Header>
