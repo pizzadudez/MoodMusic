@@ -67,6 +67,8 @@ exports.init = () => {
       color TEXT,
       verbose TEXT DEFAULT NULL,
       suffix TEXT DEFAULT NULL,
+      created_at TEXT,
+      updated_at TEXT,
       parent_id INTEGER DEFAULT NULL
     )`);
     db.run(`CREATE TABLE IF NOT EXISTS tracks_labels (

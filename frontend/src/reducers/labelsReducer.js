@@ -1,4 +1,9 @@
-import { FETCH_LABELS, CREATE_LABEL, UPDATE_LABEL } from '../actions/types';
+import {
+  FETCH_LABELS,
+  CREATE_LABEL,
+  UPDATE_LABEL,
+  DELETE_LABEL,
+} from '../actions/types';
 
 const initialState = {
   labelsById: {},
@@ -42,6 +47,28 @@ export default (state = initialState, action) => {
           [action.label.id]: action.label,
         },
       };
+    case DELETE_LABEL: {
+      const label = state.labelsById[action.id];
+      let parent = {};
+      if (label.parent_id) {
+        parent = {
+          ...state.labelsById[label.parent_id],
+        };
+        parent.subgenre_ids = parent.subgenre_ids.filter(
+          id => id !== action.id
+        );
+      }
+
+      const { [action.id]: value, ...rest } = state.labelsById;
+      return {
+        ...state,
+        labelsById: {
+          ...rest,
+          ...(label.parent_id && { [label.parent_id]: parent }),
+        },
+        ids: state.ids.filter(id => id !== action.id),
+      };
+    }
     default:
       return state;
   }

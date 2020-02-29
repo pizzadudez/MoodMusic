@@ -1,4 +1,4 @@
-import React, { memo, useMemo } from 'react';
+import React, { memo, useMemo, useCallback } from 'react';
 import { Formik, Form, Field } from 'formik';
 import styled from 'styled-components';
 import { createSelector } from 'reselect';
@@ -6,7 +6,12 @@ import { useSelector, useDispatch } from 'react-redux';
 import { CSSTransition } from 'react-transition-group';
 import * as yup from 'yup';
 
-import { createLabel, updateLabel } from '../../actions/labelActions';
+import {
+  createLabel,
+  updateLabel,
+  deleteLabel,
+} from '../../actions/labelActions';
+import { confirm } from '../../actions/appActions';
 import Button from '../common/Button';
 import ColorPicker from '../common/form/ColorPicker';
 import TextField from '../common/form/TextField';
@@ -35,6 +40,19 @@ const stateSelector = createSelector(
 export default memo(({ id, close: closeForm, isOpen }) => {
   const dispatch = useDispatch();
   const { labelsById, genres } = useSelector(stateSelector);
+
+  const deleteHandler = useCallback(
+    () =>
+      dispatch(
+        confirm({
+          title: 'Are you sure you want to delete this label?',
+          description: 'All associations will be PERMANENTLY lost!',
+        })
+      )
+        .then(() => dispatch(deleteLabel(id)))
+        .catch(() => {}),
+    [(dispatch, id)]
+  );
 
   const initialValues = useMemo(() => {
     if (id) {
@@ -90,7 +108,7 @@ export default memo(({ id, close: closeForm, isOpen }) => {
                         tooltip="Create label playlist."
                       />
                       <Button
-                        disabled
+                        onClick={deleteHandler}
                         variant="danger"
                         startIcon={<DeleteIcon />}
                         tooltip="Delete Label permantenly."

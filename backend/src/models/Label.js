@@ -150,7 +150,6 @@ exports.removeLabelTracks = id => {
 };
 
 exports.create = data => {
-  console.log(data);
   const values = [
     data.type,
     data.name,
@@ -158,10 +157,11 @@ exports.create = data => {
     data.parent_id ? data.parent_id : null,
     data.verbose ? data.verbose : null,
     data.suffix ? data.suffix : null,
+    new Date().toISOString(),
   ];
   const insertSql = `INSERT INTO labels
-    (type, name, color, parent_id, verbose, suffix)
-    VALUES(?, ?, ?, ?, ?, ?)`;
+    (type, name, color, parent_id, verbose, suffix, created_at)
+    VALUES(?, ?, ?, ?, ?, ?, ?)`;
 
   return new Promise((resolve, reject) => {
     const sql =
@@ -192,6 +192,7 @@ exports.update = (id, data) => {
     ...(data.parent_id && { parent_id: data.parent_id }),
     ...(data.verbose && { verbose: data.verbose }),
     ...(data.suffix && { suffix: data.suffix }),
+    updated_at: new Date().toISOString(),
   };
   const fields = Object.keys(sanitizedData)
     .map(key => key + '=?')

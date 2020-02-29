@@ -2,11 +2,15 @@ import React, { memo, useCallback } from 'react';
 import styled from 'styled-components';
 import { createSelector } from 'reselect';
 import { useSelector } from 'react-redux';
+import moment from 'moment';
 
 import ExpandButton from '../common/ExpandButton';
 import Label from '../common/Label';
 import LabelForm from './LabelForm';
 import Divider from '@material-ui/core/Divider';
+
+const formatDate = timestamp =>
+  timestamp ? moment(timestamp).format('DD MMM YYYY') : '...';
 
 const stateSelector = createSelector(
   state => state.playlists.playlistsById,
@@ -93,12 +97,12 @@ export default memo(({ label, update, formOpen }) => {
           )}
           <div>
             <span>created</span>
-            <span>...</span>
+            <span>{formatDate(label.created_at)}</span>
           </div>
           <Divider />
           <div>
-            <span>updated</span>
-            <span>...</span>
+            <span>last update</span>
+            <span>{formatDate(label.updated_at)}</span>
           </div>
         </Details>
       </Card>
@@ -132,10 +136,7 @@ const Header = styled.div`
 `;
 const Details = styled.div`
   display: grid;
-  grid-auto-flow: row;
   row-gap: 2px;
-  /* display: flex;
-  flex-direction: column; */
   background: #2b2b2b;
   border-radius: 3px;
   > div {

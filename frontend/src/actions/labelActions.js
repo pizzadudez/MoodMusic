@@ -1,6 +1,6 @@
 import axios from 'axios';
 import _ from 'lodash';
-import { CREATE_LABEL, UPDATE_LABEL, SELECT_LABEL_TO_UPDATE } from './types';
+import { CREATE_LABEL, UPDATE_LABEL, DELETE_LABEL } from './types';
 
 export const createLabel = data => dispatch => {
   const json = _.pickBy(data);
@@ -26,9 +26,9 @@ export const updateLabel = (id, data) => dispatch => {
     )
     .catch(err => console.log(err));
 };
-export const selectLabelToUpdate = id => dispatch => {
-  dispatch({
-    type: SELECT_LABEL_TO_UPDATE,
-    id,
-  });
+export const deleteLabel = id => dispatch => {
+  axios
+    .delete('/api/label/' + id)
+    .then(() => dispatch({ type: DELETE_LABEL, id }))
+    .catch(err => console.log(err));
 };
