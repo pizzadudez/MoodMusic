@@ -49,22 +49,21 @@ export default (state = initialState, action) => {
       };
     case DELETE_LABEL: {
       const label = state.labelsById[action.id];
-      let parent = {};
-      if (label.parent_id) {
-        parent = {
-          ...state.labelsById[label.parent_id],
-        };
-        parent.subgenre_ids = parent.subgenre_ids.filter(
-          id => id !== action.id
-        );
-      }
+      const parent = {
+        ...state.labelsById[label.parent_id],
+      };
 
       const { [action.id]: value, ...rest } = state.labelsById;
       return {
         ...state,
         labelsById: {
           ...rest,
-          ...(label.parent_id && { [label.parent_id]: parent }),
+          ...(label.parent_id && {
+            [label.parent_id]: {
+              ...parent,
+              subgenre_ids: parent.subgenre_ids.filter(id => id !== action.id),
+            },
+          }),
         },
         ids: state.ids.filter(id => id !== action.id),
       };

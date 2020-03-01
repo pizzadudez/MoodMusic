@@ -37,7 +37,7 @@ const stateSelector = createSelector(
   })
 );
 
-export default memo(({ id, close: closeForm, isOpen }) => {
+export default memo(({ id, isOpen, close }) => {
   const dispatch = useDispatch();
   const { labelsById, genres } = useSelector(stateSelector);
 
@@ -82,22 +82,39 @@ export default memo(({ id, close: closeForm, isOpen }) => {
           initialValues={initialValues}
           enableReinitialize
           validationSchema={validationSchema}
-          onSubmit={async (data, { setSubmitting, resetForm }) => {
-            setSubmitting(true);
+          onSubmit={(data, { resetForm }) => {
             if (id) {
-              await dispatch(updateLabel(id, data));
+              if (data !== initialValues) {
+                const sanitizedData = {
+                  ...(data.name !== initialValues.name && { name: data.name }),
+                  ...(data.verbose !== initialValues.verbose && {
+                    verbose: data.verbose,
+                  }),
+                  ...(data.color !== initialValues.color && {
+                    color: data.color,
+                  }),
+                  ...(data.type === 'subgenre' && {
+                    type: data.type,
+                    parent_id: data.parent_id,
+                    ...(data.suffix !== initialValues.suffix && {
+                      suffix: data.suffix,
+                    }),
+                  }),
+                };
+                dispatch(updateLabel(id, sanitizedData));
+              }
             } else {
-              await dispatch(createLabel(data));
+              dispatch(createLabel(data));
             }
-            setSubmitting(false);
-            closeForm();
             resetForm();
+            close();
           }}
         >
           {({ values, handleSubmit }) => (
             <StyledForm>
               <LeftContainer>
                 <Header>
+                  {!id && <span>New Label</span>}
                   <StyledLabel color={values.color} name={values.name} />
                   {!!id && (
                     <SpecialActions>
@@ -133,7 +150,7 @@ export default memo(({ id, close: closeForm, isOpen }) => {
                   </InputRow>
                 )}
                 <Actions>
-                  <Button variant="cancel" onClick={closeForm}>
+                  <Button variant="cancel" onClick={close}>
                     Cancel
                   </Button>
                   <Button variant="submit" type="submit" onClick={handleSubmit}>
@@ -195,6 +212,18 @@ const LeftContainer = styled.div`
 const Header = styled.div`
   display: flex;
   margin-bottom: 4px;
+  > span {
+    display: block;
+    width: 100%;
+    font-size: 2rem;
+    font-weight: 600;
+    margin-block-start: 10px;
+    margin-block-end: 6px;
+    margin-right: 6px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
 `;
 const SpecialActions = styled.div`
   width: 100%;

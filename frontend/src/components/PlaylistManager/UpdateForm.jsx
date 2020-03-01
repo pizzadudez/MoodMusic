@@ -41,25 +41,23 @@ export default memo(({ playlist, isOpen, close }) => {
 
   const submitHandler = useCallback(
     (data, { resetForm }) => {
-      if (data !== initialValues) {
-        if (playlist) {
-          const sanitizedData = {
-            ...(data.name !== initialValues.name && { name: data.name }),
-            ...(data.description !== initialValues.description && {
-              description: data.description,
+      if (data !== initialValues && playlist) {
+        const sanitizedData = {
+          ...(data.name !== initialValues.name && { name: data.name }),
+          ...(data.description !== initialValues.description && {
+            description: data.description,
+          }),
+          ...(data.type !== initialValues.type && {
+            type: data.type,
+          }),
+          ...(data.type === 'label' &&
+            !!data.label_id &&
+            data.label_id !== initialValues.label_id && {
+              type: 'label',
+              label_id: data.label_id,
             }),
-            ...(data.type !== initialValues.type && {
-              type: data.type,
-            }),
-            ...(data.type === 'label' &&
-              !!data.label_id &&
-              data.label_id !== initialValues.label_id && {
-                type: 'label',
-                label_id: data.label_id,
-              }),
-          };
-          dispatch(updatePlaylist(playlist.id, sanitizedData));
-        }
+        };
+        dispatch(updatePlaylist(playlist.id, sanitizedData));
       }
       resetForm();
       close();
