@@ -59,8 +59,29 @@ exports.create = async data => {
     snapshot_id: response.snapshot_id,
     added_at: new Date().toISOString(),
     type: data.type,
-    label_id: data.label_id ? data.label_id : null,
+    ...(data.type === 'label' && { label_id: data.label_id }),
   };
+
+  // Add labelTracks to labelPlaylist
+  if (data.type === 'label' && data.label_id) {
+    const labelTracks = await LabelModel.getTracks(data.label_id);
+    const playlistTracks = {
+      playlist_id: response.id,
+      track_ids: labelTracks,
+    };
+    if (labelTracks.length) {
+      const [snapshotId, newTrackCount] = await addPlaylistTracks(
+        playlistTracks
+      );
+      // Update data fields if we add tracks
+      playlistData.snapshot_id = snapshotId;
+      playlistData.track_count = newTrackCount;
+    }
+    const playlist = await PlaylistModel.create(playlistData);
+    await PlaylistModel.addPlaylists([playlistTracks], true);
+    return playlist;
+  }
+
   return PlaylistModel.create(playlistData);
 };
 exports.update = async (id, data) => {

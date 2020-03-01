@@ -145,15 +145,15 @@ exports.create = data => {
   const values = Object.values(data);
   const sql = `INSERT INTO playlists 
     (id, name, description, track_count, snapshot_id,
-    added_at, type, label_id)
-    VALUES (?, ?, ?, ?, ?, ?, ?, ?)`;
+    added_at, type, label_id, updates)
+    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`;
 
   return new Promise((resolve, reject) => {
-    db.run(sql, values, function(err) {
+    db.run(sql, [...values, 0], err => {
       if (err) {
         reject(new Error(err.message));
       } else {
-        resolve(exports.getOne(this.lastID));
+        resolve(exports.getOne(data.id));
       }
     });
   });

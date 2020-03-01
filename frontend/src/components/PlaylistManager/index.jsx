@@ -23,7 +23,6 @@ const stateSelector = createSelector(
 );
 
 export default memo(() => {
-  console.log('PlaylistManager');
   const { playlistsById, playlistIdsByType, labelsById } = useSelector(
     stateSelector
   );

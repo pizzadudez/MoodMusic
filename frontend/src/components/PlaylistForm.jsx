@@ -65,11 +65,11 @@ export default memo(() => {
             )}
           </Inputs>
           <Actions>
-            <Button variant="submit" type="submit" onClick={handleSubmit}>
-              Submit
-            </Button>
             <Button variant="cancel" onClick={resetForm}>
               Reset
+            </Button>
+            <Button variant="submit" type="submit" onClick={handleSubmit}>
+              Submit
             </Button>
           </Actions>
         </StyledForm>

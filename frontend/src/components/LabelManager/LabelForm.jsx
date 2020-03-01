@@ -113,7 +113,7 @@ export default memo(({ id, isOpen, close }) => {
           {({ values, handleSubmit }) => (
             <StyledForm>
               <LeftContainer>
-                <Header>
+                <Header createForm={!id}>
                   {!id && <span>New Label</span>}
                   <StyledLabel color={values.color} name={values.name} />
                   {!!id && (
@@ -210,11 +210,16 @@ const LeftContainer = styled.div`
   flex-direction: column;
 `;
 const Header = styled.div`
-  display: flex;
+  /* display: flex; */
+  display: grid;
+  grid-auto-flow: column;
+  grid-auto-columns: minmax(0, max-content);
+  align-items: center;
+  ${props =>
+    props.createForm ? '' : 'grid-template-columns: max-content 1fr;'}
   margin-bottom: 4px;
   > span {
     display: block;
-    width: 100%;
     font-size: 2rem;
     font-weight: 600;
     margin-block-start: 10px;
@@ -226,10 +231,7 @@ const Header = styled.div`
   }
 `;
 const SpecialActions = styled.div`
-  width: 100%;
-  display: flex;
-  justify-content: flex-end;
-  align-items: center;
+  justify-self: end;
   > button {
     margin-left: 10px;
   }

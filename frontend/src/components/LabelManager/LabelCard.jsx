@@ -26,9 +26,7 @@ export default memo(({ label, update, formOpen }) => {
     <Paper>
       <Card>
         <Header>
-          <h2 style={{ textAlign: 'center', margin: 0 }}>
-            {label.verbose || label.name}
-          </h2>
+          <span>{label.verbose || label.name}</span>
           <StyledLabel color={label.color} name={label.name} />
           <ExpandButton onClick={toggle} expanded={formOpen}>
             Update
@@ -133,6 +131,14 @@ const Header = styled.div`
   grid-template-columns: 1fr min-content min-content;
   align-items: center;
   margin-bottom: 12px;
+  > span {
+    font-size: 1.6rem;
+    font-weight: 600;
+    margin-left: 12px;
+  }
+  > div {
+    align-self: start;
+  }
 `;
 const Details = styled.div`
   display: grid;
@@ -154,7 +160,7 @@ const Details = styled.div`
     > span:last-child {
       display: inline-block;
       text-align: end;
-      color: #60ea8e;
+      color: #46d274;
       margin: 4px 0;
       overflow: hidden;
       text-overflow: ellipsis;
