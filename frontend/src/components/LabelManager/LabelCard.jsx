@@ -127,17 +127,22 @@ const Card = styled.div`
   padding: 6px;
 `;
 const Header = styled.div`
+  max-height: 83px;
   display: grid;
   grid-template-columns: 1fr min-content min-content;
-  align-items: center;
+  align-items: start;
   margin-bottom: 12px;
   > span {
+    max-width: 100%;
+    overflow: hidden;
+    word-wrap: break-word;
     font-size: 1.6rem;
     font-weight: 600;
-    margin-left: 12px;
+    margin-left: 8px;
+    margin-top: 8px;
   }
-  > div {
-    align-self: start;
+  > button {
+    margin-top: 10px;
   }
 `;
 const Details = styled.div`

@@ -21,22 +21,22 @@ export default (state = initialState, action) => {
           .map(([key, _]) => parseInt(key)),
       };
     case CREATE_LABEL: {
-      const label = action.label;
-      let parent = {};
+      const { label } = action;
+      // handle subgenres
+      let parent;
       if (label.parent_id) {
-        parent = {
-          ...state.labelsById[label.parent_id],
-        };
+        parent = { ...state.labelsById[label.parent_id] };
         parent.subgenre_ids = [...(parent.subgenre_ids || []), label.id];
       }
+
       return {
         ...state,
+        ids: [...state.ids, label.id],
         labelsById: {
           ...state.labelsById,
           [label.id]: label,
           ...(label.parent_id && { [label.parent_id]: parent }),
         },
-        ids: [...state.ids, action.label.id],
       };
     }
     case UPDATE_LABEL:
@@ -48,22 +48,11 @@ export default (state = initialState, action) => {
         },
       };
     case DELETE_LABEL: {
-      const label = state.labelsById[action.id];
-      const parent = {
-        ...state.labelsById[label.parent_id],
-      };
-
       const { [action.id]: value, ...rest } = state.labelsById;
       return {
         ...state,
         labelsById: {
           ...rest,
-          ...(label.parent_id && {
-            [label.parent_id]: {
-              ...parent,
-              subgenre_ids: parent.subgenre_ids.filter(id => id !== action.id),
-            },
-          }),
         },
         ids: state.ids.filter(id => id !== action.id),
       };

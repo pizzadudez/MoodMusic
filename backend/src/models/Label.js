@@ -221,16 +221,13 @@ exports.update = (id, data) => {
     });
   });
 };
-// TODO: handle deleting genres (what happens to subgenres?)
 exports.delete = id => {
   return new Promise((resolve, reject) => {
-    db.run('DELETE FROM labels WHERE id=?', [id], function(err) {
+    db.run('DELETE FROM labels WHERE id=?', [id], err => {
       if (err) {
         reject(new Error(err.message));
-      } else if (this.changes) {
-        resolve();
       } else {
-        resolve(`Could not delete label with id: ${id}`);
+        resolve();
       }
     });
   });

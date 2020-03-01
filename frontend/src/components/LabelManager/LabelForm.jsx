@@ -23,7 +23,14 @@ import DeleteIcon from '@material-ui/icons/Delete';
 import PlaylistAddIcon from '@material-ui/icons/PlaylistAdd';
 
 const validationSchema = yup.object().shape({
-  name: yup.string().required('Required field.'),
+  name: yup
+    .string()
+    .test(
+      'len',
+      'Name must be at least 2 characters long.',
+      val => '' + val.length > 1
+    )
+    .required('Required field.'),
   parent_id: yup.string().when('type', {
     is: 'subgenre',
     then: yup.string().required('Required field'),
@@ -70,14 +77,20 @@ export default memo(({ id, isOpen, close }) => {
               color: data.color,
             }),
             ...(data.type === 'subgenre' && {
-              type: data.type,
-              parent_id: data.parent_id,
+              ...(data.parent_id !== initialValues.parent_id && {
+                parent_id: data.parent_id,
+                type: data.type,
+              }),
               ...(data.suffix !== initialValues.suffix && {
                 suffix: data.suffix,
+                type: data.type,
               }),
             }),
           };
-          dispatch(updateLabel(id, sanitizedData));
+          // initialValues change when we createLabelPlaylist()
+          if (Object.keys(sanitizedData).length) {
+            dispatch(updateLabel(id, sanitizedData));
+          }
         }
       } else {
         dispatch(createLabel(data));

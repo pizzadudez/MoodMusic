@@ -36,7 +36,7 @@ export const updatePlaylist = (id, data) => dispatch => {
     .catch(err => console.log(err));
 };
 export const deletePlaylist = id => (dispatch, getState) => {
-  const type = getState().playlists.playlistsById[id].type;
+  const { type } = getState().playlists.playlistsById[id];
   axios
     .delete('/api/playlist/' + id)
     .then(res => {

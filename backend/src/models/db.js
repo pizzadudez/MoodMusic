@@ -58,7 +58,8 @@ exports.init = () => {
       added_at TEXT,
       PRIMARY KEY (track_id, playlist_id),
       FOREIGN KEY (track_id) REFERENCES tracks (id) ON DELETE CASCADE,
-      FOREIGN KEY (playlist_id) REFERENCES playlists (id) ON DELETE CASCADE)`);
+      FOREIGN KEY (playlist_id) REFERENCES playlists (id) ON DELETE CASCADE
+    )`);
 
     db.run(`CREATE TABLE IF NOT EXISTS labels (
       id INTEGER NOT NULL PRIMARY KEY,
@@ -69,7 +70,8 @@ exports.init = () => {
       suffix TEXT DEFAULT NULL,
       created_at TEXT,
       updated_at TEXT,
-      parent_id INTEGER DEFAULT NULL
+      parent_id INTEGER DEFAULT NULL,
+      FOREIGN KEY (parent_id) REFERENCES labels (id) ON DELETE CASCADE
     )`);
     db.run(`CREATE TABLE IF NOT EXISTS tracks_labels (
       track_id TEXT NOT NULL,

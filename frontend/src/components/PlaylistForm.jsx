@@ -12,7 +12,14 @@ import TextField from './common/form/TextField';
 import Select from './common/form/Select';
 
 const validationSchema = yup.object().shape({
-  name: yup.string().required('Required field.'),
+  name: yup
+    .string()
+    .test(
+      'len',
+      'Name must be at least 2 characters long.',
+      val => '' + val.length > 1
+    )
+    .required('Required field.'),
   description: yup.string(),
   label_id: yup.string().when('type', {
     is: 'label',

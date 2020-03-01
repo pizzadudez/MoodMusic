@@ -1,4 +1,5 @@
 const LabelModel = require('../models/Label');
+const LabelsService = require('../services/labels');
 
 exports.getAll = async (req, res, next) => {
   try {
@@ -48,8 +49,8 @@ exports.update = async (req, res, next) => {
 };
 exports.delete = async (req, res, next) => {
   try {
-    const message = await LabelModel.delete(req.params.id);
-    res.status(200).send(message || 'Successfully deleted.');
+    await LabelsService.delete(req.params.id);
+    res.status(200).send('Successfully deleted.');
   } catch (err) {
     console.log(err);
     res.status(500).send('Internal server error.');
