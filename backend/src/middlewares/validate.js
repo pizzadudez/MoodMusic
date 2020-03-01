@@ -57,9 +57,11 @@ const validate = field => {
       }),
     }),
     createPlaylist: Joi.object().keys({
-      name: Joi.string()
-        .min(2)
-        .required(),
+      name: Joi.when('type', {
+        is: 'label',
+        then: Joi.string().min(2),
+        otherwise: Joi.string().min(2).required,
+      }),
       description: Joi.string(),
       type: Joi.string()
         .valid('label', 'mix')

@@ -11,6 +11,7 @@ import {
   updateLabel,
   deleteLabel,
 } from '../../actions/labelActions';
+import { createPlaylist } from '../../actions/playlistActions';
 import { confirm } from '../../actions/appActions';
 import Button from '../common/Button';
 import ColorPicker from '../common/form/ColorPicker';
@@ -41,19 +42,6 @@ export default memo(({ id, isOpen, close }) => {
   const dispatch = useDispatch();
   const { labelsById, genres } = useSelector(stateSelector);
 
-  const deleteHandler = useCallback(
-    () =>
-      dispatch(
-        confirm({
-          title: 'Are you sure you want to delete this label?',
-          description: 'All associations will be PERMANENTLY lost!',
-        })
-      )
-        .then(() => dispatch(deleteLabel(id)))
-        .catch(() => {}),
-    [(dispatch, id)]
-  );
-
   const initialValues = useMemo(() => {
     if (id) {
       const l = labelsById[id];
@@ -69,6 +57,60 @@ export default memo(({ id, isOpen, close }) => {
     return defaultValues;
   }, [id, labelsById]);
 
+  const submitHandler = useCallback(
+    (data, { resetForm }) => {
+      if (id) {
+        if (data !== initialValues) {
+          const sanitizedData = {
+            ...(data.name !== initialValues.name && { name: data.name }),
+            ...(data.verbose !== initialValues.verbose && {
+              verbose: data.verbose,
+            }),
+            ...(data.color !== initialValues.color && {
+              color: data.color,
+            }),
+            ...(data.type === 'subgenre' && {
+              type: data.type,
+              parent_id: data.parent_id,
+              ...(data.suffix !== initialValues.suffix && {
+                suffix: data.suffix,
+              }),
+            }),
+          };
+          dispatch(updateLabel(id, sanitizedData));
+        }
+      } else {
+        dispatch(createLabel(data));
+      }
+      resetForm();
+      close();
+    },
+    [dispatch, close, id, initialValues]
+  );
+
+  const deleteHandler = useCallback(
+    () =>
+      dispatch(
+        confirm({
+          title: 'Are you sure you want to delete this label?',
+          description: 'All associations will be PERMANENTLY lost!',
+        })
+      )
+        .then(() => dispatch(deleteLabel(id)))
+        .catch(() => {}),
+    [dispatch, id]
+  );
+  const createLabelPlaylist = useCallback(
+    () =>
+      dispatch(
+        createPlaylist({
+          type: 'label',
+          label_id: id,
+        })
+      ),
+    [dispatch, id]
+  );
+
   return (
     <CSSTransition
       in={isOpen}
@@ -82,33 +124,7 @@ export default memo(({ id, isOpen, close }) => {
           initialValues={initialValues}
           enableReinitialize
           validationSchema={validationSchema}
-          onSubmit={(data, { resetForm }) => {
-            if (id) {
-              if (data !== initialValues) {
-                const sanitizedData = {
-                  ...(data.name !== initialValues.name && { name: data.name }),
-                  ...(data.verbose !== initialValues.verbose && {
-                    verbose: data.verbose,
-                  }),
-                  ...(data.color !== initialValues.color && {
-                    color: data.color,
-                  }),
-                  ...(data.type === 'subgenre' && {
-                    type: data.type,
-                    parent_id: data.parent_id,
-                    ...(data.suffix !== initialValues.suffix && {
-                      suffix: data.suffix,
-                    }),
-                  }),
-                };
-                dispatch(updateLabel(id, sanitizedData));
-              }
-            } else {
-              dispatch(createLabel(data));
-            }
-            resetForm();
-            close();
-          }}
+          onSubmit={submitHandler}
         >
           {({ values, handleSubmit }) => (
             <StyledForm>
@@ -119,7 +135,8 @@ export default memo(({ id, isOpen, close }) => {
                   {!!id && (
                     <SpecialActions>
                       <Button
-                        disabled
+                        onClick={createLabelPlaylist}
+                        disabled={!!labelsById[id].playlist_id}
                         variant="special"
                         startIcon={<PlaylistAddIcon />}
                         tooltip="Create label playlist."

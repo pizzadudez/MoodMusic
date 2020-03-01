@@ -9,6 +9,7 @@ import {
   CLEAR_TRACK_CHANGES,
   TOGGLE_TRACK_LIKE,
 } from './types';
+import { fetchLabels, fetchPlaylists } from './dataActions';
 
 // Track Selecting
 export const modifyTrackSelection = id => dispatch => {
@@ -92,6 +93,8 @@ export const submitChanges = () => async (dispatch, getState) => {
       parseAndSubmit(playlistsToRemove, 'playlist', 'remove'),
     ]);
     dispatch({ type: CLEAR_TRACK_CHANGES });
+    dispatch(fetchPlaylists());
+    dispatch(fetchLabels());
   } catch (err) {
     console.log(err);
   }
