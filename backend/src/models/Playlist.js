@@ -142,14 +142,14 @@ exports.removePlaylistTracks = id => {
 };
 
 exports.create = data => {
-  const values = Object.values(data);
   const sql = `INSERT INTO playlists 
     (id, name, description, track_count, snapshot_id,
     added_at, type, label_id, updates)
     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`;
+  const values = [...Object.values(data), ...(data.label_id ? [] : [null]), 0];
 
   return new Promise((resolve, reject) => {
-    db.run(sql, [...values, 0], err => {
+    db.run(sql, values, err => {
       if (err) {
         reject(new Error(err.message));
       } else {
@@ -176,7 +176,7 @@ exports.update = (id, data) => {
 
   return new Promise((resolve, reject) => {
     const sql = 'UPDATE playlists SET ' + fields + ' WHERE id=?';
-    db.run(sql, [...values, id], function(err) {
+    db.run(sql, [...values, id], function (err) {
       if (err) {
         reject(new Error(err.message));
       } else {

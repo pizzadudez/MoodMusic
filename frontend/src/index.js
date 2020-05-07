@@ -1,10 +1,10 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
-import App from './App';
-
 import { Provider } from 'react-redux';
-import store from './store';
 import { createGlobalStyle } from 'styled-components';
+
+import store from './store';
+import App from './App';
 
 const GlobalStyle = createGlobalStyle`
   html {

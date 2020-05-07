@@ -1,6 +1,6 @@
 const Joi = require('@hapi/joi');
 
-const validate = field => {
+const validate = (field) => {
   const schema = {
     addLabels: Joi.array().items(
       Joi.object()
@@ -19,12 +19,8 @@ const validate = field => {
         .required()
     ),
     createLabel: Joi.object().keys({
-      type: Joi.string()
-        .valid('genre', 'subgenre', 'mood')
-        .required(),
-      name: Joi.string()
-        .min(2)
-        .required(),
+      type: Joi.string().valid('genre', 'subgenre', 'mood').required(),
+      name: Joi.string().min(2).required(),
       color: Joi.string()
         .regex(/^#[A-Fa-f0-9]{6}/)
         .required(),
@@ -60,12 +56,10 @@ const validate = field => {
       name: Joi.when('type', {
         is: 'label',
         then: Joi.string().min(2),
-        otherwise: Joi.string().min(2).required,
+        otherwise: Joi.string().min(2).required(),
       }),
       description: Joi.string(),
-      type: Joi.string()
-        .valid('label', 'mix')
-        .required(),
+      type: Joi.string().valid('label', 'mix').required(),
       label_id: Joi.when('type', {
         is: 'label',
         then: Joi.number().required(),
@@ -92,7 +86,7 @@ const validate = field => {
     if (error) {
       console.log(error);
       const { details } = error;
-      const message = details.map(e => e.message).join(',\n');
+      const message = details.map((e) => e.message).join(',\n');
       console.log('Validation error: ', message);
       res.status(422).send(message);
     } else {
