@@ -1,4 +1,4 @@
-const db = require('./db').conn();
+const db = require('../../db').conn();
 
 exports.createUser = (userId, accessToken, refreshToken) => {
   return new Promise((resolve, reject) => {

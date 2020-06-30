@@ -1,4 +1,4 @@
-const db = require('./db').conn();
+const db = require('../../db').conn();
 
 exports.getAll = (byId = false) => {
   const selectSql = `SELECT l.*, p.id as playlist_id, (
@@ -174,7 +174,7 @@ exports.create = data => {
       } else if (!row) {
         reject(new Error('"parent_id" does not match a genre id.'));
       } else {
-        db.run(insertSql, values, function(err) {
+        db.run(insertSql, values, function (err) {
           if (err) {
             reject(new Error(err.message));
           } else {
@@ -210,7 +210,7 @@ exports.update = (id, data) => {
       } else if (!row) {
         reject(new Error('"parent_id" does not match a genre id.'));
       } else {
-        db.run(updateSql, [...values, id], function(err) {
+        db.run(updateSql, [...values, id], function (err) {
           if (err) {
             reject(new Error(err.message));
           } else {

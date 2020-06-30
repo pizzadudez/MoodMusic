@@ -1,7 +1,7 @@
 const express = require('express');
 const path = require('path');
 
-const db = require('./models/db');
+const db = require('../db');
 const config = require('./config');
 const handleJSON = require('./middlewares/handleJSON');
 const AuthServices = require('./services/auth');
@@ -13,7 +13,6 @@ app.use(express.urlencoded({ extended: true }));
 app.use(handleJSON());
 app.set('json spaces', 2);
 // Routers
-app.use(express.static(path.join(__dirname, '../public')));
 app.use('/auth', AuthRouter);
 app.use('/api', ApiRouter);
 

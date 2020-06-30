@@ -1,4 +1,4 @@
-const db = require('./db').conn();
+const db = require('../../db').conn();
 
 exports.getAll = async (byId = false) => {
   const trackSQL = `SELECT id, name, artist, added_at, 

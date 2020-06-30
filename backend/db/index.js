@@ -1,6 +1,8 @@
+/* Old sqlite3 connection */
+
 const sqlite3 = require('sqlite3').verbose();
 
-const db = new sqlite3.Database('./db.sqlite3', err => {
+const db = new sqlite3.Database('./db/db.sqlite3', err => {
   err ? console.log(err) : {};
 });
 // Import this into models
