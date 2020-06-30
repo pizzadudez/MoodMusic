@@ -1,4 +1,6 @@
-require('dotenv').config();
+require('dotenv-safe').config({
+  allowEmpty: true,
+});
 
 module.exports = {
   port: process.env.PORT,
