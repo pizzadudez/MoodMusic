@@ -4,7 +4,8 @@ const path = require('path');
 const db = require('../db');
 const config = require('./config');
 const handleJSON = require('./middlewares/handleJSON');
-const AuthServices = require('./services/auth');
+const AuthService = require('./services/auth_');
+const AuthRouter_ = require('./auth/index_');
 const AuthRouter = require('./auth');
 const ApiRouter = require('./routes');
 
@@ -13,12 +14,13 @@ app.use(express.urlencoded({ extended: true }));
 app.use(handleJSON());
 app.set('json spaces', 2);
 // Routers
-app.use('/auth', AuthRouter);
+app.use('/auth', AuthRouter_); // old, remove
+// app.use('/authorize', AuthRouter);
 app.use('/api', ApiRouter);
 
 // Initialization and recurring tasks
 db.init(); // Create database and tables
-AuthServices.refreshToken(); // Refresh Access Token
+AuthService.refreshToken(); // Refresh Access Token
 
 const port = config.port || 1000;
 app.listen(port, () => {

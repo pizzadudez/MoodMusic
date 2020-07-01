@@ -1,120 +1,89 @@
-const request = require('request');
+const axios = require('axios');
+const qs = require('querystring');
 const config = require('../config');
-const UserModel = require('../models/User');
+const jwt = require('jsonwebtoken');
+const UserModel = require('../models/knex/User');
 
-// Spotify authorization uri
-exports.authUri = () => {
-  const scope = [
-    'user-library-read',
-    'user-library-modify',
-    //
-    'playlist-modify-public',
-    'user-library-modify',
-    //
-    'user-modify-playback-state',
-    'user-read-playback-state',
-    'user-read-currently-playing',
-    'user-read-recently-played',
-    // Web SDK
-    'streaming',
-    'user-read-email',
-    'user-read-private',
-  ].join(' ');
-  const uri =
+const authScopes = [
+  // User info
+  'user-read-email',
+  'user-read-private',
+  // Library
+  'user-library-read',
+  'user-library-modify',
+  'playlist-modify-public',
+  // Web SDK
+  'streaming',
+  // Others
+  'user-modify-playback-state',
+  'user-read-playback-state',
+  'user-read-currently-playing',
+  'user-read-recently-played',
+].join(' ');
+
+// Generate Spotify Authorization URI, can take custom clientId
+exports.getAuthUrl = (clientId = config.clientId) => {
+  return (
     'https://accounts.spotify.com/authorize?' +
     'client_id=' +
-    config.clientId +
+    clientId +
     '&response_type=code' +
-    (scope ? '&scope=' + encodeURIComponent(scope) : '') +
+    '&scope=' +
+    encodeURIComponent(authScopes) +
     '&redirect_uri=' +
-    encodeURIComponent(config.redirectUri);
-  return uri;
+    encodeURIComponent(config.redirectUri)
+  );
 };
-// Request access + refresh tokens
-exports.requestTokens = code => {
-  const authOptions = {
-    url: 'https://accounts.spotify.com/api/token',
-    form: {
-      code: code,
-      redirect_uri: config.redirectUri,
-      grant_type: 'authorization_code',
-    },
+
+// Exchange authorization code for access + refresh tokens
+exports.requestTokens = async (
+  code,
+  clientId = config.clientId,
+  clientSecret = config.clientSecret
+) => {
+  const url = 'https://accounts.spotify.com/api/token';
+  const data = qs.stringify({
+    grant_type: 'authorization_code',
+    code: code,
+    redirect_uri: config.redirectUri,
+  });
+  const config = {
     headers: {
+      'Content-Type': 'application/x-www-form-urlencoded',
       Authorization:
         'Basic ' +
-        new Buffer.from(config.clientId + ':' + config.clientSecret).toString(
-          'base64'
-        ),
+        new Buffer.from(`${clientId}:${clientSecret}`).toString('base64'),
     },
-    json: true,
   };
-  return new Promise((resolve, reject) => {
-    request.post(authOptions, (err, res, body) => {
-      if (err || res.statusCode !== 200) {
-        reject('Authorization failed.');
-      } else {
-        resolve({
-          accessToken: body.access_token,
-          refreshToken: body.refresh_token,
-          expiresIn: body.expires_in,
-        });
-      }
-    });
-  });
+  const response = await axios.post(url, data, config);
+  const { access_token, refresh_token, expires_in } = response.data;
+
+  return {
+    access_token,
+    refresh_token,
+    exp: Math.floor(new Date() / 1000) + expires_in,
+  };
 };
-// Request userId and register
-exports.registerUser = async tokensObj => {
-  try {
-    const userId = await new Promise((resolve, reject) => {
-      const options = {
-        url: 'https://api.spotify.com/v1/me',
-        headers: { Authorization: 'Bearer ' + tokensObj.accessToken },
-        json: true,
-      };
-      request.get(options, (err, res, body) => {
-        const error = err || res.statusCode >= 400 ? body : null;
-        error ? reject(error) : resolve(body.id);
-      });
-    });
-    const message = await UserModel.createUser(
-      userId,
-      tokensObj.accessToken,
-      tokensObj.refreshToken
-    );
-    console.log(message);
-  } catch (err) {
-    console.log(err);
-  }
+
+// Registers user and returns the userObject for jwt signing
+exports.registerUser = async (access_token, refresh_token, exp) => {
+  const url = 'https://api.spotify.com/v1/me';
+  const config = {
+    headers: { Authorization: 'Bearer ' + access_token },
+  };
+  const { data } = await axios.get(url, config);
+  const { id, email, display_name, images, premium } = data;
+  // register user to db
+
+  return {
+    id,
+    access_token,
+    exp,
+  };
 };
-// Refresh accessToken
-exports.refreshToken = async () => {
-  try {
-    const userData = await UserModel.data();
-    const authOptions = {
-      url: 'https://accounts.spotify.com/api/token',
-      form: {
-        grant_type: 'refresh_token',
-        refresh_token: userData.refresh_token,
-      },
-      headers: {
-        Authorization:
-          'Basic ' +
-          new Buffer.from(config.clientId + ':' + config.clientSecret).toString(
-            'base64'
-          ),
-      },
-      json: true,
-    };
-    const res = await new Promise((resolve, reject) => {
-      request.post(authOptions, (err, res, body) => {
-        const error = err || res.statusCode >= 400 ? body : null;
-        error ? reject(error) : resolve(body);
-      });
-    });
-    await UserModel.updateToken(res.access_token);
-    console.log('Refreshed access token!');
-    setTimeout(exports.refreshToken, (res.expires_in - 1) * 1000);
-  } catch (err) {
-    console.log(err);
-  }
+
+exports.refreshToken;
+
+exports.signJWT = payload => {
+  return jwt.sign(payload, config.jwtSecret);
 };

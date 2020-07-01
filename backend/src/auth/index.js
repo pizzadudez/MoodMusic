@@ -1,30 +1,35 @@
 const router = require('express').Router();
 const config = require('../config');
 const AuthService = require('../services/auth');
-const UserModel = require('../models/User');
 
-// Start Authorization Flow
-router.get('/', (req, res, next) => {
-  res.redirect(AuthService.authUri());
+// Redirect User to Spotify authorization url
+router.get('/', (req, res) => {
+  res.redirect(AuthService.getAuthUrl());
 });
-// Check if authorized
-router.get('/check', async (req, res, next) => {
+
+// Handle authorization code from Spotify
+router.get('/callback', async (req, res) => {
+  const { error, code } = req.query;
+  if (error) {
+    return res.status(200).send('Application has not been authorized :(');
+  }
   try {
-    await UserModel.data();
-    res.json({ authorized: true });
+    const {
+      access_token,
+      refresh_token,
+      exp,
+    } = await AuthService.requestTokens(code);
+    const userObj = await AuthService.registerUser(
+      access_token,
+      refresh_token,
+      exp
+    );
+    const jwt = AuthService.signJWT(userObj);
+    // TODO change this to req.baseUrl
+    // Send JWT in querystring
+    res.redirect(config.frontendUri + `/?jwt=${jwt}`);
   } catch (err) {
     console.log(err);
-    res.json({ authorized: false });
-  }
-});
-// Request tokens using received code
-router.get('/callback', async (req, res, next) => {
-  try {
-    const code = req.query.code || null;
-    const tokens = await AuthService.requestTokens(code);
-    await AuthService.registerUser(tokens);
-    res.redirect(config.frontendUri);
-  } catch (err) {
     res.send(err);
   }
 });

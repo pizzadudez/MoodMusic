@@ -8,4 +8,5 @@ module.exports = {
   clientSecret: process.env.CLIENT_SECRET,
   redirectUri: process.env.REDIRECT_URI,
   frontendUri: process.env.FRONTEND_URI,
+  jwtSecret: process.env.JWT_SECRET,
 };
