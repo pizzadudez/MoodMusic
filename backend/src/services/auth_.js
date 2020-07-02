@@ -1,6 +1,6 @@
 const request = require('request');
-const config = require('../config');
 const UserModel = require('../models/User');
+const { CLIENT_ID, CLIENT_SECRET, REDIRECT_URI } = require('../config');
 
 // Spotify authorization uri
 exports.authUri = () => {
@@ -23,11 +23,11 @@ exports.authUri = () => {
   const uri =
     'https://accounts.spotify.com/authorize?' +
     'client_id=' +
-    config.clientId +
+    CLIENT_ID +
     '&response_type=code' +
     (scope ? '&scope=' + encodeURIComponent(scope) : '') +
     '&redirect_uri=' +
-    encodeURIComponent(config.redirectUri);
+    encodeURIComponent(REDIRECT_URI);
   return uri;
 };
 // Request access + refresh tokens
@@ -36,15 +36,13 @@ exports.requestTokens = code => {
     url: 'https://accounts.spotify.com/api/token',
     form: {
       code: code,
-      redirect_uri: config.redirectUri,
+      redirect_uri: REDIRECT_URI,
       grant_type: 'authorization_code',
     },
     headers: {
       Authorization:
         'Basic ' +
-        new Buffer.from(config.clientId + ':' + config.clientSecret).toString(
-          'base64'
-        ),
+        new Buffer.from(CLIENT_ID + ':' + CLIENT_SECRET).toString('base64'),
     },
     json: true,
   };
@@ -99,9 +97,7 @@ exports.refreshToken = async () => {
       headers: {
         Authorization:
           'Basic ' +
-          new Buffer.from(config.clientId + ':' + config.clientSecret).toString(
-            'base64'
-          ),
+          new Buffer.from(CLIENT_ID + ':' + CLIENT_SECRET).toString('base64'),
       },
       json: true,
     };

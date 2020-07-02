@@ -1,6 +1,6 @@
 const router = require('express').Router();
-const config = require('../config');
 const AuthService = require('../services/auth');
+const { FRONTEND_URI } = require('../config');
 
 // Redirect User to Spotify authorization url
 router.get('/', (req, res) => {
@@ -27,7 +27,7 @@ router.get('/callback', async (req, res) => {
     const jwt = AuthService.signJWT(userObj);
     // TODO change this to req.baseUrl
     // Send JWT in querystring
-    res.redirect(config.frontendUri + `/?jwt=${jwt}`);
+    res.redirect(FRONTEND_URI + `/#jwt=${jwt}`);
   } catch (err) {
     console.log(err);
     res.send(err);

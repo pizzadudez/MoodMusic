@@ -4,10 +4,12 @@ import {
   CONFIRM_ACTION_START,
   CONFIRM_ACTION_SUCCESS,
   CONFIRM_ACTION_CANCEL,
+  SET_AUTHENTICATED,
 } from '../actions/types';
 
 const initialState = {
   authorized: false,
+  authenticated: false,
   loadingData: true,
   updatingLabelId: null,
   confirmation: {
@@ -24,6 +26,11 @@ export default (state = initialState, action) => {
       return {
         ...state,
         authorized: action.payload,
+      };
+    case SET_AUTHENTICATED:
+      return {
+        ...state,
+        authenticated: action.payload,
       };
     case LOADING_FINISHED:
       return {

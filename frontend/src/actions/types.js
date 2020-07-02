@@ -2,6 +2,7 @@
 // Initial Loading and Updates
 // ============================================================================
 export const SET_AUTHORIZED = 'SET_AUTHORIZED';
+export const SET_AUTHENTICATED = 'SET_AUTHENTICATED';
 export const LOADING_FINISHED = 'LOADING_FINISHED';
 export const CONFIRM_ACTION_START = 'CONFIRM_ACTION_START';
 export const CONFIRM_ACTION_SUCCESS = 'CONFIRM_ACTION_SUCCESS';

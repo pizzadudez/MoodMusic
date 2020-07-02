@@ -1,8 +1,13 @@
 const axios = require('axios');
 const qs = require('querystring');
-const config = require('../config');
 const jwt = require('jsonwebtoken');
 const UserModel = require('../models/knex/User');
+const {
+  CLIENT_ID,
+  CLIENT_SECRET,
+  REDIRECT_URI,
+  JWT_SECRET,
+} = require('../config');
 
 const authScopes = [
   // User info
@@ -22,7 +27,7 @@ const authScopes = [
 ].join(' ');
 
 // Generate Spotify Authorization URI, can take custom clientId
-exports.getAuthUrl = (clientId = config.clientId) => {
+exports.getAuthUrl = (clientId = CLIENT_ID) => {
   return (
     'https://accounts.spotify.com/authorize?' +
     'client_id=' +
@@ -31,21 +36,21 @@ exports.getAuthUrl = (clientId = config.clientId) => {
     '&scope=' +
     encodeURIComponent(authScopes) +
     '&redirect_uri=' +
-    encodeURIComponent(config.redirectUri)
+    encodeURIComponent(REDIRECT_URI)
   );
 };
 
 // Exchange authorization code for access + refresh tokens
 exports.requestTokens = async (
   code,
-  clientId = config.clientId,
-  clientSecret = config.clientSecret
+  clientId = CLIENT_ID,
+  clientSecret = CLIENT_SECRET
 ) => {
   const url = 'https://accounts.spotify.com/api/token';
   const data = qs.stringify({
     grant_type: 'authorization_code',
     code: code,
-    redirect_uri: config.redirectUri,
+    redirect_uri: REDIRECT_URI,
   });
   const config = {
     headers: {
@@ -85,5 +90,5 @@ exports.registerUser = async (access_token, refresh_token, exp) => {
 exports.refreshToken;
 
 exports.signJWT = payload => {
-  return jwt.sign(payload, config.jwtSecret);
+  return jwt.sign(payload, JWT_SECRET);
 };

@@ -3,10 +3,10 @@ require('dotenv-safe').config({
 });
 
 module.exports = {
-  port: process.env.PORT,
-  clientId: process.env.CLIENT_ID,
-  clientSecret: process.env.CLIENT_SECRET,
-  redirectUri: process.env.REDIRECT_URI,
-  frontendUri: process.env.FRONTEND_URI,
-  jwtSecret: process.env.JWT_SECRET,
+  PORT: process.env.PORT,
+  CLIENT_ID: process.env.CLIENT_ID,
+  CLIENT_SECRET: process.env.CLIENT_SECRET,
+  REDIRECT_URI: process.env.REDIRECT_URI,
+  FRONTEND_URI: process.env.FRONTEND_URI,
+  JWT_SECRET: process.env.JWT_SECRET,
 };

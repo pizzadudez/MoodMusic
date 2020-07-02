@@ -2,9 +2,21 @@ import {
   CONFIRM_ACTION_START,
   CONFIRM_ACTION_SUCCESS,
   CONFIRM_ACTION_CANCEL,
+  SET_AUTHENTICATED,
 } from './types';
 import store from '../store';
 
+// Authentication
+export const authenticate = () => dispatch => {
+  const { error, jwt: newToken } = getHashParams();
+  const oldToken = getJwtFromStorage();
+  if (newToken) setJwtInStorage(newToken);
+  const jwt = newToken || oldToken || undefined;
+
+  dispatch({ type: SET_AUTHENTICATED, payload: !!jwt });
+};
+
+// Dialog confirmation
 export const confirm = options => (dispatch, getState) => {
   const { title, description } = options;
   dispatch({
@@ -32,3 +44,17 @@ export const confirmAction = () => dispatch => {
 export const cancelAction = () => dispatch => {
   dispatch({ type: CONFIRM_ACTION_CANCEL });
 };
+
+// Helpers
+const getHashParams = () => {
+  const hashParams = {};
+  let e;
+  const r = /([^&;=]+)=?([^&;]*)/g;
+  const q = window.location.hash.substring(1);
+  while ((e = r.exec(q))) {
+    hashParams[e[1]] = decodeURIComponent(e[2]);
+  }
+  return hashParams;
+};
+const getJwtFromStorage = () => window.localStorage.getItem('jwt');
+const setJwtInStorage = token => window.localStorage.setItem('jwt', token);

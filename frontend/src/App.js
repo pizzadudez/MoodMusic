@@ -5,6 +5,7 @@ import { useSelector, useDispatch } from 'react-redux';
 import { createSelector } from 'reselect';
 import styled from 'styled-components';
 
+import { authenticate } from './actions/appActions';
 import { fetchData } from './actions/dataActions';
 import LoadingSpinner from './components/LoadingSpinner';
 import Navbar from './components/Navbar';
@@ -13,24 +14,26 @@ import ConfirmModal from './components/ConfirmModal';
 import Main from './views/Main';
 import Labels from './views/Labels';
 import Playlists from './views/Playlists';
+import AuthTest from './views/AuthTest';
 
 const stateSelector = createSelector(
-  state => state.app.authorized,
+  state => state.app.authenticated,
   state => state.app.loadingData,
-  (authorized, loadingData) => ({ authorized, loadingData })
+  (authenticated, loadingData) => ({ authenticated, loadingData })
 );
 
 export default memo(() => {
   const dispatch = useDispatch();
-  const { authorized, loadingData } = useSelector(stateSelector);
+  const { authenticated, loadingData } = useSelector(stateSelector);
 
   useEffect(() => {
-    dispatch(fetchData());
+    dispatch(authenticate());
+    // dispatch(fetchData());
   }, [dispatch]);
 
   return (
     <StylesProvider injectFirst>
-      {authorized && !loadingData && (
+      {authenticated && (
         <Page>
           <Router>
             <Navbar />
@@ -41,8 +44,11 @@ export default memo(() => {
               <Router path="/playlists">
                 <Playlists />
               </Router>
-              <Route path="/">
+              <Route path="/tracks">
                 <Main />
+              </Route>
+              <Route path="/">
+                <AuthTest />
               </Route>
             </Switch>
             <Footer />
@@ -50,9 +56,9 @@ export default memo(() => {
           <ConfirmModal />
         </Page>
       )}
-      {authorized && loadingData && <LoadingSpinner />}
-      {!authorized && (
-        <a href="http://localhost:8888/auth">
+      {/* {authenticated && loadingData && <LoadingSpinner />} */}
+      {!authenticated && (
+        <a href="http://localhost:8888/authorize">
           <button onClick={() => console.log('authTest')}>Authorize</button>
         </a>
       )}
