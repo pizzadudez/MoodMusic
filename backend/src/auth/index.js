@@ -24,7 +24,7 @@ router.get('/callback', async (req, res) => {
       refresh_token,
       iat
     );
-    const jwt = AuthService.signJWT(userObj);
+    const jwt = AuthService.signJwt(userObj);
     // TODO change this to req.baseUrl
     // Send JWT in querystring
     res.redirect(FRONTEND_URI + `/#jwt=${jwt}`);

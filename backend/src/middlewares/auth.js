@@ -1,4 +1,5 @@
 const jwt = require('jsonwebtoken');
+const AuthService = require('../services/auth');
 const { FRONTEND_URI, JWT_SECRET } = require('../config');
 
 exports.authenticateJwt = (req, res, next) => {
@@ -16,16 +17,22 @@ exports.authenticateJwt = (req, res, next) => {
 
 exports.refreshJwt = (req, res, next) => {
   const { iat } = req.user;
-  const duration = 60 * 2; // 2 min access_token
-  const exp = iat + duration;
+  const lifeTime = 60 * 58; // 2 min before expiration
+  const exp = iat + lifeTime;
   const now = Math.floor(new Date() / 1000);
 
-  console.log(exp - now, 'seconds');
   if (exp < now) {
-    const oldJson = res.json;
+    // Generate new JWT with fresh access_token
+    const payload = {
+      ...req.user,
+      jwt: 'fresh new jwt',
+    };
+    const jwt = AuthService.signJwt(payload);
+    // Inject jwt property before sending res.json
+    const originalMethod = res.json;
     res.json = data => {
-      res.json = oldJson;
-      return res.json({ jwt: 'test', ...data });
+      res.json = originalMethod;
+      return res.json({ jwt, ...data });
     };
     console.log('access token expired');
   }

@@ -90,6 +90,6 @@ exports.registerUser = async (access_token, refresh_token, iat) => {
 
 exports.refreshToken;
 
-exports.signJWT = payload => {
+exports.signJwt = payload => {
   return jwt.sign(payload, JWT_SECRET);
 };
