@@ -66,12 +66,13 @@ exports.requestTokens = async (
   return {
     access_token,
     refresh_token,
-    exp: Math.floor(new Date() / 1000) + expires_in,
+    expires_in,
+    iat: Math.floor(new Date() / 1000),
   };
 };
 
 // Registers user and returns the userObject for jwt signing
-exports.registerUser = async (access_token, refresh_token, exp) => {
+exports.registerUser = async (access_token, refresh_token, iat) => {
   const url = 'https://api.spotify.com/v1/me';
   const config = {
     headers: { Authorization: 'Bearer ' + access_token },
@@ -83,7 +84,7 @@ exports.registerUser = async (access_token, refresh_token, exp) => {
   return {
     id,
     access_token,
-    exp,
+    iat,
   };
 };
 

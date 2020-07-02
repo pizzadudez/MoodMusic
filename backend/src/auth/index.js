@@ -17,12 +17,12 @@ router.get('/callback', async (req, res) => {
     const {
       access_token,
       refresh_token,
-      exp,
+      iat,
     } = await AuthService.requestTokens(code);
     const userObj = await AuthService.registerUser(
       access_token,
       refresh_token,
-      exp
+      iat
     );
     const jwt = AuthService.signJWT(userObj);
     // TODO change this to req.baseUrl

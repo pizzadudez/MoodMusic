@@ -5,6 +5,7 @@ import {
   SET_AUTHENTICATED,
 } from './types';
 import store from '../store';
+import axios from 'axios';
 
 // Authentication
 export const authenticate = () => dispatch => {
@@ -12,6 +13,11 @@ export const authenticate = () => dispatch => {
   const oldToken = getJwtFromStorage();
   if (newToken) setJwtInStorage(newToken);
   const jwt = newToken || oldToken || undefined;
+
+  // add auth header
+  if (jwt) {
+    axios.defaults.headers.common['Authorization'] = `Bearer: ${jwt}`;
+  }
 
   dispatch({ type: SET_AUTHENTICATED, payload: !!jwt });
 };
