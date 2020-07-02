@@ -1,6 +1,5 @@
 import axios from 'axios';
 import {
-  SET_AUTHORIZED,
   FETCH_PLAYLISTS,
   FETCH_TRACKS,
   FETCH_LABELS,
@@ -9,11 +8,6 @@ import {
 
 export const fetchData = () => async dispatch => {
   try {
-    const authRes = await axios.get('/auth/check');
-    const authorized = authRes.data.authorized;
-    dispatch({ type: SET_AUTHORIZED, payload: authorized });
-    if (!authorized) return;
-
     const tracks = await axios.get('/api/tracks/refresh');
     dispatch({ type: FETCH_TRACKS, payload: tracks.data.tracks });
 

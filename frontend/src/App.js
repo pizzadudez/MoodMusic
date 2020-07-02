@@ -14,7 +14,7 @@ import ConfirmModal from './components/ConfirmModal';
 import Main from './views/Main';
 import Labels from './views/Labels';
 import Playlists from './views/Playlists';
-import AuthTest from './views/AuthTest';
+import Login from './views/Login';
 
 const stateSelector = createSelector(
   state => state.app.authenticated,
@@ -28,12 +28,15 @@ export default memo(() => {
 
   useEffect(() => {
     dispatch(authenticate());
-    // dispatch(fetchData());
   }, [dispatch]);
+
+  useEffect(() => {
+    if (authenticated) dispatch(fetchData());
+  }, [dispatch, authenticated]);
 
   return (
     <StylesProvider injectFirst>
-      {authenticated && (
+      {authenticated && !loadingData && (
         <Page>
           <Router>
             <Navbar />
@@ -44,11 +47,8 @@ export default memo(() => {
               <Router path="/playlists">
                 <Playlists />
               </Router>
-              <Route path="/tracks">
-                <Main />
-              </Route>
               <Route path="/">
-                <AuthTest />
+                <Main />
               </Route>
             </Switch>
             <Footer />
@@ -56,12 +56,8 @@ export default memo(() => {
           <ConfirmModal />
         </Page>
       )}
-      {/* {authenticated && loadingData && <LoadingSpinner />} */}
-      {!authenticated && (
-        <a href="http://localhost:8888/authorize">
-          <button onClick={() => console.log('authTest')}>Authorize</button>
-        </a>
-      )}
+      {authenticated && loadingData && <LoadingSpinner />}
+      {!authenticated && <Login />}
     </StylesProvider>
   );
 });

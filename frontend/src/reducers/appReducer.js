@@ -1,6 +1,5 @@
 import {
   LOADING_FINISHED,
-  SET_AUTHORIZED,
   CONFIRM_ACTION_START,
   CONFIRM_ACTION_SUCCESS,
   CONFIRM_ACTION_CANCEL,
@@ -8,10 +7,8 @@ import {
 } from '../actions/types';
 
 const initialState = {
-  authorized: false,
   authenticated: false,
   loadingData: true,
-  updatingLabelId: null,
   confirmation: {
     pending: false,
     status: false,
@@ -22,11 +19,6 @@ const initialState = {
 
 export default (state = initialState, action) => {
   switch (action.type) {
-    case SET_AUTHORIZED:
-      return {
-        ...state,
-        authorized: action.payload,
-      };
     case SET_AUTHENTICATED:
       return {
         ...state,
