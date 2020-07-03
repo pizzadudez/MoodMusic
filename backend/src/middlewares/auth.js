@@ -11,7 +11,7 @@ exports.authenticateJwt = (req, res, next) => {
   jwt.verify(token, JWT_SECRET, (err, payload) => {
     if (err) return res.sendStatus(403);
     req.user = {
-      spotifyId: payload.id,
+      spotifyId: payload.spotify_id,
       accessToken: payload.access_token,
       iat: payload.iat,
     };
@@ -21,18 +21,16 @@ exports.authenticateJwt = (req, res, next) => {
 
 exports.refreshJwt = async (req, res, next) => {
   try {
-    const { iat } = req.user;
+    const { iat, spotifyId } = req.user;
     const lifeTime = 60 * 1; // 2 min before expiration
     const exp = iat + lifeTime;
     const now = Math.floor(new Date() / 1000);
 
     if (exp < now) {
       // Generate new JWT with fresh access_token
-      const { access_token, iat } = await AuthService.refreshToken(
-        req.user.spotifyId
-      );
+      const { access_token, iat } = await AuthService.refreshToken(spotifyId);
       const jwt = AuthService.signJwt({
-        ...req.user,
+        spotify_id: spotifyId,
         access_token,
         iat,
       });
@@ -42,7 +40,7 @@ exports.refreshJwt = async (req, res, next) => {
         res.json = originalMethod;
         return res.json({ jwt, ...data });
       };
-      console.log(`JWT refreshed for user: ${req.user.spotifyId}`);
+      console.log(`JWT refreshed for user: ${spotifyId}`);
     }
     next();
   } catch (err) {

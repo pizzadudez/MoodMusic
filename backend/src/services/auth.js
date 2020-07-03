@@ -83,7 +83,7 @@ exports.registerUser = async (access_token, refresh_token, iat) => {
   await UserModel.register(id, refresh_token);
 
   return {
-    id,
+    spotify_id: id,
     access_token,
     iat,
   };
