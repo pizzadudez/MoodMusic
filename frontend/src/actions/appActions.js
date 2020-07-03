@@ -5,21 +5,15 @@ import {
   SET_AUTHENTICATED,
 } from './types';
 import store from '../store';
-import axios from 'axios';
+import * as auth from '../utils/auth';
 
 // Authentication
 export const authenticate = () => dispatch => {
-  const { error, jwt: newToken } = getHashParams();
-  const oldToken = getJwtFromStorage();
-  if (newToken) setJwtInStorage(newToken);
-  const jwt = newToken || oldToken || undefined;
-
-  // add auth header
+  const jwt = auth.getJwt();
   if (jwt) {
-    axios.defaults.headers.common['Authorization'] = `Bearer: ${jwt}`;
+    auth.setAuthHeader(jwt);
+    dispatch({ type: SET_AUTHENTICATED, payload: !!jwt });
   }
-
-  dispatch({ type: SET_AUTHENTICATED, payload: !!jwt });
 };
 
 // Dialog confirmation
@@ -50,17 +44,3 @@ export const confirmAction = () => dispatch => {
 export const cancelAction = () => dispatch => {
   dispatch({ type: CONFIRM_ACTION_CANCEL });
 };
-
-// Helpers
-const getHashParams = () => {
-  const hashParams = {};
-  let e;
-  const r = /([^&;=]+)=?([^&;]*)/g;
-  const q = window.location.hash.substring(1);
-  while ((e = r.exec(q))) {
-    hashParams[e[1]] = decodeURIComponent(e[2]);
-  }
-  return hashParams;
-};
-const getJwtFromStorage = () => window.localStorage.getItem('jwt');
-const setJwtInStorage = token => window.localStorage.setItem('jwt', token);

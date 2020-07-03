@@ -17,7 +17,7 @@ exports.authenticateJwt = (req, res, next) => {
 
 exports.refreshJwt = (req, res, next) => {
   const { iat } = req.user;
-  const lifeTime = 60 * 58; // 2 min before expiration
+  const lifeTime = 60 * 1; // 2 min before expiration
   const exp = iat + lifeTime;
   const now = Math.floor(new Date() / 1000);
 
@@ -25,7 +25,8 @@ exports.refreshJwt = (req, res, next) => {
     // Generate new JWT with fresh access_token
     const payload = {
       ...req.user,
-      jwt: 'fresh new jwt',
+      access_token: 'fresh access_token',
+      iat: now,
     };
     const jwt = AuthService.signJwt(payload);
     // Inject jwt property before sending res.json

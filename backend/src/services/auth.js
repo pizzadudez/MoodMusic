@@ -80,6 +80,7 @@ exports.registerUser = async (access_token, refresh_token, iat) => {
   const { data } = await axios.get(url, config);
   const { id, email, display_name, images, premium } = data;
   // register user to db
+  await UserModel.createUser(id, refresh_token);
 
   return {
     id,

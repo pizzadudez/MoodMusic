@@ -15,7 +15,7 @@ exports.refreshTracks = async (req, res, next) => {
     const updates = await TracksService.refreshTracks();
     res.status(200).json(updates);
   } catch (err) {
-    console.log(err);
+    console.log(err.stack);
     res.sendStatus(500);
   }
 };
