@@ -15,27 +15,31 @@ exports.authenticateJwt = (req, res, next) => {
   });
 };
 
-exports.refreshJwt = (req, res, next) => {
-  const { iat } = req.user;
-  const lifeTime = 60 * 1; // 2 min before expiration
-  const exp = iat + lifeTime;
-  const now = Math.floor(new Date() / 1000);
+exports.refreshJwt = async (req, res, next) => {
+  try {
+    const { iat } = req.user;
+    const lifeTime = 60 * 1; // 2 min before expiration
+    const exp = iat + lifeTime;
+    const now = Math.floor(new Date() / 1000);
 
-  if (exp < now) {
-    // Generate new JWT with fresh access_token
-    const payload = {
-      ...req.user,
-      access_token: 'fresh access_token',
-      iat: now,
-    };
-    const jwt = AuthService.signJwt(payload);
-    // Inject jwt property before sending res.json
-    const originalMethod = res.json;
-    res.json = data => {
-      res.json = originalMethod;
-      return res.json({ jwt, ...data });
-    };
-    console.log('access token expired');
+    if (exp < now) {
+      // Generate new JWT with fresh access_token
+      const { access_token, iat } = await AuthService.refreshToken(req.user.id);
+      const jwt = AuthService.signJwt({
+        ...req.user,
+        access_token,
+        iat,
+      });
+      // Inject jwt property before sending res.json
+      const originalMethod = res.json;
+      res.json = data => {
+        res.json = originalMethod;
+        return res.json({ jwt, ...data });
+      };
+      console.log(`JWT refreshed for user: ${req.user.id}`);
+    }
+    next();
+  } catch (err) {
+    console.log(err.stack);
   }
-  next();
 };
