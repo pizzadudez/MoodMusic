@@ -29,8 +29,8 @@ router.get('/callback', async (req, res) => {
     // Send JWT in querystring
     res.redirect(FRONTEND_URI + `/#jwt=${jwt}`);
   } catch (err) {
-    console.log(err);
-    res.send(err);
+    console.log(err.stack);
+    res.send(err.message);
   }
 });
 

@@ -1,17 +1,17 @@
 const request = require('request-promise-native');
-const UserModel = require('../models/User');
+const UserModel = require('../models/knex/User');
 const PlaylistModel = require('../models/Playlist');
 const TrackModel = require('../models/Track');
 
-exports.refreshTracks = async (sync = false) => {
+exports.refreshTracks = async (userObj, sync = false) => {
   // Liked Tracks (last 50 / all)
-  const likedTracks = await getLikedTracks(sync);
+  const likedTracks = await getLikedTracks(userObj, sync);
   await TrackModel.addTracks(likedTracks, true, sync);
   // Playlist Tracks (refresh: mix, sync: mix + label)
-  const playlists = await refreshPlaylists(sync);
+  const playlists = await refreshPlaylists(userObj, sync);
   if (playlists.length) {
     const requests = playlists.map(({ id, track_count }) =>
-      exports.getPlaylistTracks(id, sync, track_count)
+      exports.getPlaylistTracks(userObj, id, sync, track_count)
     );
     const responses = await Promise.all(requests);
     const playlistTracks = playlists.map(({ id }, idx) => ({
@@ -26,22 +26,23 @@ exports.refreshTracks = async (sync = false) => {
     );
   }
   // Update timestamps
-  await UserModel.updateUser(sync ? 'sync' : 'refresh');
+  await UserModel.update(userObj.spotifyId, {
+    [sync ? 'latest_sync' : 'latest_refresh']: new Date().toISOString(),
+  });
 
   return {
     message: `Track ${sync ? 'sync' : 'refresh'} complete!`,
     tracks: await TrackModel.getAllById(),
   };
 };
-exports.getPlaylistTracks = async (id, sync = false, track_count) => {
-  const { access_token: token } = await UserModel.data();
+exports.getPlaylistTracks = async (userObj, id, sync = false, track_count) => {
   const response = await request.get({
     url:
       'https://api.spotify.com/v1/playlists/' +
       id +
       '/tracks' +
       (!sync ? '?offset=' + (track_count > 100 ? track_count - 100 : 0) : ''),
-    headers: { Authorization: 'Bearer ' + token },
+    headers: { Authorization: 'Bearer ' + userObj.accessToken },
     json: true,
   });
   const totalTracks = response.total;
@@ -58,7 +59,7 @@ exports.getPlaylistTracks = async (id, sync = false, track_count) => {
             id +
             '/tracks?offset=' +
             offset * 100,
-          headers: { Authorization: 'Bearer ' + token },
+          headers: { Authorization: 'Bearer ' + userObj.accessToken },
           json: true,
         });
         return response.items;
@@ -69,11 +70,10 @@ exports.getPlaylistTracks = async (id, sync = false, track_count) => {
     return parseTracks([...response.items, ...otherTracks]);
   }
 };
-exports.toggleLike = async (id, toggle = true) => {
-  const { access_token: token } = await UserModel.data();
+exports.toggleLike = async (userObj, id, toggle = true) => {
   await request[toggle ? 'put' : 'delete']({
     url: 'https://api.spotify.com/v1/me/tracks',
-    headers: { Authorization: 'Bearer ' + token },
+    headers: { Authorization: 'Bearer ' + userObj.accessToken },
     body: { ids: [id] },
     json: true,
   });
@@ -81,11 +81,10 @@ exports.toggleLike = async (id, toggle = true) => {
 };
 
 // Helpers
-const getLikedTracks = async (sync = false) => {
-  const { access_token: token } = await UserModel.data();
+const getLikedTracks = async (userObj, sync = false) => {
   const response = await request.get({
     url: 'https://api.spotify.com/v1/me/tracks?limit=50',
-    headers: { Authorization: 'Bearer ' + token },
+    headers: { Authorization: 'Bearer ' + userObj.accessToken },
     json: true,
   });
 
@@ -102,7 +101,7 @@ const getLikedTracks = async (sync = false) => {
           url:
             'https://api.spotify.com/v1/me/tracks?limit=50&offset=' +
             offset * 50,
-          headers: { Authorization: 'Bearer ' + token },
+          headers: { Authorization: 'Bearer ' + userObj.accessToken },
           json: true,
         });
         return response.items;
@@ -113,11 +112,10 @@ const getLikedTracks = async (sync = false) => {
     return parseTracks([...response.items, ...otherTracks]);
   }
 };
-const refreshPlaylists = async (sync = false) => {
-  const { access_token: token } = await UserModel.data();
+const refreshPlaylists = async (userObj, sync = false) => {
   const response = await request.get({
     url: 'https://api.spotify.com/v1/me/playlists?limit=50',
-    headers: { Authorization: 'Bearer ' + token },
+    headers: { Authorization: 'Bearer ' + userObj.accessToken },
     json: true,
   });
   const totalPlaylists = response.total;
@@ -132,7 +130,7 @@ const refreshPlaylists = async (sync = false) => {
           url:
             'https://api.spotify.com/v1/me/playlists?limit=50&offset=' +
             offset * 50,
-          headers: { Authorization: 'Bearer ' + token },
+          headers: { Authorization: 'Bearer ' + userObj.accessToken },
           json: true,
         });
         return response.items;

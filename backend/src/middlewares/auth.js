@@ -10,7 +10,11 @@ exports.authenticateJwt = (req, res, next) => {
   if (!token) return res.redirect(FRONTEND_URI);
   jwt.verify(token, JWT_SECRET, (err, payload) => {
     if (err) return res.sendStatus(403);
-    req.user = payload;
+    req.user = {
+      spotifyId: payload.id,
+      accessToken: payload.access_token,
+      iat: payload.iat,
+    };
     next();
   });
 };
@@ -24,7 +28,9 @@ exports.refreshJwt = async (req, res, next) => {
 
     if (exp < now) {
       // Generate new JWT with fresh access_token
-      const { access_token, iat } = await AuthService.refreshToken(req.user.id);
+      const { access_token, iat } = await AuthService.refreshToken(
+        req.user.spotifyId
+      );
       const jwt = AuthService.signJwt({
         ...req.user,
         access_token,
@@ -36,7 +42,7 @@ exports.refreshJwt = async (req, res, next) => {
         res.json = originalMethod;
         return res.json({ jwt, ...data });
       };
-      console.log(`JWT refreshed for user: ${req.user.id}`);
+      console.log(`JWT refreshed for user: ${req.user.spotifyId}`);
     }
     next();
   } catch (err) {

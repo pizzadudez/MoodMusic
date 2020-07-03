@@ -10,7 +10,7 @@ router.get('/', async (req, res, next) => {
     test = await TrackModel.getAllById();
     res.status(200).json(test);
   } catch (err) {
-    console.log(err);
+    console.log(err.stack);
     res.sendStatus(500);
   }
 });

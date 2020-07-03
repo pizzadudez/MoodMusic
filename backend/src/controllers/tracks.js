@@ -6,13 +6,13 @@ exports.getAll = async (req, res, next) => {
     const tracksById = await TrackModel.getAllById();
     res.status(200).json(tracksById);
   } catch (err) {
-    console.log(err);
+    console.log(err.stack);
     res.status(500).send('Internal server error.');
   }
 };
 exports.refreshTracks = async (req, res, next) => {
   try {
-    const updates = await TracksService.refreshTracks();
+    const updates = await TracksService.refreshTracks(req.user);
     res.status(200).json(updates);
   } catch (err) {
     console.log(err.stack);
@@ -21,20 +21,20 @@ exports.refreshTracks = async (req, res, next) => {
 };
 exports.syncTracks = async (req, res, next) => {
   try {
-    const updates = await TracksService.refreshTracks(true);
+    const updates = await TracksService.refreshTracks(req.user, true);
     res.status(200).json(updates);
   } catch (err) {
-    console.log(err);
+    console.log(err.stack);
     res.sendStatus(500);
   }
 };
 
 exports.toggleLike = async (req, res, next) => {
   try {
-    await TracksService.toggleLike(req.params.id, req.body.toggle);
+    await TracksService.toggleLike(req.user, req.params.id, req.body.toggle);
     res.sendStatus(200);
   } catch (err) {
-    console.log(err);
+    console.log(err.stack);
     res.sendStatus(500);
   }
 };
