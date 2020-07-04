@@ -22,7 +22,7 @@ exports.authenticateJwt = (req, res, next) => {
 exports.refreshJwt = async (req, res, next) => {
   try {
     const { iat, spotifyId } = req.user;
-    const lifeTime = 60 * 1; // 2 min before expiration
+    const lifeTime = 60 * 58; // 2 min before expiration
     const exp = iat + lifeTime;
     const now = Math.floor(new Date() / 1000);
 
@@ -34,6 +34,12 @@ exports.refreshJwt = async (req, res, next) => {
         access_token,
         iat,
       });
+      // Update req.user for this request
+      req.user = {
+        ...req.user,
+        accessToken: access_token,
+        iat,
+      };
       // Inject jwt property before sending res.json
       const originalMethod = res.json;
       res.json = data => {
