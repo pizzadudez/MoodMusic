@@ -83,14 +83,14 @@ exports.registerUser = async (access_token, refresh_token, iat) => {
   await UserModel.register(id, refresh_token);
 
   return {
-    spotify_id: id,
+    id,
     access_token,
     iat,
   };
 };
 
-exports.refreshToken = async spotify_id => {
-  const refresh_token = await UserModel.getRefreshToken(spotify_id);
+exports.refreshToken = async userId => {
+  const refresh_token = await UserModel.getRefreshToken(userId);
   // Get these from UserModel if use has his own app
   const clientId = CLIENT_ID;
   const clientSecret = CLIENT_SECRET;

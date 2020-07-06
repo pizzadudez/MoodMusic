@@ -26,8 +26,8 @@ exports.refreshTracks = async (userObj, sync = false) => {
     );
   }
   // Update timestamps
-  await UserModel.update(userObj.spotifyId, {
-    [sync ? 'latest_sync' : 'latest_refresh']: new Date().toISOString(),
+  await UserModel.update(userObj.userId, {
+    [sync ? 'synced_at' : 'refreshed_at']: new Date().toISOString(),
   });
 
   return {
