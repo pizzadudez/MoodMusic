@@ -9,4 +9,5 @@ module.exports = {
   REDIRECT_URI: process.env.REDIRECT_URI,
   FRONTEND_URI: process.env.FRONTEND_URI,
   JWT_SECRET: process.env.JWT_SECRET,
+  JWT_REFRESH_MINUTES: process.env.JWT_REFRESH_MINUTES,
 };

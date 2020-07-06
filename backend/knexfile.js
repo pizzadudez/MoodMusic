@@ -22,6 +22,7 @@ module.exports = {
     seeds: {
       directory: './db/seeds',
     },
+    asyncStackTraces: true,
   },
   production: {
     client: 'postgresql',
@@ -42,5 +43,6 @@ module.exports = {
     seeds: {
       directory: './db/seeds',
     },
+    asyncStackTraces: true,
   },
 };

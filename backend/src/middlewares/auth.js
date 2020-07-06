@@ -1,6 +1,6 @@
 const jwt = require('jsonwebtoken');
 const AuthService = require('../services/auth');
-const { FRONTEND_URI, JWT_SECRET } = require('../config');
+const { FRONTEND_URI, JWT_SECRET, JWT_REFRESH_MINUTES } = require('../config');
 
 exports.authenticateJwt = (req, res, next) => {
   const authHeader = req.headers['authorization'];
@@ -22,7 +22,7 @@ exports.authenticateJwt = (req, res, next) => {
 exports.refreshJwt = async (req, res, next) => {
   try {
     const { iat, userId } = req.user;
-    const lifeTime = 60 * 58; // 2 min before expiration
+    const lifeTime = 60 * JWT_REFRESH_MINUTES;
     const exp = iat + lifeTime;
     const now = Math.floor(new Date() / 1000);
 
