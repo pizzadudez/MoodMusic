@@ -1,6 +1,6 @@
 const router = require('express').Router();
 const controller = require('../controllers/tracks');
-const validate = require('../middlewares/validate');
+const validate = require('../middleware/validate');
 
 router.get('/tracks', controller.getAll);
 router.patch('/track/:id/like', validate('toggleLike'), controller.toggleLike);

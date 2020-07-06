@@ -1,6 +1,6 @@
 const router = require('express').Router();
 const controller = require('../controllers/playlists');
-const validate = require('../middlewares/validate');
+const validate = require('../middleware/validate');
 
 router.get('/playlists', controller.getAll);
 router.post(

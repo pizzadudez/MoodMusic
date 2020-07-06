@@ -1,6 +1,6 @@
 const router = require('express').Router();
 const controller = require('../controllers/labels');
-const validate = require('../middlewares/validate');
+const validate = require('../middleware/validate');
 
 router.get('/labels', controller.getAll);
 router.post('/labels', validate('createLabel'), controller.create);

@@ -1,12 +1,18 @@
 const router = require('express').Router();
+const { authenticateJwt, refreshJwt } = require('../middleware/auth');
 const TracksRouter = require('./tracks');
 const PlaylistsRouter = require('./playlists');
 const LabelsRouter = require('./labels');
-const TestRouter = require('./test');
 
-router.use('/', TracksRouter);
-router.use('/', PlaylistsRouter);
-router.use('/', LabelsRouter);
-router.use('/test', TestRouter);
+router.use(
+  '/',
+  // Auth middleware
+  authenticateJwt,
+  refreshJwt,
+  // Resource specific routers
+  TracksRouter,
+  PlaylistsRouter,
+  LabelsRouter
+);
 
 module.exports = router;

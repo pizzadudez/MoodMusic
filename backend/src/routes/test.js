@@ -14,5 +14,9 @@ router.get('/', async (req, res, next) => {
     res.sendStatus(500);
   }
 });
+router.post('/', (req, res) => {
+  console.log(req.body);
+  res.json(req.body);
+});
 
 module.exports = router;
