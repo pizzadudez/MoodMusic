@@ -1,5 +1,5 @@
 const express = require('express');
-// const path = require('path');
+const path = require('path');
 require('../db').init(); // Init old sqlite3 db (create tables)
 
 const { PORT } = require('./config');
@@ -10,6 +10,7 @@ const DocsRouter = require('./docs');
 const TestRouter = require('./routes/test');
 
 const app = express();
+app.use(express.static(path.join(__dirname, '../../frontend/build')));
 // Middleware
 app.use(express.urlencoded({ extended: true }));
 app.use(handleJson);

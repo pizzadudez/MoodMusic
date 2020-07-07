@@ -24,7 +24,7 @@
   },
   "devDependencies": {},
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
+    "test": "set REACT_ENV=production && nodemon ./src/app.js",
     "start": "nodemon ./src/app.js"
   },
   "author": "",
