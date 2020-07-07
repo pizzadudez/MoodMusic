@@ -1,0 +1,76 @@
+openapi: 3.0.1
+info:
+  title: MoodMusic API
+  description: MoodMusic API
+  contact:
+    email: email@email.com
+  version: 1.0.0
+servers:
+  - url: http://localhost:8888/docs
+tags:
+  - name: tracks
+    description: Track routes
+  - name: playlists
+    description: Playlist routes
+  - name: labels
+    description: Label routes
+paths:
+  /tracks:
+    get:
+      tags:
+        - tracks
+      summary: bla
+      description: bla bla
+      responses:
+        200:
+          description: bla
+          content: {}
+
+  /playlists/add:
+    post:
+      tags:
+        - playlists
+      summary: Add tracks to playlists
+      description: Add track-playlist associations
+      requestBody:
+        description: request body description
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/playlistTracks'
+      responses:
+        201:
+          description: ok, added
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/playlistTracks'
+        500:
+          description: internal server error
+
+components:
+  schemas:
+    playlistTracks:
+      type: object
+      properties:
+        id:
+          type: string
+          example: id5645624dfbsfbf
+        track_ids:
+          type: array
+          description: Array of track_ids
+          items:
+            type: string
+          example: ['5634562456', '36234653426']
+      required:
+        - id
+        - track_ids
+
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+
+security:
+  - bearerAuth: []
