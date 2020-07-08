@@ -1,5 +1,5 @@
 require('dotenv-safe').config({
-  allowEmpty: true,
+  allowEmptyValues: true,
 });
 
 const environment = process.env.NODE_ENV || 'development';

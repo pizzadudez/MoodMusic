@@ -1,5 +1,7 @@
+const { string } = require('@hapi/joi');
+
 require('dotenv-safe').config({
-  allowEmpty: true,
+  allowEmptyValues: true,
 });
 
 const REACT_ENV = process.env.REACT_ENV || 'development';
@@ -14,5 +16,5 @@ module.exports = {
       ? process.env.FRONTEND_URI_DEV
       : process.env.FRONTEND_URI,
   JWT_SECRET: process.env.JWT_SECRET,
-  JWT_REFRESH_MINUTES: process.env.JWT_REFRESH_MINUTES,
+  JWT_REFRESH_MINUTES: Number(process.env.JWT_REFRESH_MINUTES) || 15,
 };

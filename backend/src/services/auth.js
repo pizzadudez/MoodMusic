@@ -1,4 +1,4 @@
-const axios = require('axios');
+const { default: axios } = require('axios');
 const qs = require('querystring');
 const jwt = require('jsonwebtoken');
 const UserModel = require('../models/knex/User');
@@ -57,7 +57,7 @@ exports.requestTokens = async (
       'Content-Type': 'application/x-www-form-urlencoded',
       Authorization:
         'Basic ' +
-        new Buffer.from(`${clientId}:${clientSecret}`).toString('base64'),
+        Buffer.from(`${clientId}:${clientSecret}`).toString('base64'),
     },
   };
   const response = await axios.post(url, data, config);
@@ -67,7 +67,7 @@ exports.requestTokens = async (
     access_token,
     refresh_token,
     expires_in,
-    iat: Math.floor(new Date() / 1000),
+    iat: Math.floor(new Date().getTime() / 1000),
   };
 };
 
@@ -105,7 +105,7 @@ exports.refreshToken = async userId => {
       'Content-Type': 'application/x-www-form-urlencoded',
       Authorization:
         'Basic ' +
-        new Buffer.from(`${clientId}:${clientSecret}`).toString('base64'),
+        Buffer.from(`${clientId}:${clientSecret}`).toString('base64'),
     },
   };
   const response = await axios.post(url, data, config);
@@ -114,7 +114,7 @@ exports.refreshToken = async userId => {
   return {
     access_token,
     expires_in,
-    iat: Math.floor(new Date() / 1000),
+    iat: Math.floor(new Date().getTime() / 1000),
   };
 };
 

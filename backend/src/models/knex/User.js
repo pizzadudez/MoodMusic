@@ -18,5 +18,3 @@ exports.getRefreshToken = id => {
     .select('refresh_token')
     .then(row => row[0].refresh_token);
 };
-
-exports.updateUser;

@@ -2,11 +2,18 @@ const request = require('request-promise-native');
 const UserModel = require('../models/knex/User');
 const PlaylistModel = require('../models/Playlist');
 const TrackModel = require('../models/Track');
+const TrackModel2 = require('../models/knex/Track');
 
+/**
+ * Refresh tracks descriptionsdfsdfsssssssssssssssssssssssssssssssssssssssssssssssssssssss
+ * @param {{accessToken: string, userId: string}} userObj
+ * @param {boolean} sync wether to hard reset or soft refresh
+ */
 exports.refreshTracks = async (userObj, sync = false) => {
   // Liked Tracks (last 50 / all)
   const likedTracks = await getLikedTracks(userObj, sync);
   await TrackModel.addTracks(likedTracks, true, sync);
+  await TrackModel2.addTracks(userObj, likedTracks, true, sync);
   // Playlist Tracks (refresh: mix, sync: mix + label)
   const playlists = await refreshPlaylists(userObj, sync);
   if (playlists.length) {
@@ -20,6 +27,7 @@ exports.refreshTracks = async (userObj, sync = false) => {
     }));
     // Add Tracks and PlaylistTracks
     await TrackModel.addTracks(responses.flat(Infinity));
+    await TrackModel2.addTracks(userObj, responses.flat(Infinity));
     await PlaylistModel.addPlaylists(playlistTracks, sync);
     await PlaylistModel.updateMany(
       playlists.map(pl => ({ id: pl.id, updates: 0 }))
@@ -35,6 +43,7 @@ exports.refreshTracks = async (userObj, sync = false) => {
     tracks: await TrackModel.getAllById(),
   };
 };
+
 exports.getPlaylistTracks = async (userObj, id, sync = false, track_count) => {
   const response = await request.get({
     url:
@@ -81,6 +90,7 @@ exports.toggleLike = async (userObj, id, toggle = true) => {
 };
 
 // Helpers
+
 const getLikedTracks = async (userObj, sync = false) => {
   const response = await request.get({
     url: 'https://api.spotify.com/v1/me/tracks?limit=50',
@@ -112,6 +122,9 @@ const getLikedTracks = async (userObj, sync = false) => {
     return parseTracks([...response.items, ...otherTracks]);
   }
 };
+/**
+ * Comment JSDoc
+ */
 const refreshPlaylists = async (userObj, sync = false) => {
   const response = await request.get({
     url: 'https://api.spotify.com/v1/me/playlists?limit=50',

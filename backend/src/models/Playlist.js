@@ -237,7 +237,7 @@ exports.refresh = (data, sync = false) => {
         ];
         // INSERT
         db.run(insertSql, values, err => {
-          if (err && err.code !== 'SQLITE_CONSTRAINT') {
+          if (err && err['code'] !== 'SQLITE_CONSTRAINT') {
             reject(new Error(err.message));
           } else if (err) {
             const values = [

@@ -1,5 +1,5 @@
-require('dotenv').config({
-  allowEmpty: true,
+require('dotenv-safe').config({
+  allowEmptyValues: true,
 });
 
 module.exports = {

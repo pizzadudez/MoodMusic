@@ -7,7 +7,7 @@ const PlaylistModel = require('../models/Playlist');
 
 router.get('/', async (req, res, next) => {
   try {
-    test = await TrackModel.getAllById();
+    const test = await TrackModel.getAllById();
     res.status(200).json(test);
   } catch (err) {
     console.log(err.stack);

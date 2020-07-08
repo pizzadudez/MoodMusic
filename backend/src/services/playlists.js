@@ -4,6 +4,11 @@ const TrackModel = require('../models/Track');
 const LabelModel = require('../models/Label');
 const TracksService = require('./tracks');
 
+/**
+ *
+ * @param {{accessToken: number, userId}} userObj
+ * @param {Array<{playlist_id: string, track_ids: string[]}>} data
+ */
 exports.addTracks = async (userObj, data) => {
   const requests = data.map(playlistTracks =>
     addPlaylistTracks(userObj, playlistTracks)
