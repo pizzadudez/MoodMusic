@@ -67,7 +67,7 @@ exports.requestTokens = async (
     access_token,
     refresh_token,
     expires_in,
-    iat: Math.floor(new Date().getTime() / 1000),
+    iat: Math.floor(Date.now() / 1000),
   };
 };
 
@@ -114,7 +114,7 @@ exports.refreshToken = async userId => {
   return {
     access_token,
     expires_in,
-    iat: Math.floor(new Date().getTime() / 1000),
+    iat: Math.floor(Date.now() / 1000),
   };
 };
 

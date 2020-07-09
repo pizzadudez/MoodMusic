@@ -5,9 +5,9 @@ const LabelModel = require('../models/Label');
 const TracksService = require('./tracks');
 
 /**
- *
- * @param {{accessToken: number, userId}} userObj
- * @param {Array<{playlist_id: string, track_ids: string[]}>} data
+ * Add tracks to Spotify playlists and associations on MoodMusic
+ * @param {UserObj} userObj
+ * @param {{playlist_id: string, track_ids: string[]}[]} data
  */
 exports.addTracks = async (userObj, data) => {
   const requests = data.map(playlistTracks =>

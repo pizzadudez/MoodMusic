@@ -24,7 +24,7 @@ exports.refreshJwt = async (req, res, next) => {
     const { iat, userId } = req.user;
     const lifeTime = 60 * JWT_REFRESH_MINUTES;
     const exp = iat + lifeTime;
-    const now = Math.floor(new Date().getTime() / 1000);
+    const now = Math.floor(Date.now() / 1000);
 
     if (exp < now) {
       // Generate new JWT with fresh access_token

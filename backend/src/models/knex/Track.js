@@ -1,16 +1,17 @@
 const db = require('../../../db/knex');
 
+/**
+ *
+ * @param {UserObj} userObj
+ * @param {ParsedTrack[]} trackList - List of parsed Spotify TrackObjects.
+ * @param {boolean=} liked - Set true if the list of tracks is from Liked Songs.
+ * @param {boolean=} sync
+ */
 exports.addTracks = async (userObj, trackList, liked = false, sync = false) => {
   // TODO: sync liked tracks
   const data = trackList.reduce(
     (obj, track) => {
-      obj.albums.push({
-        id: track.album.id,
-        name: track.album.name,
-        small: track.album.images[0],
-        medium: track.album.images[1],
-        large: track.album.images[2],
-      });
+      obj.albums.push(track.album);
       obj.tracks.push({
         id: track.id,
         name: track.name,

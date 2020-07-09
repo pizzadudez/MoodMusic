@@ -5,14 +5,13 @@ const TrackModel = require('../models/Track');
 const TrackModel2 = require('../models/knex/Track');
 
 /**
- * Refresh tracks descriptionsdfsdfsssssssssssssssssssssssssssssssssssssssssssssssssssssss
- * @param {{accessToken: string, userId: string}} userObj
- * @param {boolean} sync wether to hard reset or soft refresh
+ * Refresh tracks service
+ * @param {UserObj} userObj
+ * @param {boolean=} sync wether to hard reset or soft refresh
  */
 exports.refreshTracks = async (userObj, sync = false) => {
   // Liked Tracks (last 50 / all)
   const likedTracks = await getLikedTracks(userObj, sync);
-  await TrackModel.addTracks(likedTracks, true, sync);
   await TrackModel2.addTracks(userObj, likedTracks, true, sync);
   // Playlist Tracks (refresh: mix, sync: mix + label)
   const playlists = await refreshPlaylists(userObj, sync);
@@ -23,11 +22,10 @@ exports.refreshTracks = async (userObj, sync = false) => {
     const responses = await Promise.all(requests);
     const playlistTracks = playlists.map(({ id }, idx) => ({
       playlist_id: id,
-      tracks: responses[idx],
+      tracks: responses[idx].tracks,
     }));
     // Add Tracks and PlaylistTracks
-    await TrackModel.addTracks(responses.flat(Infinity));
-    await TrackModel2.addTracks(userObj, responses.flat(Infinity));
+    await TrackModel2.addTracks(userObj, responses.flat());
     await PlaylistModel.addPlaylists(playlistTracks, sync);
     await PlaylistModel.updateMany(
       playlists.map(pl => ({ id: pl.id, updates: 0 }))
@@ -158,18 +156,25 @@ const refreshPlaylists = async (userObj, sync = false) => {
   }
 };
 
-// Data Parsers
-const parseTracks = list => {
-  return list.map(obj => ({
-    id: obj.track.id,
-    name: obj.track.name,
-    artist: obj.track.artists[0].name,
-    album_id: obj.track.album.id,
-    added_at: obj.added_at,
+// Spotify response data parsers
+/**
+ * Parse a list of Spotify TrackObjects
+ * @param {{added_at: string, track: object}[]} spotifyTracks
+ * @returns {ParsedTrack[]}
+ */
+const parseTracks = spotifyTracks => {
+  return spotifyTracks.map(({ added_at, track }) => ({
+    id: track.id,
+    name: track.name,
+    artist: track.artists[0].name,
+    album_id: track.album.id,
+    added_at,
     album: {
-      id: obj.track.album.id,
-      name: obj.track.album.name,
-      images: obj.track.album.images.map(size => size.url),
+      id: track.album.id,
+      name: track.album.name,
+      small: track.album.images[0].url,
+      medium: track.album.images[1].url,
+      large: track.album.images[2].url,
     },
   }));
 };
