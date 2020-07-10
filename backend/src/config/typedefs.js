@@ -20,11 +20,3 @@
  * @property {string} medium
  * @property {string} large
  */
-
-/**
- * @typedef {{
- * playlist_id: string,
- * track_ids?: string[],
- * tracks?: {id: string, added_at: string}[]
- * }} PlaylistTracks
- */

@@ -34,14 +34,14 @@ exports.addTracks = async (userObj, trackList, liked = false, sync = false) => {
   );
 
   return db.transaction(async trx => {
-    const insertAlbums = trx.raw(`? ON CONFLICT (id) DO NOTHING`, [
+    const insertAlbums = trx.raw('? ON CONFLICT (id) DO NOTHING', [
       db('albums').insert(data.albums),
     ]);
-    const insertTracks = trx.raw(`? ON CONFLICT (id) DO NOTHING`, [
+    const insertTracks = trx.raw('? ON CONFLICT (id) DO NOTHING', [
       db('tracks').insert(data.tracks),
     ]);
     const insertUserTracks = trx.raw(
-      `? ON CONFLICT (track_id, user_id) DO NOTHING`,
+      '? ON CONFLICT (track_id, user_id) DO NOTHING',
       [db('tracks_users').insert(data.userTracks)]
     );
     await insertAlbums;
