@@ -11,7 +11,12 @@ exports.up = function (knex) {
     })
     .createTable('labels', table => {
       table.increments('id');
-      table.string('type').notNullable();
+      table
+        .enum('type', ['genre', 'subgenre', 'mood'], {
+          useNative: true,
+          enumName: 'label_type',
+        })
+        .notNullable();
       table.string('name').notNullable();
       table.string('color');
       table.string('verbose');
@@ -28,8 +33,14 @@ exports.up = function (knex) {
       table.string('description');
       table.integer('track_count');
       table.string('snapshot_id');
-      table.string('type').notNullable().defaultTo('untracked');
-      table.boolean('updates');
+      table
+        .enum('type', ['untracked', 'mix', 'label', 'deleted'], {
+          useNative: true,
+          enumName: 'playlist_type',
+        })
+        .notNullable()
+        .defaultTo('untracked');
+      table.boolean('updates').notNullable().defaultTo(true);
       table.timestamp('added_at').notNullable().defaultTo(knex.fn.now());
 
       table.integer('label_id').references('labels.id').defaultTo(null);

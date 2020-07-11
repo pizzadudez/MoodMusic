@@ -4,10 +4,11 @@ const router = require('express').Router();
 const LabelModel = require('../models/Label');
 const TrackModel = require('../models/Track');
 const PlaylistModel = require('../models/Playlist');
+const TracksService = require('../services/tracks');
 
 router.get('/', async (req, res, next) => {
   try {
-    const test = await TrackModel.getAllById();
+    const test = await TracksService.refreshTracks(req.user);
     res.status(200).json(test);
   } catch (err) {
     console.log(err.stack);

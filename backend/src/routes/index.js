@@ -3,6 +3,7 @@ const { authenticateJwt, refreshJwt } = require('../middleware/auth');
 const TracksRouter = require('./tracks');
 const PlaylistsRouter = require('./playlists');
 const LabelsRouter = require('./labels');
+const TestRouter = require('./test');
 
 router.use(
   '/',
@@ -13,6 +14,17 @@ router.use(
   TracksRouter,
   PlaylistsRouter,
   LabelsRouter
+);
+
+// For Testing
+router.use('/test', TestRouter);
+router.use(
+  '/test/auth',
+  // Auth middleware
+  authenticateJwt,
+  refreshJwt,
+  // Route
+  TestRouter
 );
 
 module.exports = router;

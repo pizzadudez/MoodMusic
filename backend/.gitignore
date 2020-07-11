@@ -5,8 +5,8 @@ package-lock.json
 *.gz
 
 # custom
-*.sqlite3
-*.db
+*.sqlite3*
+*.db*
 *.env
 .env
 

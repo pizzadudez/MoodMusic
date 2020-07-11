@@ -20,3 +20,17 @@
  * @property {string} medium
  * @property {string} large
  */
+/**
+ * @typedef {object} ParsedPlaylist
+ * @property {string} id
+ * @property {string} name
+ * @property {string} description
+ * @property {string} snapshot_id
+ * @property {number} track_count
+ */
+/**
+ * @typedef {object} PlaylistTracks
+ * @property {string} playlist_id
+ * @property {string[]=} track_ids
+ * @property {{id: string; added_at: string}[]=} tracks
+ */

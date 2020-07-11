@@ -12,8 +12,9 @@ exports.getAll = async (req, res, next) => {
 };
 exports.refreshTracks = async (req, res, next) => {
   try {
-    const updates = await TracksService.refreshTracks(req.user);
-    res.status(200).json(updates);
+    await TracksService.refreshTracks(req.user);
+    const tracks = await TrackModel.getAllById();
+    res.status(200).json({ message: 'refreshed', tracks });
   } catch (err) {
     console.log(err.stack);
     res.sendStatus(500);
@@ -21,8 +22,9 @@ exports.refreshTracks = async (req, res, next) => {
 };
 exports.syncTracks = async (req, res, next) => {
   try {
-    const updates = await TracksService.refreshTracks(req.user, true);
-    res.status(200).json(updates);
+    await TracksService.refreshTracks(req.user, true);
+    const tracks = await TrackModel.getAllById();
+    res.status(200).json({ message: 'synced', tracks });
   } catch (err) {
     console.log(err.stack);
     res.sendStatus(500);

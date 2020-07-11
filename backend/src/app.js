@@ -7,7 +7,6 @@ const handleJson = require('./middleware/handleJson');
 const AuthRouter = require('./auth');
 const ApiRouter = require('./routes');
 const DocsRouter = require('./docs');
-const TestRouter = require('./routes/test');
 
 const app = express();
 app.use(express.static(path.join(__dirname, '../../frontend/build')));
@@ -19,7 +18,6 @@ app.set('json spaces', 2);
 app.use('/authorize', AuthRouter);
 app.use('/api', ApiRouter);
 app.use('/docs', DocsRouter);
-app.use('/test', TestRouter);
 
 const port = PORT || 1000;
 app.listen(port, () => {

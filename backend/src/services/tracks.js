@@ -1,82 +1,77 @@
+const { default: axios } = require('axios');
 const request = require('request-promise-native');
 const UserModel = require('../models/knex/User');
 const PlaylistModel = require('../models/Playlist');
+const PlaylistModel2 = require('../models/knex/Playlist');
 const TrackModel = require('../models/Track');
 const TrackModel2 = require('../models/knex/Track');
 
 /**
- * Refresh tracks service
+ * Refresh or sync all of a user's tracks:
+ * - liked tracks (refresh: latest 50 only)
+ * - playlist tracks excluding those from untracked playlists
  * @param {UserObj} userObj
- * @param {boolean=} sync wether to hard reset or soft refresh
+ * @param {boolean=} sync - Do a hard sync instead of refresh
  */
 exports.refreshTracks = async (userObj, sync = false) => {
   // Liked Tracks (last 50 / all)
   const likedTracks = await getLikedTracks(userObj, sync);
-  await TrackModel2.addTracks(userObj, likedTracks, true, sync);
+  await TrackModel2.addTracks(userObj.userId, likedTracks, true, sync);
   // Playlist Tracks (refresh: mix, sync: mix + label)
   const playlists = await refreshPlaylists(userObj, sync);
   if (playlists.length) {
-    const requests = playlists.map(({ id, track_count }) =>
-      exports.getPlaylistTracks(userObj, id, sync, track_count)
+    const trackRequests = playlists.map(({ id, track_count }) =>
+      exports.getPlaylistTracks(userObj, id, sync ? undefined : track_count)
     );
-    const responses = await Promise.all(requests);
-    const playlistTracks = playlists.map(({ id }, idx) => ({
+    const trackLists = await Promise.all(trackRequests);
+    // Add Tracks
+    await TrackModel2.addTracks(userObj.userId, trackLists.flat(), sync);
+    // Add Playlist-Track associations
+    const playlistTracksList = playlists.map(({ id }, idx) => ({
       playlist_id: id,
-      tracks: responses[idx].tracks,
+      tracks: trackLists[idx],
     }));
-    // Add Tracks and PlaylistTracks
-    await TrackModel2.addTracks(userObj, responses.flat());
-    await PlaylistModel.addPlaylists(playlistTracks, sync);
-    await PlaylistModel.updateMany(
-      playlists.map(pl => ({ id: pl.id, updates: 0 }))
-    );
+    await PlaylistModel2.addPlaylists(playlistTracksList, sync);
   }
   // Update timestamps
+  // TODO: more elegant
   await UserModel.update(userObj.userId, {
     [sync ? 'synced_at' : 'refreshed_at']: new Date().toISOString(),
   });
+};
 
-  return {
-    message: `Track ${sync ? 'sync' : 'refresh'} complete!`,
-    tracks: await TrackModel.getAllById(),
+/**
+ * Get playlist tracks from Spotify
+ * @param {UserObj} userObj
+ * @param {string} id - playlistId
+ * @param {number=} trackCount - Get only latest 100 tracks
+ */
+exports.getPlaylistTracks = async (userObj, id, trackCount = undefined) => {
+  const baseUrl = `https://api.spotify.com/v1/playlists/${id}/tracks?offset=`;
+  const config = {
+    headers: {
+      Authorization: 'Bearer ' + userObj.accessToken,
+    },
   };
-};
-
-exports.getPlaylistTracks = async (userObj, id, sync = false, track_count) => {
-  const response = await request.get({
-    url:
-      'https://api.spotify.com/v1/playlists/' +
-      id +
-      '/tracks' +
-      (!sync ? '?offset=' + (track_count > 100 ? track_count - 100 : 0) : ''),
-    headers: { Authorization: 'Bearer ' + userObj.accessToken },
-    json: true,
-  });
-  const totalTracks = response.total;
-
-  if (!sync) {
-    return parseTracks(response.items);
-  } else {
+  // Get last 100 tracks only if trackCount is provided
+  const firstOffset = trackCount > 100 ? trackCount - 100 : 0;
+  const {
+    data: { items: tracks, total: resTrackCount },
+  } = await axios.get(baseUrl + firstOffset, config);
+  // Concurrently request rest of tracks
+  let otherTracks = [];
+  if (!trackCount) {
     const requests = [];
-    for (let offset = 1; offset <= totalTracks / 50; offset++) {
-      const req = async () => {
-        const response = await request.get({
-          url:
-            'https://api.spotify.com/v1/playlists/' +
-            id +
-            '/tracks?offset=' +
-            offset * 100,
-          headers: { Authorization: 'Bearer ' + userObj.accessToken },
-          json: true,
-        });
-        return response.items;
-      };
-      requests.push(req());
+    for (let offset = 1; offset <= resTrackCount / 100; offset++) {
+      requests.push(axios.get(baseUrl + offset * 100, config));
     }
-    const otherTracks = (await Promise.all(requests)).flat(Infinity);
-    return parseTracks([...response.items, ...otherTracks]);
+    const responses = await Promise.all(requests);
+    otherTracks = responses.map(res => res.data.items).flat();
   }
+
+  return parseTracks([...tracks, ...otherTracks]);
 };
+// TODO
 exports.toggleLike = async (userObj, id, toggle = true) => {
   await request[toggle ? 'put' : 'delete']({
     url: 'https://api.spotify.com/v1/me/tracks',
@@ -88,75 +83,72 @@ exports.toggleLike = async (userObj, id, toggle = true) => {
 };
 
 // Helpers
-
+/**
+ * Get liked tracks from Spotify
+ * @param {UserObj} userObj
+ * @param {boolean=} sync - When true will fetch all Liked Songs
+ */
 const getLikedTracks = async (userObj, sync = false) => {
-  const response = await request.get({
-    url: 'https://api.spotify.com/v1/me/tracks?limit=50',
-    headers: { Authorization: 'Bearer ' + userObj.accessToken },
-    json: true,
-  });
-
-  if (!sync) {
-    // Get only first 50 tracks
-    return parseTracks(response.items);
-  } else {
-    // Get all liked tracks (parallel requests)
-    const totalTracks = response.total;
+  const baseUrl = 'https://api.spotify.com/v1/me/tracks?limit=50';
+  const config = {
+    headers: {
+      Authorization: 'Bearer ' + userObj.accessToken,
+    },
+  };
+  // Get latest 50 liked tracks and total count
+  const {
+    data: { items: latestTracks, total: trackCount },
+  } = await axios.get(baseUrl, config);
+  // Concurrently request rest of tracks
+  let otherTracks = [];
+  if (sync) {
     const requests = [];
-    for (let offset = 1; offset <= totalTracks / 50; offset++) {
-      const req = async () => {
-        const response = await request.get({
-          url:
-            'https://api.spotify.com/v1/me/tracks?limit=50&offset=' +
-            offset * 50,
-          headers: { Authorization: 'Bearer ' + userObj.accessToken },
-          json: true,
-        });
-        return response.items;
-      };
-      requests.push(req());
+    for (let offset = 1; offset <= trackCount / 50; offset++) {
+      requests.push(axios.get(baseUrl + `&offset=${offset * 50}`, config));
     }
-    const otherTracks = (await Promise.all(requests)).flat(Infinity);
-    return parseTracks([...response.items, ...otherTracks]);
+    const responses = await Promise.all(requests);
+    otherTracks = responses.map(res => res.data.items).flat();
   }
+
+  return parseTracks([...latestTracks, ...otherTracks]);
 };
 /**
- * Comment JSDoc
+ * Upsert user's playlists, returns list of playlists to refresh tracks for.
+ * @param {UserObj} userObj
+ * @param {*} sync - Return all playlist ids (except untracked/deleted)
+ * @returns {Promise<{id: string, track_count: number}[]>}
  */
 const refreshPlaylists = async (userObj, sync = false) => {
-  const response = await request.get({
-    url: 'https://api.spotify.com/v1/me/playlists?limit=50',
-    headers: { Authorization: 'Bearer ' + userObj.accessToken },
-    json: true,
-  });
-  const totalPlaylists = response.total;
-
-  if (totalPlaylists <= 50) {
-    return PlaylistModel.refresh(parsePlaylists(response.items), sync);
-  } else {
+  const baseUrl = 'https://api.spotify.com/v1/me/playlists?limit=50';
+  const config = {
+    headers: {
+      Authorization: 'Bearer ' + userObj.accessToken,
+    },
+  };
+  // Get first batch of playlists and total count
+  const {
+    data: { items: playlists, total: playlistCount },
+  } = await axios.get(baseUrl, config);
+  // Concurrently request rest of playlists
+  let otherPlaylists = [];
+  if (playlistCount > 50) {
     const requests = [];
-    for (let offset = 1; offset <= totalPlaylists / 50; offset++) {
-      const req = async () => {
-        const response = await request.get({
-          url:
-            'https://api.spotify.com/v1/me/playlists?limit=50&offset=' +
-            offset * 50,
-          headers: { Authorization: 'Bearer ' + userObj.accessToken },
-          json: true,
-        });
-        return response.items;
-      };
-      requests.push(req());
+    for (let offset = 1; offset <= playlistCount / 50; offset++) {
+      requests.push(axios.get(baseUrl + `&offset=${offset * 50}`, config));
     }
-    const otherPlaylists = (await Promise.all(requests)).flat(Infinity);
-    return PlaylistModel.refresh(
-      parsePlaylists([...response.items, ...otherPlaylists]),
-      sync
-    );
+    const responses = await Promise.all(requests);
+    otherPlaylists = responses.map(res => res.data.items).flat();
   }
+  // Parse, update and return ids with changes
+  const parsedPlaylists = parsePlaylists(
+    [...playlists, ...otherPlaylists],
+    userObj.userId
+  );
+
+  return PlaylistModel2.refresh(parsedPlaylists, sync);
 };
 
-// Spotify response data parsers
+// Spotify response items data parsers
 /**
  * Parse a list of Spotify TrackObjects
  * @param {{added_at: string, track: object}[]} spotifyTracks
@@ -178,12 +170,19 @@ const parseTracks = spotifyTracks => {
     },
   }));
 };
-const parsePlaylists = list => {
-  return list.map(obj => ({
+/**
+ * Parse a list of Spotify PlaylistObjects
+ * @param {object[]} spotifyPlaylists
+ * @param {string} userId
+ * @returns {ParsedPlaylist[]}
+ */
+const parsePlaylists = (spotifyPlaylists, userId) => {
+  return spotifyPlaylists.map(obj => ({
     id: obj.id,
     name: obj.name,
     description: obj.description,
     snapshot_id: obj.snapshot_id,
     track_count: obj.tracks.total,
+    user_id: userId,
   }));
 };
