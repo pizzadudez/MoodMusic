@@ -15,6 +15,7 @@ import Main from './views/Main';
 import Labels from './views/Labels';
 import Playlists from './views/Playlists';
 import Login from './views/Login';
+import Tests from './views/Tests';
 
 const stateSelector = createSelector(
   state => state.app.authenticated,
@@ -41,12 +42,15 @@ export default memo(() => {
           <Router>
             <Navbar />
             <Switch>
+              <Route path="/tests">
+                <Tests />
+              </Route>
               <Route path="/labels">
                 <Labels />
               </Route>
-              <Router path="/playlists">
+              <Route path="/playlists">
                 <Playlists />
-              </Router>
+              </Route>
               <Route path="/">
                 <Main />
               </Route>

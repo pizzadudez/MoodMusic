@@ -8,8 +8,9 @@ const TracksService = require('../services/tracks');
 
 router.get('/', async (req, res, next) => {
   try {
-    const test = await TracksService.refreshTracks(req.user);
-    res.status(200).json(test);
+    // const test = await TracksService.refreshTracks(req.user);
+    // res.status(200).json(test);
+    res.send('ok');
   } catch (err) {
     console.log(err.stack);
     res.sendStatus(500);

@@ -33,6 +33,14 @@ exports.refresh = async (playlistList, sync = false) => {
 exports.addPlaylists = async (list, sync = false) => {
   // TODO: also set playlists updates to FALSE if data comes from refresh
 
+  /**
+   * - syncing means we get all tracks in playlists so we would want to update
+   * positions for every track in playlist
+   * - if we get track_ids we insert them with idx: lastIdx + idx (addPlaylists req)
+   * - if we get tracks it means its from refresh
+   *  - if sync then
+   */
+
   //if sync we delete
   db.transaction(async trx => {
     try {
