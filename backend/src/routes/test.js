@@ -10,7 +10,15 @@ router.get('/', async (req, res, next) => {
   try {
     // const test = await TracksService.refreshTracks(req.user);
     // res.status(200).json(test);
-    res.send('ok');
+    const id = '5lZhmODcfCJBMRIP0Ju5Gh';
+    const trackCount = 138;
+    const tracks = await TracksService.getPlaylistTracks(
+      req.user,
+      id,
+      trackCount
+    );
+    const test = tracks.map(track => track.name);
+    res.json(test);
   } catch (err) {
     console.log(err.stack);
     res.sendStatus(500);
