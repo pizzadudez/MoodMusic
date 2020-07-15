@@ -27,6 +27,7 @@
  * @property {string} description
  * @property {string} snapshot_id
  * @property {number} track_count
+ * @property {string} user_id
  */
 /**
  * @typedef {object} PlaylistTracks

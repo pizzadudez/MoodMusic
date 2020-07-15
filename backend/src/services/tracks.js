@@ -31,7 +31,7 @@ exports.refreshTracks = async (userObj, sync = false) => {
       playlist_id: id,
       tracks: trackLists[idx],
     }));
-    await PlaylistModel2.addPlaylists(playlistTracksList, sync);
+    await PlaylistModel2.addPlaylists(userObj.userId, playlistTracksList, sync);
   }
   // Update timestamps
   // TODO: more elegant
@@ -145,7 +145,7 @@ const refreshPlaylists = async (userObj, sync = false) => {
     userObj.userId
   );
 
-  return PlaylistModel2.refresh(parsedPlaylists, sync);
+  return PlaylistModel2.refresh(userObj.userId, parsedPlaylists, sync);
 };
 
 // Spotify response items data parsers

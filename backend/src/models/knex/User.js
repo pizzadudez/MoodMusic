@@ -16,5 +16,5 @@ exports.getRefreshToken = id => {
   return db('users')
     .where({ id })
     .select('refresh_token')
-    .then(row => row[0].refresh_token);
+    .then(rows => rows[0].refresh_token);
 };
