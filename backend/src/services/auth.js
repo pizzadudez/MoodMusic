@@ -90,7 +90,7 @@ exports.registerUser = async (access_token, refresh_token, iat) => {
 };
 
 exports.refreshToken = async userId => {
-  const refresh_token = await UserModel.getRefreshToken(userId);
+  const { refresh_token } = await UserModel.data(userId);
   // Get these from UserModel if use has his own app
   const clientId = CLIENT_ID;
   const clientSecret = CLIENT_SECRET;

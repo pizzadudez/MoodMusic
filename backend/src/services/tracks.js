@@ -1,15 +1,14 @@
 const { default: axios } = require('axios');
 const request = require('request-promise-native');
 const UserModel = require('../models/knex/User');
-const PlaylistModel = require('../models/Playlist');
-const PlaylistModel2 = require('../models/knex/Playlist');
+const PlaylistModel = require('../models/knex/Playlist');
 const TrackModel = require('../models/Track');
 const TrackModel2 = require('../models/knex/Track');
 
 /**
- * Refresh or sync all of a user's tracks:
+ * Refresh or sync user's tracks:
  * - liked tracks (refresh: latest 50 only)
- * - playlist tracks excluding those from untracked playlists
+ * - tracks from playlists (mix/label)
  * @param {UserObj} userObj
  * @param {boolean=} sync - Do a hard sync instead of refresh
  */
@@ -31,7 +30,7 @@ exports.refreshTracks = async (userObj, sync = false) => {
       playlist_id: id,
       tracks: trackLists[idx],
     }));
-    await PlaylistModel2.addPlaylists(userObj.userId, playlistTracksList, sync);
+    await PlaylistModel.addPlaylists(userObj.userId, playlistTracksList, sync);
   }
   // Update timestamps
   // TODO: more elegant
@@ -39,7 +38,6 @@ exports.refreshTracks = async (userObj, sync = false) => {
     [sync ? 'synced_at' : 'refreshed_at']: new Date().toISOString(),
   });
 };
-
 /**
  * Get playlist tracks from Spotify
  * @param {UserObj} userObj
@@ -113,7 +111,8 @@ const getLikedTracks = async (userObj, sync = false) => {
   return parseTracks([...latestTracks, ...otherTracks]);
 };
 /**
- * Upsert user's playlists, returns list of playlists to refresh tracks for.
+ * - Get up to date playlists from Spotify
+ * - Return list of playlists to be refreshed/synced.
  * @param {UserObj} userObj
  * @param {*} sync - Return all playlist ids (except untracked/deleted)
  * @returns {Promise<{id: string, track_count: number}[]>}
@@ -145,7 +144,7 @@ const refreshPlaylists = async (userObj, sync = false) => {
     userObj.userId
   );
 
-  return PlaylistModel2.refresh(userObj.userId, parsedPlaylists, sync);
+  return PlaylistModel.refresh(userObj.userId, parsedPlaylists, sync);
 };
 
 // Spotify response items data parsers

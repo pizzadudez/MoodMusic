@@ -35,3 +35,9 @@
  * @property {string[]=} track_ids
  * @property {{id: string; added_at: string}[]=} tracks
  */
+/**
+ * @typedef {object} userData
+ * @property {string} refresh_token
+ * @property {string} refreshed_at
+ * @property {string} synced_at
+ */

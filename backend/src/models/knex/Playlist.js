@@ -1,9 +1,9 @@
 const db = require('../../../db/knex');
 const { chunkArray } = require('../../utils');
-const { last } = require('lodash');
 
 /**
- * Upsert user's playlists, returns list of playlists to refresh tracks for.
+ * - Upsert user's playlists
+ * - Return list of playlists to be refreshed/synced.
  * @param {string} userId
  * @param {ParsedPlaylist[]} playlistList
  * @param {boolean=} sync - Return all playlist ids (except untracked/deleted)
@@ -31,7 +31,7 @@ exports.refresh = async (userId, playlistList, sync = false) => {
   return playlistIds;
 };
 /**
- * Handle Playlist-Track associations.
+ * Handle adding Playlist-Track associations.
  * @param {string} userId
  * @param {PlaylistTracks[]} list - Accepts both tracks and track_ids
  * @param {boolean=} sync
@@ -89,8 +89,8 @@ exports.addPlaylists = async (userId, list, sync = false) => {
 
 // Helpers
 /**
- * Returns a hashMap of a user's playlist's last track positions,
- * this can be different from track count.
+ * Create hashMap of user's playlist's last track positions,
+ * these can be different from playlist total track count.
  * @param {string} userId
  * @returns {Promise<Object<string, number>>}
  */

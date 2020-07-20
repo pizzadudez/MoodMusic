@@ -2,7 +2,7 @@
   "name": "moodmusic-backend",
   "version": "1.0.0",
   "description": "",
-  "main": "index.js",
+  "main": "./src/app.js",
   "dependencies": {
     "@hapi/joi": "^17.1.0",
     "axios": "^0.19.2",
@@ -13,7 +13,6 @@
     "hapi": "^18.1.0",
     "jsonwebtoken": "^8.5.1",
     "knex": "^0.21.1",
-    "lodash": "^4.17.15",
     "pg": "^8.2.1",
     "querystring": "^0.2.0",
     "request": "^2.88.0",
@@ -24,9 +23,9 @@
   },
   "devDependencies": {},
   "scripts": {
-    "test": "set REACT_ENV=production && nodemon ./src/app.js",
-    "start": "nodemon ./src/app.js"
+    "test": "set REACT_ENV=production && nodemon",
+    "start": "nodemon"
   },
-  "author": "",
+  "author": "Vlad Albert",
   "license": "ISC"
 }

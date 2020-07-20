@@ -5,20 +5,25 @@ const LabelModel = require('../models/Label');
 const TrackModel = require('../models/Track');
 const PlaylistModel = require('../models/Playlist');
 const TracksService = require('../services/tracks');
+const UserModel = require('../models/knex/User');
 
 router.get('/', async (req, res, next) => {
   try {
     // const test = await TracksService.refreshTracks(req.user);
     // res.status(200).json(test);
-    const id = '5lZhmODcfCJBMRIP0Ju5Gh';
-    const trackCount = 138;
-    const tracks = await TracksService.getPlaylistTracks(
-      req.user,
-      id,
-      trackCount
-    );
-    const test = tracks.map(track => track.name);
-    res.json(test);
+
+    // const id = '5lZhmODcfCJBMRIP0Ju5Gh';
+    // const trackCount = 138;
+    // const tracks = await TracksService.getPlaylistTracks(
+    //   req.user,
+    //   id,
+    //   trackCount
+    // );
+    // const test = tracks.map(track => track.name);
+    // res.json(test);
+
+    const test = await UserModel.data(req.user.userId);
+    res.send(test);
   } catch (err) {
     console.log(err.stack);
     res.sendStatus(500);
