@@ -35,7 +35,7 @@ exports.refreshTracks = async (userObj, sync = false) => {
   // Update timestamps
   // TODO: more elegant
   await UserModel.update(userObj.userId, {
-    [sync ? 'synced_at' : 'refreshed_at']: new Date().toISOString(),
+    [sync ? 'synced_at' : 'refreshed_at']: true,
   });
 };
 /**

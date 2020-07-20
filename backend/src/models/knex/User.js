@@ -15,17 +15,22 @@ exports.register = async (id, refresh_token) => {
   );
 };
 /**
- * Update user
+ * Update user record.
  * @param {string} id - userId
  * @param {object} data
- * @param {string=} data.refreshed_at
- * @param {string=} data.synced_at
- * @param {string=} data.refresh_token
+ * @param {boolean=} data.refreshed_at
+ * @param {boolean=} data.synced_at
  */
 exports.update = async (id, data) => {
+  const { refreshed_at, synced_at, ...rest } = data;
   await db('users')
     .where({ id })
-    .update({ ...data, updated_at: knex.fn.now() });
+    .update({
+      ...rest,
+      ...(refreshed_at && { refreshed_at: knex.fn.now() }),
+      ...(synced_at && { synced_at: knex.fn.now() }),
+      updated_at: knex.fn.now(),
+    });
 };
 /**
  * Retrieve userData
