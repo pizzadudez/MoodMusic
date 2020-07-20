@@ -4,7 +4,7 @@ exports.register = (id, refresh_token) => {
   return db.raw(
     `? ON CONFLICT (id) DO UPDATE SET
       refresh_token = EXCLUDED.refresh_token,
-      updated_at = CURRENT_TIMESTAMP`,
+      updated_at = NOW()`,
     [db('users').insert({ id, refresh_token })]
   );
 };

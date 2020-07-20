@@ -37,24 +37,24 @@ exports.refresh = async (userId, playlistList, sync = false) => {
  * @param {boolean=} sync
  */
 exports.addPlaylists = async (userId, list, sync = false) => {
+  // TODO: also set playlists updates to FALSE if data comes from refresh
   const lastPositions = await getLastPositions(userId);
   const data = list
     .map(({ playlist_id, tracks, track_ids }) => {
       if (tracks) {
-        // Handle user adding duplicate tracks through Spotify
-        const hashMap = {};
-        const trackList = tracks.map((track, idx) => {
-          if (hashMap[track.id]) return;
-          hashMap[track.id] = true;
-          return {
+        // tracks from playlist refresh/sync
+        const trackMap = tracks.reduce((obj, track, idx) => {
+          obj[track.id] = obj[track.id] || {
             playlist_id,
             track_id: track.id,
             added_at: track.added_at,
             position: sync ? idx : idx + 1 + (lastPositions[playlist_id] || -1),
           };
-        });
-        return trackList;
+          return obj;
+        }, {});
+        return Object.values(trackMap);
       } else {
+        // track_ids from user request
         return track_ids.map((id, idx) => ({
           playlist_id,
           track_id: id,
@@ -63,63 +63,54 @@ exports.addPlaylists = async (userId, list, sync = false) => {
       }
     })
     .flat();
-  console.time('tr');
   // Batch insert associations
   await db.transaction(async tr => {
-    // delete if sync
-    if (sync) {
-      const playlists = list.map(playlistTracks => playlistTracks.playlist_id);
-      console.time('delete');
-      await tr('tracks_playlists').whereIn('playlist_id', playlists).del();
-      console.timeEnd('delete');
-    }
-
     const chunks = chunkArray(data, 1000);
-    console.time('insert');
+    const update = `UPDATE SET 
+        position = EXCLUDED.position, 
+        updated_at = NOW()`;
+    // Upsert or Insert New Associations
     for (const chunk of chunks) {
       await tr.raw(`? ON CONFLICT (track_id, playlist_id) DO ?`, [
         tr('tracks_playlists').insert(chunk),
-        tr.raw(sync ? 'UPDATE SET position = EXCLUDED.position' : 'NOTHING'),
+        tr.raw(sync ? update : 'NOTHING'),
       ]);
     }
-    console.timeEnd('insert');
+    // Remove associations that have not been upserted
+    if (sync) {
+      const playlists = list.map(playlistTracks => playlistTracks.playlist_id);
+      await tr('tracks_playlists')
+        .whereIn('playlist_id', playlists)
+        .andWhere('updated_at', '<', tr.fn.now())
+        .del();
+    }
   });
-  console.timeEnd('tr');
-
-  // TODO: try adding updated_at col, then delete tracks before timestamp
-  //  this means they were not there for syncing - this might remove dupes too
-  // TODO: also set playlists updates to FALSE if data comes from refresh
-
-  /**
-   * - syncing means we get all tracks in playlists so we would want to update
-   * positions for every track in playlist
-   * - if we get track_ids we insert them with pos: lastIdx + idx (addPlaylists req)
-   * - if we get tracks it means its from refresh
-   *  - if sync then:
-   *    - CONSIDER: syncing is for 100% up to date, user might have added/removed tracks
-   *      manually
-   *    - delete all tracks from respective playlists
-   *    - we get all tracks, insert in order with position=index
-   *  - if not sync then:
-   *    -
-   */
 };
 
 // Helpers
 /**
- * Returns a hashMap with a user's playlists and their last track's positions
+ * Returns a hashMap of a user's playlist's last track positions,
+ * this can be different from track count.
  * @param {string} userId
- * @returns {Promise<object>}
+ * @returns {Promise<Object<string, number>>}
  */
 const getLastPositions = async userId => {
-  /** @type {{id: string, last_pos: number}[]} */
   const rows = await db('tracks_playlists')
-    .select(db.raw('playlist_id AS id, MAX(position) as last_pos'))
+    .select('playlist_id as id')
+    .max('position as last_pos')
     .whereIn(
       'playlist_id',
       db('playlists').select('id').where('user_id', userId)
     )
     .groupBy('playlist_id');
+
+  /** Join vs WhereIn Select, join seems slower the more data we have */
+  // const rows = await db('tracks_playlists')
+  //   .leftJoin('playlists', 'playlists.id', 'tracks_playlists.playlist_id')
+  //   .select('playlist_id as id')
+  //   .max('position as last_pos')
+  //   .where('user_id', userId)
+  //   .groupBy('playlist_id');
 
   return Object.fromEntries(rows.map(({ id, last_pos }) => [id, last_pos]));
 };

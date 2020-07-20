@@ -74,6 +74,7 @@ exports.up = function (knex) {
       table.string('playlist_id').references('playlists.id').notNullable();
       table.integer('position').defaultTo(null);
       table.timestamp('added_at').notNullable().defaultTo(knex.fn.now());
+      table.timestamp('updated_at').notNullable().defaultTo(knex.fn.now());
 
       table.primary(['track_id', 'playlist_id']);
     })
@@ -95,5 +96,7 @@ exports.down = function (knex) {
     .dropTable('albums')
     .dropTable('playlists')
     .dropTable('labels')
-    .dropTable('users');
+    .dropTable('users')
+    .raw(`DROP TYPE IF EXISTS label_type`)
+    .raw(`DROP TYPE IF EXISTS playlist_type`);
 };
