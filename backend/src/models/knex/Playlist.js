@@ -65,17 +65,14 @@ exports.addPlaylists = async (userId, list, sync = false) => {
     .flat();
   // Batch insert associations
   await db.transaction(async tr => {
-    const chunks = chunkArray(data, 1000);
-    const update = `UPDATE SET 
+    const onConflict = `ON CONFLICT (track_id, playlist_id) DO UPDATE SET 
         position = EXCLUDED.position, 
         updated_at = NOW()`;
-    // Upsert or Insert New Associations
-    for (const chunk of chunks) {
-      await tr.raw(`? ON CONFLICT (track_id, playlist_id) DO ?`, [
-        tr('tracks_playlists').insert(chunk),
-        tr.raw(sync ? update : 'NOTHING'),
-      ]);
-    }
+    // Insert (or Upsert if sync) New Associations
+    await tr('tracks_playlists').bulkUpsert(
+      data,
+      sync ? onConflict : undefined
+    );
     // Remove associations that have not been upserted
     if (sync) {
       const playlists = list.map(playlistTracks => playlistTracks.playlist_id);

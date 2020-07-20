@@ -5,13 +5,29 @@ require('dotenv-safe').config({
 const environment = process.env.NODE_ENV || 'development';
 const config = require('../knexfile')[environment];
 const Knex = require('knex');
+const { chunkArray } = require('../src/utils');
 
 // Extend Knex with custom methods
-Knex.QueryBuilder.extend('bulkUpdate', function (value) {
-  return this.select(value);
+// @ts-ignore
+Knex.QueryBuilder.extend('bulkUpsert', async function (
+  data,
+  onConflict = 'ON CONFLICT DO NOTHING',
+  chunkSize = 1000
+) {
+  const chunks = chunkArray(data, chunkSize);
+  for (const chunk of chunks) {
+    await this.client.raw('? ?', [
+      this.insert(chunk),
+      this.client.raw(onConflict),
+    ]);
+  }
 });
-Knex.QueryBuilder.extend('bulkTest', function (value) {
-  return this.select(value);
+// @ts-ignore
+Knex.QueryBuilder.extend('bulkInsert', async function (data, chunkSize = 1000) {
+  const chunks = chunkArray(data, chunkSize);
+  for (const chunk of chunks) {
+    await this.client.raw('? ON CONFLICT DO NOTHING', [this.insert(chunk)]);
+  }
 });
 
 module.exports = Knex(config);

@@ -33,7 +33,6 @@ exports.refreshTracks = async (userObj, sync = false) => {
     await PlaylistModel.addPlaylists(userObj.userId, playlistTracksList, sync);
   }
   // Update timestamps
-  // TODO: more elegant
   await UserModel.update(userObj.userId, {
     [sync ? 'synced_at' : 'refreshed_at']: true,
   });

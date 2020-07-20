@@ -2,8 +2,20 @@ import * as Knex from 'knex';
 
 declare module 'knex' {
   interface QueryBuilder {
-    /**bulk update brah */
-    bulkUpdate<TRecord, TResult>(value: string): QueryBuilder<TRecord, TResult>;
-    bulkTest<TRecord, TResult>(value: string): QueryBuilder<TRecord, TResult>;
+    /**
+     * Bulk upsert, defaults to bulk insert when no onConflict string is passed
+     * @param data - Array of objects containing key value pairs
+     * @param {string=} [onConflict] - ex: ON CONFLICT (col1, col2) UPDATE SET col3 = EXCLUDED.col3, updated_at = NOW()
+     * @param [chunkSize] - optional, defaults to 1000
+     */
+    bulkUpsert<TRecord, TResult>(
+      data: object[],
+      onConflict?: string,
+      chunkSize?: number
+    ): QueryBuilder<TRecord, TResult>;
+    bulkInsert<TRecord, TResult>(
+      data: object[],
+      chunkSize?: number
+    ): QueryBuilder<TRecord, TResult>;
   }
 }

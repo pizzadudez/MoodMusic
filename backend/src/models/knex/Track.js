@@ -10,39 +10,23 @@ const db = require('../../../db/knex');
 exports.addTracks = async (userId, trackList, sync = false, liked = false) => {
   // TODO: sync liked tracks
   if (trackList.length < 1) return;
-  const data = trackList.reduce(
-    (obj, track) => {
-      obj.albums.push(track.album);
-      obj.tracks.push({
-        id: track.id,
-        name: track.name,
-        artist: track.artist,
-        album_id: track.album_id,
-      });
-      obj.userTracks.push({
-        track_id: track.id,
-        user_id: userId,
-        liked,
-        added_at: track.added_at,
-      });
-      return obj;
-    },
-    {
-      albums: [],
-      tracks: [],
-      userTracks: [],
-    }
-  );
+  const albums = trackList.map(track => track.album);
+  const tracks = trackList.map(track => ({
+    id: track.id,
+    name: track.name,
+    artist: track.artist,
+    album_id: track.album_id,
+  }));
+  const userTracks = trackList.map(track => ({
+    track_id: track.id,
+    user_id: userId,
+    liked,
+    added_at: track.added_at,
+  }));
 
-  return db.transaction(async trx => {
-    await trx.raw('? ON CONFLICT (id) DO NOTHING', [
-      db('albums').insert(data.albums),
-    ]);
-    await trx.raw('? ON CONFLICT (id) DO NOTHING', [
-      db('tracks').insert(data.tracks),
-    ]);
-    await trx.raw('? ON CONFLICT (track_id, user_id) DO NOTHING', [
-      db('tracks_users').insert(data.userTracks),
-    ]);
+  await db.transaction(async tr => {
+    await tr('albums').bulkInsert(albums);
+    await tr('tracks').bulkInsert(tracks);
+    await tr('tracks_users').bulkInsert(userTracks);
   });
 };
