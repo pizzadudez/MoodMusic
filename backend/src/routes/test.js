@@ -2,7 +2,8 @@
 
 const router = require('express').Router();
 const LabelModel = require('../models/Label');
-const TrackModel = require('../models/Track');
+const TrackModel1 = require('../models/Track');
+const TrackModel = require('../models/knex/Track');
 const PlaylistModel = require('../models/Playlist');
 const TracksService = require('../services/tracks');
 const UserModel = require('../models/knex/User');
@@ -22,7 +23,10 @@ router.get('/', async (req, res, next) => {
     // const test = tracks.map(track => track.name);
     // res.json(test);
 
-    const test = await UserModel.data(req.user.userId);
+    console.time('tracks');
+    // const test = await TrackModel1.getAll();
+    const test = await TrackModel.getAllById(req.user.userId);
+    console.timeEnd('tracks');
     res.send(test);
   } catch (err) {
     console.log(err.stack);

@@ -1,5 +1,34 @@
 const db = require('../../../db/knex');
-const { chunkArray } = require('../../utils');
+
+/**
+ * Get user's playlists as an array.
+ * @param {string} userId
+ * @returns {Promise<object[]>}
+ */
+exports.getAll = userId => {
+  return db('playlists')
+    .select(
+      'id',
+      'name',
+      'description',
+      'track_count',
+      'updates',
+      'added_at',
+      'type',
+      'label_id'
+    )
+    .orderBy('added_at', 'desc')
+    .where({ user_id: userId });
+};
+/**
+ * Get user's playlists as a byId object.
+ * @param {string} userId
+ * @returns {Promise<Object<string,object>>}
+ */
+exports.getAllById = async userId => {
+  const playlists = await exports.getAll(userId);
+  return Object.fromEntries(playlists.map(el => [el.id, el]));
+};
 
 /**
  * - Upsert user's playlists

@@ -1,9 +1,10 @@
 const PlaylistModel = require('../models/Playlist');
+const PlaylistModel2 = require('../models/knex/Playlist');
 const PlaylistsService = require('../services/playlists');
 
 exports.getAll = async (req, res, next) => {
   try {
-    const playlistsById = await PlaylistModel.getAllById();
+    const playlistsById = await PlaylistModel2.getAllById(req.user.userId);
     res.status(200).json(playlistsById);
   } catch (err) {
     console.log(err.stack);
