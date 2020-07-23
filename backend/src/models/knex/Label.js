@@ -40,7 +40,6 @@ exports.getAllById = async userId => {
   const labels = await exports.get(userId);
   return Object.fromEntries(labels.map(el => [el.id, el]));
 };
-
 /**
  * Create new label.
  * @param {string} userId
@@ -90,7 +89,57 @@ exports.delete = async (userId, labelId) => {
   await db('labels').where({ id: labelId, user_id: userId }).del();
 };
 
+/**
+ * Handle adding Label-Track associations.
+ * @param {LabelTracks[]} list
+ */
+exports.addLabels = async list => {
+  // TODO: validate labels belong to user?
+  const data = list
+    .map(({ label_id, track_ids }) =>
+      track_ids.map(track_id => ({
+        label_id,
+        track_id,
+      }))
+    )
+    .flat();
+  await db('tracks_labels').bulkUpsert(data);
+};
+/**
+ * Handle removing Label-Track associations.
+ * @param {LabelTracks[]} list
+ */
+exports.removeLabels = async list => {
+  const data = list
+    .map(({ label_id, track_ids }) =>
+      track_ids.map(track_id => ({
+        label_id,
+        track_id,
+      }))
+    )
+    .flat();
+  // Delete associations using temporary table
+  await db.transaction(async tr => {
+    await tr.raw(`CREATE TEMPORARY TABLE del (
+      track_id varchar(255),
+      label_id integer
+    )`);
+    await tr('del').bulkUpsert(data);
+    await tr.raw(`DELETE FROM tracks_labels tl
+      USING del d
+      WHERE tl.track_id = d.track_id
+        AND tl.label_id = d.label_id`);
+    await tr.raw('DROP TABLE del');
+  });
+};
+
 // Helpers
+/**
+ * Check label against type.
+ * @param {string} id - labelId
+ * @param {string} type - labelType
+ * @returns {Promise<boolean>}
+ */
 const labelIsType = async (id, type) => {
   const rows = await db('labels').pluck('type').where('id', id);
   return rows[0] === type;

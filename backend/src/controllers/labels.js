@@ -1,10 +1,9 @@
-const LabelModel = require('../models/Label');
-const LabelModel2 = require('../models/knex/Label');
+const LabelModel = require('../models/knex/Label');
 const LabelsService = require('../services/labels');
 
 exports.getAll = async (req, res, next) => {
   try {
-    const labelsById = await LabelModel2.getAllById(req.user.userId);
+    const labelsById = await LabelModel.getAllById(req.user.userId);
     res.status(200).json(labelsById);
   } catch (err) {
     console.log(err.stack);
@@ -32,7 +31,7 @@ exports.removeLabels = async (req, res, next) => {
 
 exports.create = async (req, res, next) => {
   try {
-    const label = await LabelModel2.create(req.user.userId, req.body);
+    const label = await LabelModel.create(req.user.userId, req.body);
     res.status(200).json(label);
   } catch (err) {
     console.log(err.stack);
@@ -41,7 +40,7 @@ exports.create = async (req, res, next) => {
 };
 exports.update = async (req, res, next) => {
   try {
-    const label = await LabelModel2.update(
+    const label = await LabelModel.update(
       req.user.userId,
       req.params.id,
       req.body
@@ -52,6 +51,7 @@ exports.update = async (req, res, next) => {
     res.status(500).send('Internal server error.');
   }
 };
+// TODO
 exports.delete = async (req, res, next) => {
   try {
     await LabelsService.delete(req.params.id);

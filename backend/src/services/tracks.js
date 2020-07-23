@@ -15,7 +15,7 @@ const TrackModel2 = require('../models/knex/Track');
 exports.refreshTracks = async (userObj, sync = false) => {
   // Liked Tracks (last 50 / all)
   const likedTracks = await getLikedTracks(userObj, sync);
-  await TrackModel2.addTracks(userObj.userId, likedTracks, true, sync);
+  await TrackModel2.addTracks(userObj.userId, likedTracks, sync, true);
   // Playlist Tracks (refresh: mix, sync: mix + label)
   const playlists = await refreshPlaylists(userObj, sync);
   if (playlists.length) {

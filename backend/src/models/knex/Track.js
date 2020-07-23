@@ -103,8 +103,8 @@ exports.addTracks = async (userId, trackList, sync = false, liked = false) => {
   }));
 
   await db.transaction(async tr => {
-    await tr('albums').bulkInsert(albums);
-    await tr('tracks').bulkInsert(tracks);
-    await tr('tracks_users').bulkInsert(userTracks);
+    await tr('albums').bulkUpsert(albums);
+    await tr('tracks').bulkUpsert(tracks);
+    await tr('tracks_users').bulkUpsert(userTracks);
   });
 };

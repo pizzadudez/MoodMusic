@@ -13,9 +13,5 @@ declare module 'knex' {
       onConflict?: string,
       chunkSize?: number
     ): QueryBuilder<TRecord, TResult>;
-    bulkInsert<TRecord, TResult>(
-      data: object[],
-      chunkSize?: number
-    ): QueryBuilder<TRecord, TResult>;
   }
 }

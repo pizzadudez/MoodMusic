@@ -11,7 +11,7 @@ const DocsRouter = require('./docs');
 const app = express();
 app.use(express.static(path.join(__dirname, '../../frontend/build')));
 // Middleware
-app.use(express.urlencoded({ extended: true }));
+app.use(express.urlencoded({ extended: true, limit: '50mb' }));
 app.use(handleJson);
 app.set('json spaces', 2);
 // Routers

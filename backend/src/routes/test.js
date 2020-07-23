@@ -8,6 +8,7 @@ const TrackModel = require('../models/knex/Track');
 const PlaylistModel = require('../models/Playlist');
 const TracksService = require('../services/tracks');
 const UserModel = require('../models/knex/User');
+const db = require('../../db/knex');
 
 router.get('/', async (req, res, next) => {
   try {
@@ -27,7 +28,8 @@ router.get('/', async (req, res, next) => {
 
     // const test = await TrackModel1.getAll();
     // const test = await TrackModel.getAllById(req.user.userId);
-    const test = await LabelModel.getAllById(req.user.userId);
+    // const test = await LabelModel.getAllById(req.user.userId);
+
     console.timeEnd('getTest');
     res.send(test);
   } catch (err) {
