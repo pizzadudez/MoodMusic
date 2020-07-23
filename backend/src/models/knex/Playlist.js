@@ -18,7 +18,7 @@ exports.getAll = userId => {
       'label_id'
     )
     .orderBy('added_at', 'desc')
-    .where({ user_id: userId });
+    .where('user_id', userId);
 };
 /**
  * Get user's playlists as a byId object.

@@ -29,10 +29,6 @@ exports.up = function (knex) {
     })
     .createTable('playlists', table => {
       table.string('id').primary().unique().notNullable();
-      table.string('name').notNullable();
-      table.string('description');
-      table.integer('track_count');
-      table.string('snapshot_id');
       table
         .enum('type', ['untracked', 'mix', 'label', 'deleted'], {
           useNative: true,
@@ -40,6 +36,10 @@ exports.up = function (knex) {
         })
         .notNullable()
         .defaultTo('untracked');
+      table.string('name').notNullable();
+      table.string('description');
+      table.integer('track_count');
+      table.string('snapshot_id');
       table.boolean('updates').notNullable().defaultTo(true);
       table.timestamp('added_at').notNullable().defaultTo(knex.fn.now());
 

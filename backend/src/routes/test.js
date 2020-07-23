@@ -1,7 +1,8 @@
 // Used to test different services or model methods
 
 const router = require('express').Router();
-const LabelModel = require('../models/Label');
+const LabelModel1 = require('../models/Label');
+const LabelModel = require('../models/knex/Label');
 const TrackModel1 = require('../models/Track');
 const TrackModel = require('../models/knex/Track');
 const PlaylistModel = require('../models/Playlist');
@@ -10,6 +11,7 @@ const UserModel = require('../models/knex/User');
 
 router.get('/', async (req, res, next) => {
   try {
+    console.time('getTest');
     // const test = await TracksService.refreshTracks(req.user);
     // res.status(200).json(test);
 
@@ -23,10 +25,10 @@ router.get('/', async (req, res, next) => {
     // const test = tracks.map(track => track.name);
     // res.json(test);
 
-    console.time('tracks');
     // const test = await TrackModel1.getAll();
-    const test = await TrackModel.getAllById(req.user.userId);
-    console.timeEnd('tracks');
+    // const test = await TrackModel.getAllById(req.user.userId);
+    const test = await LabelModel.getAllById(req.user.userId);
+    console.timeEnd('getTest');
     res.send(test);
   } catch (err) {
     console.log(err.stack);

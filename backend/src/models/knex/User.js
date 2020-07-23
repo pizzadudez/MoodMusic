@@ -1,5 +1,4 @@
 const db = require('../../../db/knex');
-const knex = require('../../../db/knex');
 
 /**
  * Create new user or update refresh_token for existing entry.
@@ -27,9 +26,9 @@ exports.update = async (id, data) => {
     .where({ id })
     .update({
       ...rest,
-      ...(refreshed_at && { refreshed_at: knex.fn.now() }),
-      ...(synced_at && { synced_at: knex.fn.now() }),
-      updated_at: knex.fn.now(),
+      ...(refreshed_at && { refreshed_at: db.fn.now() }),
+      ...(synced_at && { synced_at: db.fn.now() }),
+      updated_at: db.fn.now(),
     });
 };
 /**

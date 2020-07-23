@@ -1,9 +1,10 @@
 const LabelModel = require('../models/Label');
+const LabelModel2 = require('../models/knex/Label');
 const LabelsService = require('../services/labels');
 
 exports.getAll = async (req, res, next) => {
   try {
-    const labelsById = await LabelModel.getAllById();
+    const labelsById = await LabelModel2.getAllById(req.user.userId);
     res.status(200).json(labelsById);
   } catch (err) {
     console.log(err.stack);
@@ -31,7 +32,7 @@ exports.removeLabels = async (req, res, next) => {
 
 exports.create = async (req, res, next) => {
   try {
-    const label = await LabelModel.create(req.body);
+    const label = await LabelModel2.create(req.user.userId, req.body);
     res.status(200).json(label);
   } catch (err) {
     console.log(err.stack);
@@ -40,7 +41,11 @@ exports.create = async (req, res, next) => {
 };
 exports.update = async (req, res, next) => {
   try {
-    const label = await LabelModel.update(req.params.id, req.body);
+    const label = await LabelModel2.update(
+      req.user.userId,
+      req.params.id,
+      req.body
+    );
     res.status(200).json(label);
   } catch (err) {
     console.log(err.stack);

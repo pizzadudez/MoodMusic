@@ -14,7 +14,7 @@ exports.getAll = async userId => {
       db.raw('ARRAY_AGG(label_id ORDER BY tracks_labels.added_at) labels')
     )
     .groupBy('track_id')
-    .where({ user_id: userId })
+    .where('user_id', userId)
     .then(rows =>
       Object.fromEntries(rows.map(row => [row.track_id, row.labels]))
     );
@@ -27,12 +27,12 @@ exports.getAll = async userId => {
       )
     )
     .groupBy('track_id')
-    .where({ user_id: userId })
+    .where('user_id', userId)
     .then(rows =>
       Object.fromEntries(rows.map(row => [row.track_id, row.playlists]))
     );
   // Get user's tracks; add label and playlist id fields
-  const tracks = await db('tracks_users')
+  const rows = await db('tracks_users')
     .leftJoin('tracks', 'tracks.id', 'tracks_users.track_id')
     .leftJoin('albums', 'albums.id', 'tracks.album_id')
     .select(
@@ -44,33 +44,28 @@ exports.getAll = async userId => {
       'liked',
       'albums.id as album_id',
       'albums.name as album_name',
-      'albums.small as album_small',
-      'albums.medium as album_medium',
-      'albums.large as album_large'
+      'albums.small',
+      'albums.medium',
+      'albums.large'
     )
     .orderBy('added_at', 'desc')
-    .where({ user_id: userId })
-    .then(rows =>
-      rows.map(row => ({
-        id: row.id,
-        name: row.name,
-        artist: row.artist,
-        added_at: row.added_at,
-        rating: row.rating,
-        liked: row.liked,
-        album: {
-          id: row.album_id,
-          name: row.album_name,
-          images: {
-            small: row.album_small,
-            medium: row.album_medium,
-            large: row.album_large,
-          },
+    .where('user_id', userId);
+  const tracks = rows.map(
+    ({ album_id, album_name, small, medium, large, ...rest }) => ({
+      ...rest,
+      playlist_ids: trackPlaylists[rest.id] || [],
+      label_ids: trackLabels[rest.id] || [],
+      album: {
+        id: album_id,
+        name: album_name,
+        images: {
+          small,
+          medium,
+          large,
         },
-        playlist_ids: trackPlaylists[row.id] || [],
-        label_ids: trackLabels[row.id] || [],
-      }))
-    );
+      },
+    })
+  );
 
   return tracks;
 };

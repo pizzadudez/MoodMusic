@@ -25,7 +25,7 @@ export default memo(() => {
         <NavLink to="/labels">
           <Button>Labels</Button>
         </NavLink>
-        <NavLink to="tests">
+        <NavLink to="/tests">
           <Button>Tests</Button>
         </NavLink>
       </Menu>

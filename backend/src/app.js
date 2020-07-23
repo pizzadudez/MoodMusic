@@ -18,6 +18,8 @@ app.set('json spaces', 2);
 app.use('/authorize', AuthRouter);
 app.use('/api', ApiRouter);
 app.use('/docs', DocsRouter);
+// Let React Router handle all remaining routes
+app.use('*', express.static(path.join(__dirname, '../../frontend/build')));
 
 const port = PORT || 1000;
 app.listen(port, () => {
