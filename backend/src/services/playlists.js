@@ -1,9 +1,15 @@
-const request = require('request-promise-native');
-const PlaylistModel = require('../models/Playlist');
-const TrackModel = require('../models/Track');
-const LabelModel = require('../models/Label');
+const { default: axios } = require('axios');
+const PlaylistModel = require('../models/knex/Playlist');
+const TrackModel = require('../models/knex/Track');
+const LabelModel = require('../models/knex/Label');
 const TracksService = require('./tracks');
 
+const request = require('request-promise-native');
+const PlaylistModel1 = require('../models/Playlist');
+const TrackModel1 = require('../models/Track');
+const LabelModel1 = require('../models/Label');
+
+// TODO: REFACTOR TDAY
 /**
  * Add tracks to Spotify playlists and associations on MoodMusic
  * @param {UserObj} userObj
@@ -14,7 +20,7 @@ exports.addTracks = async (userObj, data) => {
     addPlaylistTracks(userObj, playlistTracks)
   );
   const responses = await Promise.all(requests);
-  await PlaylistModel.addPlaylists(data);
+  await PlaylistModel1.addPlaylists(data);
 
   const playlistsUpdates = responses
     .filter(([snapshotId]) => snapshotId !== undefined)
@@ -23,14 +29,14 @@ exports.addTracks = async (userObj, data) => {
       snapshot_id: snapshotId,
       track_count: newTrackCount,
     }));
-  await PlaylistModel.updateMany(playlistsUpdates);
+  await PlaylistModel1.updateMany(playlistsUpdates);
 };
 exports.removeTracks = async (userObj, data) => {
   const requests = data.map(playlistTracks =>
     removePlaylistTracks(userObj, playlistTracks)
   );
   const responses = await Promise.all(requests);
-  await PlaylistModel.removePlaylists(data);
+  await PlaylistModel1.removePlaylists(data);
 
   const playlistsUpdates = responses
     .filter(([snapshotId]) => snapshotId !== undefined)
@@ -39,13 +45,14 @@ exports.removeTracks = async (userObj, data) => {
       snapshot_id: snapshotId,
       track_count: newTrackCount,
     }));
-  await PlaylistModel.updateMany(playlistsUpdates);
+  await PlaylistModel1.updateMany(playlistsUpdates);
 };
 
+// TODO: Playlist CRUD
 exports.create = async (userObj, data) => {
   // handle auto-generated <Label Playlists>
   if (!data.name && data.type === 'label') {
-    const label = await LabelModel.getOne(data.label_id);
+    const label = await LabelModel1.getOne(data.label_id);
     data.name = `[ ${label.name} ]`;
     data.description =
       `Label playlist for [ ${label.name} ]. ` +
@@ -73,7 +80,7 @@ exports.create = async (userObj, data) => {
   };
   // Add labelTracks to labelPlaylist
   if (data.type === 'label' && data.label_id) {
-    const labelTracks = await LabelModel.getTracks(data.label_id);
+    const labelTracks = await LabelModel1.getTracks(data.label_id);
     const playlistTracks = {
       playlist_id: response.id,
       track_ids: labelTracks,
@@ -87,15 +94,15 @@ exports.create = async (userObj, data) => {
       playlistData.snapshot_id = snapshotId;
       playlistData.track_count = newTrackCount;
     }
-    const playlist = await PlaylistModel.create(playlistData);
-    await PlaylistModel.addPlaylists([playlistTracks], true);
+    const playlist = await PlaylistModel1.create(playlistData);
+    await PlaylistModel1.addPlaylists([playlistTracks], true);
     return playlist;
   }
 
-  return PlaylistModel.create(playlistData);
+  return PlaylistModel1.create(playlistData);
 };
 exports.update = async (userObj, id, data) => {
-  const { type, label_id } = await PlaylistModel.getOne(id);
+  const { type, label_id } = await PlaylistModel1.getOne(id);
 
   // Changing the playlist type comes with multiple side-effects
   switch (data.type) {
@@ -105,7 +112,7 @@ exports.update = async (userObj, id, data) => {
         data.label_id = null;
       }
       // Remove playlist-tracks associations (but leave tracks)
-      await PlaylistModel.removePlaylistTracks(id);
+      await PlaylistModel1.removePlaylistTracks(id);
       break;
     }
     case 'mix': {
@@ -115,25 +122,25 @@ exports.update = async (userObj, id, data) => {
         data.label_id = null;
       }
       // sync/import
-      await TrackModel.addTracks(tracks);
-      await PlaylistModel.addPlaylists([{ playlist_id: id, tracks }], true);
+      await TrackModel1.addTracks(tracks);
+      await PlaylistModel1.addPlaylists([{ playlist_id: id, tracks }], true);
       break;
     }
     case 'label': {
       const tracks = await TracksService.getPlaylistTracks(id, true);
       if (type === 'label' && data.label_id) {
         // Remove prev label from tracks and add new one
-        await LabelModel.removeLabelTracks(label_id);
+        await LabelModel1.removeLabelTracks(label_id);
       }
       // sync/import
-      await TrackModel.addTracks(tracks);
-      await PlaylistModel.addPlaylists([{ playlist_id: id, tracks }], true);
-      await LabelModel.addLabels([
+      await TrackModel1.addTracks(tracks);
+      await PlaylistModel1.addPlaylists([{ playlist_id: id, tracks }], true);
+      await LabelModel1.addLabels([
         { label_id: data.label_id, track_ids: tracks.map(t => t.id) },
       ]);
 
       // Add all tracks with label_id (not in playlist) to playlist
-      const labelTracks = await LabelModel.getTracks(data.label_id);
+      const labelTracks = await LabelModel1.getTracks(data.label_id);
       if (labelTracks.length) {
         const newPlaylistTracks = {
           playlist_id: id,
@@ -145,7 +152,7 @@ exports.update = async (userObj, id, data) => {
         );
         data.snapshot_id = snapshotId;
         data.track_count = newTrackCount;
-        await PlaylistModel.addPlaylists([newPlaylistTracks], true);
+        await PlaylistModel1.addPlaylists([newPlaylistTracks], true);
       }
       break;
     }
@@ -162,7 +169,7 @@ exports.update = async (userObj, id, data) => {
       json: true,
     });
   }
-  return PlaylistModel.update(id, data);
+  return PlaylistModel1.update(id, data);
 };
 exports.delete = async (userObj, id) => {
   await request.delete({
@@ -170,10 +177,10 @@ exports.delete = async (userObj, id) => {
     headers: { Authorization: 'Bearer ' + userObj.accessToken },
     json: true,
   });
-  await PlaylistModel.removePlaylistTracks(id);
-  await PlaylistModel.updateMany([{ id, type: 'deleted', label_id: null }]);
+  await PlaylistModel1.removePlaylistTracks(id);
+  await PlaylistModel1.updateMany([{ id, type: 'deleted', label_id: null }]);
 
-  return PlaylistModel.getOne(id);
+  return PlaylistModel1.getOne(id);
 };
 exports.restore = async (userObj, id) => {
   await request.put({
@@ -181,13 +188,14 @@ exports.restore = async (userObj, id) => {
     headers: { Authorization: 'Bearer ' + userObj.accessToken },
     json: true,
   });
-  await PlaylistModel.updateMany([{ id, type: 'untracked' }]);
+  await PlaylistModel1.updateMany([{ id, type: 'untracked' }]);
 
-  return PlaylistModel.getOne(id);
+  return PlaylistModel1.getOne(id);
 };
 
+// TODO: Playlist handle LOCAL-SPOTIFY syncing
 exports.syncTracks = async (userObj, id) => {
-  const { type, label_id } = await PlaylistModel.getOne(id);
+  const { type, label_id } = await PlaylistModel1.getOne(id);
   const tracks = await TracksService.getPlaylistTracks(userObj, id, true);
 
   const associations = [
@@ -200,19 +208,19 @@ exports.syncTracks = async (userObj, id) => {
       }),
     },
   ];
-  await TrackModel.addTracks(tracks);
+  await TrackModel1.addTracks(tracks);
   if (type !== 'untracked') {
-    await PlaylistModel.addPlaylists(associations, true);
+    await PlaylistModel1.addPlaylists(associations, true);
     if (type === 'label') {
-      await LabelModel.removeLabelTracks(label_id);
-      await LabelModel.addLabels(associations);
+      await LabelModel1.removeLabelTracks(label_id);
+      await LabelModel1.addLabels(associations);
     }
   }
-  await PlaylistModel.updateMany([{ id, updates: 0 }]);
-  return PlaylistModel.getOne(id);
+  await PlaylistModel1.updateMany([{ id, updates: 0 }]);
+  return PlaylistModel1.getOne(id);
 };
 exports.revertTracks = async (userObj, playlistId) => {
-  const trackIds = await PlaylistModel.getTracks(playlistId);
+  const trackIds = await PlaylistModel1.getTracks(playlistId);
   let uris = trackIds.map(id => 'spotify:track:' + id);
 
   let replace = true; // first 100 tracks use the replace endpoint
@@ -234,7 +242,7 @@ exports.revertTracks = async (userObj, playlistId) => {
       snapshotId = response.snapshot_id;
     }
   }
-  await PlaylistModel.updateMany([
+  await PlaylistModel1.updateMany([
     {
       id: playlistId,
       updates: 0,
@@ -242,12 +250,13 @@ exports.revertTracks = async (userObj, playlistId) => {
       snapshot_id: snapshotId,
     },
   ]);
-  return PlaylistModel.getOne(playlistId);
+  return PlaylistModel1.getOne(playlistId);
 };
 
+// TODO: REFACTOR TDAY
 // Helpers
 const addPlaylistTracks = async (userObj, { playlist_id, track_ids }) => {
-  const hashMap = await PlaylistModel.getTracks(playlist_id, true);
+  const hashMap = await PlaylistModel1.getTracks(playlist_id, true);
   let uris = track_ids
     .filter(id => !hashMap[id])
     .map(id => 'spotify:track:' + id);
@@ -268,7 +277,7 @@ const addPlaylistTracks = async (userObj, { playlist_id, track_ids }) => {
   return [snapshotId, newTrackCount];
 };
 const removePlaylistTracks = async (userObj, { playlist_id, track_ids }) => {
-  const hashMap = await PlaylistModel.getTracks(playlist_id, true);
+  const hashMap = await PlaylistModel1.getTracks(playlist_id, true);
   let uris = track_ids
     .filter(id => hashMap[id])
     .map(id => 'spotify:track:' + id);

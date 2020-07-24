@@ -13,5 +13,10 @@ declare module 'knex' {
       onConflict?: string,
       chunkSize?: number
     ): QueryBuilder<TRecord, TResult>;
+    bulkDelete<TRecord, TResult>(
+      columns: string[],
+      data: object[],
+      chunkSize?: number
+    ): QueryBuilder<TRecord, TResult>;
   }
 }

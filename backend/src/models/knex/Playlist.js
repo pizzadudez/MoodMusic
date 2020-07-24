@@ -128,19 +128,7 @@ exports.removePlaylists = async list => {
       }))
     )
     .flat();
-  // Delete associations using temp table
-  await db.transaction(async tr => {
-    await tr.raw(`CREATE TEMPORARY TABLE del (
-      playlist_id varchar(255),
-      track_id varchar(255)
-    )`);
-    await tr('del').bulkUpsert(data);
-    await tr.raw(`DELETE FROM tracks_playlists tp
-      USING del d
-      WHERE tp.playlist_id = d.playlist_id
-        AND tp.track_id = d.track_id`);
-    await tr.raw('DROP TABLE del');
-  });
+  await db('tracks_playlists').bulkDelete(Object.keys(data[0]), data);
 };
 
 // Helpers

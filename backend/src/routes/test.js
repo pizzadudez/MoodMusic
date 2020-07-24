@@ -29,7 +29,12 @@ router.get('/', async (req, res, next) => {
     // const test = await TrackModel1.getAll();
     // const test = await TrackModel.getAllById(req.user.userId);
     // const test = await LabelModel.getAllById(req.user.userId);
-    await TrackModel.update(req.user.userId, '123', { rating: 5 });
+    const data = [
+      { track_id: 1, playlist_id: 'aaa' },
+      { track_id: 3, playlist_id: 'baa' },
+    ];
+    await db('tracks_playlists').bulkDelete(['playlist_id', 'track_id'], data);
+
     console.timeEnd('getTest');
     res.send(test);
   } catch (err) {

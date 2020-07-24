@@ -5,7 +5,7 @@ require('dotenv-safe').config({
 const Knex = require('knex');
 const environment = process.env.NODE_ENV || 'development';
 const config = require('../knexfile')[environment];
-const { chunkArray } = require('../src/utils');
+const { chunkArray, generateValueBindings } = require('../src/utils');
 
 // Extend Knex QueryBuilder with custom methods
 Knex.QueryBuilder.extend('bulkUpsert', async function (
@@ -22,14 +22,45 @@ Knex.QueryBuilder.extend('bulkUpsert', async function (
   };
 
   return runInTransaction(async tr => {
+    /* Local transaction does not have the initial QueryBuilder's table,
+    we must add it manually. */
     if (!isTransaction) {
-      /* Local transaction does not have the initial QueryBuilder's table,
-      we must add it manually. */
       tr = tr(this._single.table);
     }
     const chunks = chunkArray(data, chunkSize);
     for (const chunk of chunks) {
       await tr.client.raw('? ?', [tr.insert(chunk), tr.client.raw(onConflict)]);
+    }
+  });
+});
+Knex.QueryBuilder.extend('bulkDelete', async function (
+  columns,
+  data,
+  chunkSize = 1000
+) {
+  const isTransaction = this.client.transacting ? true : false;
+  const runInTransaction = callback => {
+    if (isTransaction) {
+      return callback(this);
+    }
+    return this.client.transaction(callback);
+  };
+
+  return runInTransaction(async tr => {
+    const tableName = this._single.table;
+    const columnNames = columns.join(', ');
+    const whereConditions = columns
+      .map(c => `${tableName}.${c}::text = tmp.${c}::text`)
+      .join(' AND ');
+
+    const chunks = chunkArray(data, chunkSize);
+    for (const chunk of chunks) {
+      const valueBindings = generateValueBindings(columns.length, chunk.length);
+      const values = chunk.map(el => columns.map(c => el[c])).flat();
+      const stmt = `DELETE FROM ${tableName} 
+        USING (VALUES ${valueBindings}) AS tmp(${columnNames})
+        WHERE ${whereConditions}`;
+      await tr.client.raw(stmt, values);
     }
   });
 });
