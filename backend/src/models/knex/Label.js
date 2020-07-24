@@ -118,17 +118,17 @@ exports.removeLabels = async list => {
       }))
     )
     .flat();
-  // Delete associations using temporary table
+  // Delete associations using temp table
   await db.transaction(async tr => {
     await tr.raw(`CREATE TEMPORARY TABLE del (
-      track_id varchar(255),
-      label_id integer
+      label_id integer,
+      track_id varchar(255)
     )`);
     await tr('del').bulkUpsert(data);
     await tr.raw(`DELETE FROM tracks_labels tl
       USING del d
-      WHERE tl.track_id = d.track_id
-        AND tl.label_id = d.label_id`);
+      WHERE tl.label_id = d.label_id
+        AND tl.track_id = d.track_id`);
     await tr.raw('DROP TABLE del');
   });
 };

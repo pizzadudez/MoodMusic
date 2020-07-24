@@ -44,19 +44,17 @@ exports.update;
  */
 exports.refresh = async (userId, playlistList, sync = false) => {
   if (playlistList.length < 1) return [];
-  await db.raw(
-    `? ON CONFLICT (id) DO UPDATE SET
-        snapshot_id = EXCLUDED.snapshot_id,
-        track_count = EXCLUDED.track_count,
-        updates = true
-      WHERE playlists.snapshot_id != EXCLUDED.snapshot_id`,
-    [db('playlists').insert(playlistList)]
-  );
+  const onConflict = `ON CONFLICT (id) DO UPDATE SET
+    snapshot_id = EXCLUDED.snapshot_id,
+    track_count = EXCLUDED.track_count,
+    updates = true
+    WHERE playlists.snapshot_id != EXCLUDED.snapshot_id`;
+  await db('playlists').bulkUpsert(playlistList, onConflict);
   // Select playlitIds with changes
   const condition = sync
     ? "type IN ('mix', 'label')"
     : "type IN ('mix') AND updates = TRUE";
-  const playlistIds = db('playlists')
+  const playlistIds = await db('playlists')
     .select(['id', 'track_count'])
     .whereRaw(condition)
     .andWhere('user_id', userId);
@@ -71,6 +69,7 @@ exports.refresh = async (userId, playlistList, sync = false) => {
  */
 exports.addPlaylists = async (userId, list, sync = false) => {
   // TODO: also set playlists updates to FALSE if data comes from refresh
+  // ?Maybe put that in tracksService.refresh?
   const lastPositions = await getLastPositions(userId);
   const data = list
     .map(({ playlist_id, tracks, track_ids }) => {
@@ -116,8 +115,33 @@ exports.addPlaylists = async (userId, list, sync = false) => {
     }
   });
 };
-
-exports.removePlaylists;
+/**
+ * Handle removing Playlist-Track associations.
+ * @param {PlaylistTracks[]} list
+ */
+exports.removePlaylists = async list => {
+  const data = list
+    .map(({ playlist_id, track_ids }) =>
+      track_ids.map(track_id => ({
+        playlist_id,
+        track_id,
+      }))
+    )
+    .flat();
+  // Delete associations using temp table
+  await db.transaction(async tr => {
+    await tr.raw(`CREATE TEMPORARY TABLE del (
+      playlist_id varchar(255),
+      track_id varchar(255)
+    )`);
+    await tr('del').bulkUpsert(data);
+    await tr.raw(`DELETE FROM tracks_playlists tp
+      USING del d
+      WHERE tp.playlist_id = d.playlist_id
+        AND tp.track_id = d.track_id`);
+    await tr.raw('DROP TABLE del');
+  });
+};
 
 // Helpers
 /**
