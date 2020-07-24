@@ -29,7 +29,6 @@ Knex.QueryBuilder.extend('bulkUpsert', async function (
     }
     const chunks = chunkArray(data, chunkSize);
     for (const chunk of chunks) {
-      console.log(chunk.length);
       await tr.client.raw('? ?', [tr.insert(chunk), tr.client.raw(onConflict)]);
     }
   });

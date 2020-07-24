@@ -17,19 +17,20 @@ exports.register = async (id, refresh_token) => {
  * Update user record.
  * @param {string} id - userId
  * @param {object} data
+ * @param {string=} data.refresh_token
  * @param {boolean=} data.refreshed_at
  * @param {boolean=} data.synced_at
  */
 exports.update = async (id, data) => {
-  const { refreshed_at, synced_at, ...rest } = data;
+  const { refreshed_at, synced_at, refresh_token } = data;
   await db('users')
-    .where({ id })
     .update({
-      ...rest,
+      refresh_token,
       ...(refreshed_at && { refreshed_at: db.fn.now() }),
       ...(synced_at && { synced_at: db.fn.now() }),
       updated_at: db.fn.now(),
-    });
+    })
+    .where({ id });
 };
 /**
  * Retrieve userData

@@ -30,6 +30,10 @@ exports.getAllById = async userId => {
   return Object.fromEntries(playlists.map(el => [el.id, el]));
 };
 
+exports.create;
+
+exports.update;
+
 /**
  * - Upsert user's playlists
  * - Return list of playlists to be refreshed/synced.
@@ -112,6 +116,8 @@ exports.addPlaylists = async (userId, list, sync = false) => {
     }
   });
 };
+
+exports.removePlaylists;
 
 // Helpers
 /**

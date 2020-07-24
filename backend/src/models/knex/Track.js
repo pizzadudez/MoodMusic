@@ -79,6 +79,21 @@ exports.getAllById = async userId => {
   return Object.fromEntries(tracks.map(el => [el.id, el]));
 };
 /**
+ * Update user's track.
+ * @param {string} userId
+ * @param {string} trackId
+ * @param {object} data
+ * @param {boolean=} data.liked
+ * @param {number=} data.rating
+ */
+exports.update = async (userId, trackId, data) => {
+  const { liked, rating } = data;
+  await db('tracks_users')
+    .update({ liked, rating })
+    .where({ track_id: trackId, user_id: userId });
+};
+
+/**
  * Insert new Tracks, Albums and Track-User associations
  * @param {string} userId
  * @param {ParsedTrack[]} trackList - List of parsed Spotify TrackObjects.

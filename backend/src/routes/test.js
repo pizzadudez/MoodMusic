@@ -29,7 +29,7 @@ router.get('/', async (req, res, next) => {
     // const test = await TrackModel1.getAll();
     // const test = await TrackModel.getAllById(req.user.userId);
     // const test = await LabelModel.getAllById(req.user.userId);
-
+    await TrackModel.update(req.user.userId, '123', { rating: 5 });
     console.timeEnd('getTest');
     res.send(test);
   } catch (err) {

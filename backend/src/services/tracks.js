@@ -1,9 +1,7 @@
 const { default: axios } = require('axios');
-const request = require('request-promise-native');
 const UserModel = require('../models/knex/User');
 const PlaylistModel = require('../models/knex/Playlist');
-const TrackModel = require('../models/Track');
-const TrackModel2 = require('../models/knex/Track');
+const TrackModel = require('../models/knex/Track');
 
 /**
  * Refresh or sync user's tracks:
@@ -15,7 +13,7 @@ const TrackModel2 = require('../models/knex/Track');
 exports.refreshTracks = async (userObj, sync = false) => {
   // Liked Tracks (last 50 / all)
   const likedTracks = await getLikedTracks(userObj, sync);
-  await TrackModel2.addTracks(userObj.userId, likedTracks, sync, true);
+  await TrackModel.addTracks(userObj.userId, likedTracks, sync, true);
   // Playlist Tracks (refresh: mix, sync: mix + label)
   const playlists = await refreshPlaylists(userObj, sync);
   if (playlists.length) {
@@ -24,7 +22,7 @@ exports.refreshTracks = async (userObj, sync = false) => {
     );
     const trackLists = await Promise.all(trackRequests);
     // Add Tracks
-    await TrackModel2.addTracks(userObj.userId, trackLists.flat(), sync);
+    await TrackModel.addTracks(userObj.userId, trackLists.flat(), sync);
     // Add Playlist-Track associations
     const playlistTracksList = playlists.map(({ id }, idx) => ({
       playlist_id: id,
@@ -68,15 +66,22 @@ exports.getPlaylistTracks = async (userObj, id, trackCount = undefined) => {
 
   return parseTracks([...tracks, ...otherTracks]);
 };
-// TODO
+/**
+ * Change user's track "liked song" state.
+ * @param {UserObj} userObj
+ * @param {string} id - trackId
+ * @param {boolean=} toggle - Like/Unlike
+ */
 exports.toggleLike = async (userObj, id, toggle = true) => {
-  await request[toggle ? 'put' : 'delete']({
+  await axios({
     url: 'https://api.spotify.com/v1/me/tracks',
-    headers: { Authorization: 'Bearer ' + userObj.accessToken },
-    body: { ids: [id] },
-    json: true,
+    method: toggle ? 'put' : 'delete',
+    data: { ids: [id] },
+    headers: {
+      Authorization: 'Bearer ' + userObj.accessToken,
+    },
   });
-  await TrackModel.update(id, { liked: toggle });
+  await TrackModel.update(userObj.userId, id, { liked: toggle });
 };
 
 // Helpers
