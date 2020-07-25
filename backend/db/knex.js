@@ -38,8 +38,8 @@ Knex.QueryBuilder.extend('bulkUpsert', async function (
   });
 });
 Knex.QueryBuilder.extend('bulkDelete', async function (
-  columns,
   data,
+  columns = ['id'],
   chunkSize = 1000
 ) {
   const isTransaction = this.client.transacting ? true : false;
@@ -53,8 +53,9 @@ Knex.QueryBuilder.extend('bulkDelete', async function (
   return runInTransaction(async tr => {
     const tableName = this._single.table;
     const columnNames = columns.join(', ');
-    const whereConditions = columns
-      .map(c => `${tableName}.${c}::text = tmp.${c}::text`)
+    const columnDataTypes = getPGDataTypes(data[0]);
+    const whereCondition = columns
+      .map(c => `${tableName}.${c} = tmp.${c}::${columnDataTypes[c]}`)
       .join(' AND ');
 
     const chunks = chunkArray(data, chunkSize);
@@ -63,7 +64,7 @@ Knex.QueryBuilder.extend('bulkDelete', async function (
       const values = chunk.map(el => columns.map(c => el[c])).flat();
       const stmt = `DELETE FROM ${tableName} 
         USING (VALUES ${valueBindings}) AS tmp(${columnNames})
-        WHERE ${whereConditions}`;
+        WHERE ${whereCondition}`;
       await tr.client.raw(stmt, values);
     }
   });
@@ -85,15 +86,15 @@ Knex.QueryBuilder.extend('bulkUpdate', async function (
   return runInTransaction(async tr => {
     const tableName = this._single.table;
     const columns = Object.keys(data[0]);
-    const columnDataTypes = getPGDataTypes(data[0]);
     const columnNames = columns.join(', ');
+    const columnDataTypes = getPGDataTypes(data[0]);
     const whereCondition = whereColumns
-      .map(c => `"${tableName}"."${c}" = "tmp"."${c}"::${columnDataTypes[c]}`)
+      .map(c => `${tableName}.${c} = tmp.${c}::${columnDataTypes[c]}`)
       .join(' AND ');
     if (!updateSetStatement) {
       const setColumns = columns.filter(c => !whereColumns.includes(c));
       updateSetStatement = setColumns
-        .map(c => `"${c}" = "tmp"."${c}"::${columnDataTypes[c]}`)
+        .map(c => `${c} = tmp.${c}::${columnDataTypes[c]}`)
         .join(', ');
     }
 

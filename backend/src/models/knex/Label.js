@@ -118,7 +118,7 @@ exports.removeLabels = async list => {
       }))
     )
     .flat();
-  await db('tracks_labels').bulkDelete(Object.keys(data[0]), data);
+  await db('tracks_labels').bulkDelete(data, Object.keys(data[0]));
 };
 
 // Helpers

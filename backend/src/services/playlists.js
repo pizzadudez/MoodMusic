@@ -190,7 +190,7 @@ exports.restore = async (userObj, id) => {
     json: true,
   });
   await PlaylistModel1.updateMany([{ id, type: 'untracked' }]);
-
+  // TODO: remove this and put it in track controller
   return PlaylistModel1.getOne(id);
 };
 

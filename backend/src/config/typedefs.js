@@ -57,6 +57,7 @@
 /**
  * @typedef {object} PlaylistUpdates
  * @property {string} id
+ * @property {boolean=} updates
  * @property {string=} snapshot_id
  * @property {number=} track_count_delta
  */

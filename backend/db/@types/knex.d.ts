@@ -20,8 +20,8 @@ declare module 'knex' {
      * @param [chunkSize] - optional, defaults to 1000
      */
     bulkDelete<TRecord, TResult>(
-      columns: string[],
       data: object[],
+      columns?: string[],
       chunkSize?: number
     ): QueryBuilder<TRecord, TResult>;
     /**

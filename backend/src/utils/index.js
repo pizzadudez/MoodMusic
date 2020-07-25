@@ -22,8 +22,10 @@ exports.generateValueBindings = (columnCount, valuesCount) => {
     .join(', ');
 };
 /**
- *
+ * Generate a map of Postgres data types for an object's properties.
+ * {<key, value>} => {<key, PGDataType>}
  * @param {object} obj
+ * @returns {Object<string, string>}
  */
 exports.getPGDataTypes = obj => {
   const pgDataType = variable => {
@@ -37,8 +39,7 @@ exports.getPGDataTypes = obj => {
     }
   };
 
-  const map = Object.fromEntries(
+  return Object.fromEntries(
     Object.entries(obj).map(([key, val]) => [key, pgDataType(val)])
   );
-  return map;
 };

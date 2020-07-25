@@ -35,12 +35,13 @@ exports.create;
 exports.update;
 
 /**
- *
+ * Bulk update playlists. Can update track_count by passing
+ * track_count_delta in the PlaylistUpdate object
  * @param {PlaylistUpdates[]} updateList - List of { id, ...changes }
  */
 exports.updateMany = async updateList => {
-  const trackCountDelta = updateList[0].track_count_delta ? true : false;
-  if (trackCountDelta) {
+  if (updateList[0].track_count_delta) {
+    // Custom update, we have to change track_count based on it current value.
     const updateSetStatement = `"snapshot_id" = "tmp"."snapshot_id",
       "track_count" = "track_count" + "tmp"."track_count_delta"::integer`;
     await db('playlists').bulkUpdate(updateList, undefined, updateSetStatement);
@@ -143,7 +144,7 @@ exports.removePlaylists = async list => {
       }))
     )
     .flat();
-  await db('tracks_playlists').bulkDelete(Object.keys(data[0]), data);
+  await db('tracks_playlists').bulkDelete(data, Object.keys(data[0]));
 };
 
 // Helpers
