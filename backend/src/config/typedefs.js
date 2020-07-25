@@ -4,6 +4,13 @@
  * @property {string} UserObj.userId
  */
 /**
+ * @typedef {object} UserData
+ * @property {string} refresh_token
+ * @property {string} refreshed_at
+ * @property {string} synced_at
+ */
+
+/**
  * @typedef {object} ParsedTrack
  * @property {string} id
  * @property {string} name
@@ -29,6 +36,7 @@
  * @property {number} track_count
  * @property {string} user_id
  */
+
 /**
  * @typedef {object} PlaylistTracks
  * @property {string} playlist_id
@@ -36,13 +44,19 @@
  * @property {{id: string; added_at: string}[]=} tracks
  */
 /**
+ * @typedef {object} PlaylistTrackIds
+ * @property {string} playlist_id
+ * @property {string[]} track_ids
+ */
+/**
  * @typedef {object} LabelTracks
  * @property {number} label_id
  * @property {string[]=} track_ids
  */
+
 /**
- * @typedef {object} userData
- * @property {string} refresh_token
- * @property {string} refreshed_at
- * @property {string} synced_at
+ * @typedef {object} PlaylistUpdates
+ * @property {string} id
+ * @property {string=} snapshot_id
+ * @property {number=} track_count_delta
  */

@@ -103,9 +103,7 @@ exports.addLabels = async list => {
       }))
     )
     .flat();
-  console.time('add');
   await db('tracks_labels').bulkUpsert(data);
-  console.timeEnd('add');
 };
 /**
  * Handle removing Label-Track associations.
@@ -120,9 +118,7 @@ exports.removeLabels = async list => {
       }))
     )
     .flat();
-  console.time('remove');
   await db('tracks_labels').bulkDelete(Object.keys(data[0]), data);
-  console.timeEnd('remove');
 };
 
 // Helpers

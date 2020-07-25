@@ -3,52 +3,53 @@ const PlaylistModel = require('../models/knex/Playlist');
 const TrackModel = require('../models/knex/Track');
 const LabelModel = require('../models/knex/Label');
 const TracksService = require('./tracks');
+const { chunkArray } = require('../utils');
 
 const request = require('request-promise-native');
 const PlaylistModel1 = require('../models/Playlist');
 const TrackModel1 = require('../models/Track');
 const LabelModel1 = require('../models/Label');
 
-// TODO: REFACTOR TDAY
 /**
- * Add tracks to Spotify playlists and associations on MoodMusic
+ * - Add tracks to Spotify playlists
+ * - Add Track-Playlist associations in our database
+ * - Update Playlists with new info
  * @param {UserObj} userObj
- * @param {{playlist_id: string, track_ids: string[]}[]} data
+ * @param {PlaylistTrackIds[]} data
  */
 exports.addTracks = async (userObj, data) => {
-  const requests = data.map(playlistTracks =>
-    addPlaylistTracks(userObj, playlistTracks)
+  // Spotify: add tracks to playlists in parallel
+  const spotifyRequests = data.map(playlistTracks =>
+    updateSpotifyPlaylistTracks(userObj, playlistTracks)
   );
-  const responses = await Promise.all(requests);
-  await PlaylistModel1.addPlaylists(data);
-
-  const playlistsUpdates = responses
-    .filter(([snapshotId]) => snapshotId !== undefined)
-    .map(([snapshotId, newTrackCount], idx) => ({
-      id: data[idx].playlist_id,
-      snapshot_id: snapshotId,
-      track_count: newTrackCount,
-    }));
-  await PlaylistModel1.updateMany(playlistsUpdates);
+  // Get back new snapshot_ids and track_count_delta
+  const playlistUpdates = await Promise.all(spotifyRequests);
+  // Add associations to our database
+  await PlaylistModel.addPlaylists(userObj.userId, data);
+  // Update playlists with new info
+  await PlaylistModel.updateMany(playlistUpdates);
 };
+/**
+ * - Remove tracks from Spotify playlists
+ * - Remove Track-Playlist associations in our database
+ * - Update Playlists with new info
+ * @param {UserObj} userObj
+ * @param {PlaylistTrackIds[]} data
+ */
 exports.removeTracks = async (userObj, data) => {
-  const requests = data.map(playlistTracks =>
-    removePlaylistTracks(userObj, playlistTracks)
+  // Spotify: remove tracks to playlists in parallel
+  const spotifyRequests = data.map(playlistTracks =>
+    updateSpotifyPlaylistTracks(userObj, playlistTracks, true)
   );
-  const responses = await Promise.all(requests);
-  await PlaylistModel1.removePlaylists(data);
-
-  const playlistsUpdates = responses
-    .filter(([snapshotId]) => snapshotId !== undefined)
-    .map(([snapshotId, newTrackCount], idx) => ({
-      id: data[idx].playlist_id,
-      snapshot_id: snapshotId,
-      track_count: newTrackCount,
-    }));
-  await PlaylistModel1.updateMany(playlistsUpdates);
+  // Get back new snapshot_ids and track_count_delta
+  const playlistUpdates = await Promise.all(spotifyRequests);
+  // Remove associations from our database
+  await PlaylistModel.removePlaylists(data);
+  // Update playlists with new info
+  await PlaylistModel.updateMany(playlistUpdates);
 };
 
-// TODO: Playlist CRUD
+// =================== TODO: Playlist CRUD
 exports.create = async (userObj, data) => {
   // handle auto-generated <Label Playlists>
   if (!data.name && data.type === 'label') {
@@ -193,7 +194,7 @@ exports.restore = async (userObj, id) => {
   return PlaylistModel1.getOne(id);
 };
 
-// TODO: Playlist handle LOCAL-SPOTIFY syncing
+// ============== TODO: Playlist handle LOCAL-SPOTIFY syncing
 exports.syncTracks = async (userObj, id) => {
   const { type, label_id } = await PlaylistModel1.getOne(id);
   const tracks = await TracksService.getPlaylistTracks(userObj, id, true);
@@ -253,47 +254,49 @@ exports.revertTracks = async (userObj, playlistId) => {
   return PlaylistModel1.getOne(playlistId);
 };
 
-// TODO: REFACTOR TDAY
 // Helpers
-const addPlaylistTracks = async (userObj, { playlist_id, track_ids }) => {
-  const hashMap = await PlaylistModel1.getTracks(playlist_id, true);
-  let uris = track_ids
-    .filter(id => !hashMap[id])
-    .map(id => 'spotify:track:' + id);
-  const newTrackCount = Object.keys(hashMap).length + uris.length;
-
-  // 100 tracks per request
-  let snapshotId;
-  while (uris.length) {
-    const batch = uris.splice(0, 100);
-    const response = await request.post({
-      url: 'https://api.spotify.com/v1/playlists/' + playlist_id + '/tracks',
-      headers: { Authorization: 'Bearer ' + userObj.accessToken },
-      body: { uris: batch },
-      json: true,
+/**
+ * Handle adding/removing tracks in Spotify playlist.
+ * @param {UserObj} userObj
+ * @param {PlaylistTrackIds} data
+ * @param {boolean=} remove - Default false, pass true to reverse operation.
+ * @returns {Promise<PlaylistUpdates>}
+ */
+const updateSpotifyPlaylistTracks = async (
+  userObj,
+  { playlist_id, track_ids },
+  remove = false
+) => {
+  const trackUris = track_ids.map(id => `spotify:track:${id}`);
+  const url = `https://api.spotify.com/v1/playlists/${playlist_id}/tracks`;
+  const headers = {
+    Authorization: 'Bearer ' + userObj.accessToken,
+  };
+  let snapshot_id;
+  const chunks = chunkArray(trackUris, 100);
+  for (const chunk of chunks) {
+    const { data } = await axios({
+      url,
+      method: remove ? 'delete' : 'post',
+      data: { uris: chunk },
+      headers,
     });
-    snapshotId = response.snapshot_id;
+    snapshot_id = data.snapshot_id;
   }
-  return [snapshotId, newTrackCount];
+  // TODO! snapshot_id might be undefined (v2 had a check for this)
+  return {
+    id: playlist_id,
+    snapshot_id,
+    track_count_delta: track_ids.length * (remove ? -1 : 1),
+  };
 };
-const removePlaylistTracks = async (userObj, { playlist_id, track_ids }) => {
-  const hashMap = await PlaylistModel1.getTracks(playlist_id, true);
-  let uris = track_ids
-    .filter(id => hashMap[id])
-    .map(id => 'spotify:track:' + id);
-  const newTrackCount = Object.keys(hashMap).length - uris.length;
-
-  // 100 tracks per request
-  let snapshotId;
-  while (uris.length) {
-    const batch = uris.splice(0, 100);
-    const response = await request.delete({
-      url: 'https://api.spotify.com/v1/playlists/' + playlist_id + '/tracks',
-      headers: { Authorization: 'Bearer ' + userObj.accessToken },
-      body: { uris: batch },
-      json: true,
-    });
-    snapshotId = response.snapshot_id;
-  }
-  return [snapshotId, newTrackCount];
+/**
+ * Remove duplicate tracks from Spotify playlist.
+ * @param {UserObj} userObj
+ * @param {string} id - playlistId
+ * @param {string[]=} trackIds - Optional, for avoiding more Spotify requests.
+ */
+const removePlaylistDuplicates = async (userObj, id, trackIds) => {
+  // TODO!, use this when updating playlist to tracked or when syncing
+  // a single playlist
 };

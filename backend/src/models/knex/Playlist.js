@@ -35,6 +35,21 @@ exports.create;
 exports.update;
 
 /**
+ *
+ * @param {PlaylistUpdates[]} updateList - List of { id, ...changes }
+ */
+exports.updateMany = async updateList => {
+  const trackCountDelta = updateList[0].track_count_delta ? true : false;
+  if (trackCountDelta) {
+    const updateSetStatement = `"snapshot_id" = "tmp"."snapshot_id",
+      "track_count" = "track_count" + "tmp"."track_count_delta"::integer`;
+    await db('playlists').bulkUpdate(updateList, undefined, updateSetStatement);
+  } else {
+    await db('playlists').bulkUpdate(updateList);
+  }
+};
+
+/**
  * - Upsert user's playlists
  * - Return list of playlists to be refreshed/synced.
  * @param {string} userId

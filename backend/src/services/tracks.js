@@ -29,6 +29,9 @@ exports.refreshTracks = async (userObj, sync = false) => {
       tracks: trackLists[idx],
     }));
     await PlaylistModel.addPlaylists(userObj.userId, playlistTracksList, sync);
+    // Playlists have been refreshed/synced, set updates to false
+    const playlistUpdates = playlists.map(({ id }) => ({ id, updates: false }));
+    await PlaylistModel.updateMany(playlistUpdates);
   }
   // Update timestamps
   await UserModel.update(userObj.userId, {

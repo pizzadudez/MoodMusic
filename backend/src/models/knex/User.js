@@ -33,9 +33,9 @@ exports.update = async (id, data) => {
     .where({ id });
 };
 /**
- * Retrieve userData
+ * Retrieve UserData
  * @param {string} id - userId
- * @returns {Promise<userData>}
+ * @returns {Promise<UserData>}
  */
 exports.data = async id => {
   const rows = await db('users')

@@ -11,7 +11,7 @@ exports.getAll = async userId => {
     .leftJoin('labels', 'labels.id', 'tracks_labels.label_id')
     .select(
       'track_id',
-      db.raw('ARRAY_AGG(label_id ORDER BY tracks_labels.added_at) labels')
+      db.raw('ARRAY_AGG(label_id ORDER BY added_at, created_at) labels')
     )
     .groupBy('track_id')
     .where('user_id', userId)
