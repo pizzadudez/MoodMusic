@@ -13,7 +13,7 @@ const db = require('../../db/knex');
 
 router.get('/', async (req, res, next) => {
   try {
-    let response = 'ok';
+    let response;
     console.time('getTest');
     // =======================TEST CODE HERE=======================
     // const data = [
@@ -25,18 +25,11 @@ router.get('/', async (req, res, next) => {
     //   "verbose" = "labels"."verbose" || "tmp"."verbose"`;
     // await db('labels').bulkUpdate(data, undefined, customUpdateSet);
 
-    const data = [
-      {
-        id: '0UgkVNe1k74eWQwaudS8Ob',
-        snapshot_id: 'abcd',
-        track_count_delta: 1,
-      },
-    ];
-    await PlaylistModel.updateMany(data);
+    response = await LabelModel.getTrackIds(20);
 
     // ============================================================
     console.timeEnd('getTest');
-    res.send(response);
+    res.send(response || 'ok');
   } catch (err) {
     console.log(err.stack);
     res.sendStatus(500);

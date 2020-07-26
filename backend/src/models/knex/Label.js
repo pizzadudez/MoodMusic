@@ -120,6 +120,18 @@ exports.removeLabels = async list => {
     .flat();
   await db('tracks_labels').bulkDelete(data, Object.keys(data[0]));
 };
+/**
+ * Get all trackIds associated with a label.
+ * @param {number} labelId
+ * @returns {Promise<string[]>}
+ */
+exports.getTrackIds = async labelId => {
+  const rows = db('tracks_labels')
+    .pluck('track_id')
+    .where('label_id', labelId)
+    .orderBy('added_at', 'desc');
+  return rows;
+};
 
 // Helpers
 /**

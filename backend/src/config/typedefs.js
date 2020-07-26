@@ -61,3 +61,16 @@
  * @property {string=} snapshot_id
  * @property {number=} track_count_delta
  */
+
+/**
+ * @typedef {object} NewPlaylist
+ * @property {string} type - enum: ['label', 'mix']
+ * @property {string=} name
+ * @property {string=} description
+ * @property {number=} label_id
+ * @property {string=} id
+ * @property {string=} snapshot_id
+ * @property {number=} label_id
+ * @property {number=} track_count
+ * @property {string=} user_id
+ */

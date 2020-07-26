@@ -29,11 +29,37 @@ exports.getAllById = async userId => {
   const playlists = await exports.getAll(userId);
   return Object.fromEntries(playlists.map(el => [el.id, el]));
 };
+/**
+ * Get playlist byId
+ * @param {string} id - playlistId
+ * @returns {Promise<object>}
+ */
+exports.getOne = async id => {
+  const rows = await db('playlists')
+    .select(
+      'id',
+      'name',
+      'description',
+      'track_count',
+      'updates',
+      'added_at',
+      'type',
+      'label_id'
+    )
+    .where('id', id);
+  return rows[0];
+};
+/**
+ * Create new playlist.
+ * @param {NewPlaylist} data
+ * @returns {Promise<object>} - Created playlist
+ */
+exports.create = async data => {
+  await db('playlists').insert(data);
+  return exports.getOne(data.id);
+};
 
-exports.create;
-
-exports.update;
-
+exports.update = () => {};
 /**
  * Bulk update playlists. Can update track_count by passing
  * track_count_delta in the PlaylistUpdate object
@@ -84,8 +110,6 @@ exports.refresh = async (userId, playlistList, sync = false) => {
  * @param {boolean=} sync
  */
 exports.addPlaylists = async (userId, list, sync = false) => {
-  // TODO: also set playlists updates to FALSE if data comes from refresh
-  // ?Maybe put that in tracksService.refresh?
   const lastPositions = await getLastPositions(userId);
   const data = list
     .map(({ playlist_id, tracks, track_ids }) => {
@@ -155,6 +179,7 @@ exports.removePlaylists = async list => {
  * @returns {Promise<Object<string, number>>}
  */
 const getLastPositions = async userId => {
+  // TODO: refactor to get playlist_ids instead of userId
   const rows = await db('tracks_playlists')
     .select('playlist_id as id')
     .max('position as last_pos')
