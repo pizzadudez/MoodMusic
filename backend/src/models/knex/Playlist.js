@@ -51,15 +51,21 @@ exports.getOne = async id => {
 };
 /**
  * Create new playlist.
+ * @param {string} userId
  * @param {NewPlaylist} data
- * @returns {Promise<object>} - Created playlist
+ * @returns {Promise<object>} Created playlist
  */
-exports.create = async data => {
-  await db('playlists').insert(data);
+exports.create = async (userId, data) => {
+  await db('playlists').insert({ ...data, user_id: userId, updates: false });
   return exports.getOne(data.id);
 };
-
-exports.update = () => {};
+/**
+ * Update existing playlist.
+ * @param {string} userId
+ * @param {string} playlistId
+ * @param {*} data
+ */
+exports.update = async (userId, playlistId, data) => {};
 /**
  * Bulk update playlists. Can update track_count by passing
  * track_count_delta in the PlaylistUpdate object

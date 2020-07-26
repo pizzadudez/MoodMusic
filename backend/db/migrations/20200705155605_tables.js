@@ -38,8 +38,8 @@ exports.up = function (knex) {
         .defaultTo('untracked');
       table.string('name').notNullable();
       table.string('description');
-      table.integer('track_count');
-      table.string('snapshot_id');
+      table.integer('track_count').notNullable().defaultTo(0);
+      table.string('snapshot_id').notNullable();
       table.boolean('updates').notNullable().defaultTo(true);
       table.timestamp('added_at').notNullable().defaultTo(knex.fn.now());
 

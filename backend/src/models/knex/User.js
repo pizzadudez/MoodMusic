@@ -59,7 +59,7 @@ exports.checkLabels = async (userId, labelIds) => {
 /**
  * Check if all playlistIds belong to the user.
  * @param {string} userId
- * @param {number[]} playlistIds
+ * @param {string[]} playlistIds
  * @returns {Promise<boolean>}
  */
 exports.checkPlaylists = async (userId, playlistIds) => {
