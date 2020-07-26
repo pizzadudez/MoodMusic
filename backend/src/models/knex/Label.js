@@ -94,7 +94,6 @@ exports.delete = async (userId, labelId) => {
  * @param {LabelTracks[]} list
  */
 exports.addLabels = async list => {
-  // TODO: validate labels belong to user?
   const data = list
     .map(({ label_id, track_ids }) =>
       track_ids.map(track_id => ({

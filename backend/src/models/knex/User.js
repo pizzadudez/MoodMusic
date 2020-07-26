@@ -43,3 +43,28 @@ exports.data = async id => {
     .where({ id });
   return rows[0];
 };
+
+/**
+ * Check if all labelIds belong to the user.
+ * @param {string} userId
+ * @param {number[]} labelIds
+ * @returns {Promise<boolean>}
+ */
+exports.checkLabels = async (userId, labelIds) => {
+  const ids = await db('labels').pluck('id').where('user_id', userId);
+  const userLabels = Object.fromEntries(ids.map(id => [id, true]));
+
+  return labelIds.every(id => userLabels[id]);
+};
+/**
+ * Check if all playlistIds belong to the user.
+ * @param {string} userId
+ * @param {number[]} playlistIds
+ * @returns {Promise<boolean>}
+ */
+exports.checkPlaylists = async (userId, playlistIds) => {
+  const ids = await db('playlists').pluck('id').where('user_id', userId);
+  const userPlaylists = Object.fromEntries(ids.map(id => [id, true]));
+
+  return playlistIds.every(id => userPlaylists[id]);
+};

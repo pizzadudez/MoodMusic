@@ -1,5 +1,9 @@
 const Joi = require('@hapi/joi');
-const schema = {
+const UserModel = require('../models/knex/User');
+
+const FORBIDDEN = `Forbidden: Request contains resource identifiers\
+ that do not belong to the user.`;
+const validationSchema = {
   addLabels: Joi.array().items(
     Joi.object()
       .keys({
@@ -79,8 +83,32 @@ const schema = {
   }),
 };
 
-const validate = field => (req, res, next) => {
-  const { error } = schema[field].validate(req.body, { abortEarly: false });
+const authorizeResource = type => async (req, res, next) => {
+  const { userId } = req.user;
+  let authorized = true;
+
+  switch (type) {
+    case 'addLabels': {
+      const labelIds = req.body.map(({ label_id }) => label_id);
+      authorized = await UserModel.checkLabels(userId, labelIds);
+      break;
+    }
+    case 'addPlaylists': {
+      const playlistIds = req.body.map(({ playlist_id }) => playlist_id);
+      authorized = await UserModel.checkPlaylists(userId, playlistIds);
+      break;
+    }
+  }
+
+  if (authorized) next();
+  else res.status(403).json({ message: FORBIDDEN });
+};
+
+const validate = type => async (req, res, next) => {
+  // TODO: sometimes we'll validate req.params, we wont need Joi validation
+  const { error } = validationSchema[type].validate(req.body, {
+    abortEarly: false,
+  });
   if (error) {
     console.log(error);
     const { details } = error;
@@ -88,7 +116,7 @@ const validate = field => (req, res, next) => {
     console.log('Validation error: ', message);
     res.status(422).send(message);
   } else {
-    next();
+    return authorizeResource(type)(req, res, next);
   }
 };
 
