@@ -97,17 +97,12 @@ exports.create = async (userObj, data) => {
  * @param {PlaylistUpdates} data
  */
 exports.update = async (userObj, id, data) => {
-  /**
-   * - EXTRA: removeDupes here???
-   * - get playlist (type, label_id)
-   * - handle type changes
-   * - spotify request for name/description change
-   */
+  // TODO?? remove playlist duplicates here??
   const { type, label_id } = await PlaylistModel.getOne(userObj.userId, id);
 
-  // Changing the playlist type comes with multiple side-effects
+  // Changing playlist type comes with multiple side-effects
   if (data.type) {
-    // Handle changes on existing label playlist
+    // Handle changes to existing label playlist
     if (type === 'label') {
       if (data.type === 'label' && data.label_id) {
         // Remove old label from playlist's tracks
@@ -127,10 +122,13 @@ exports.update = async (userObj, id, data) => {
         type: data.type,
         label_id: data.label_id,
       });
+      data.updates = false;
       if (data.type === 'label') {
-        // TODO!! what if playlist contains tracks with label
-        // will there be duplicates after spotify req??
-        const trackIds = await LabelModel.getTrackIds(data.label_id);
+        // Playlist inherit label's tracks
+        const trackIds = await LabelModel.getTrackIdsNotInPlaylist(
+          data.label_id,
+          id
+        );
         if (trackIds.length) {
           const playlistTrackIds = {
             playlist_id: id,
@@ -144,10 +142,6 @@ exports.update = async (userObj, id, data) => {
           data.track_count_delta = playlistChanges.track_count_delta;
           await PlaylistModel.addPlaylists(userObj.userId, [playlistTrackIds]);
         }
-        // Add tracks from label_id (label_id might have extra tracks not added)
-        //  updateSpotifyPlaylistTracks
-        //    update snapshot_id and track_count
-        //  PlaylistModel.addPlaylists
       }
     }
   }
@@ -261,8 +255,9 @@ exports.restore = async (userObj, id) => {
 };
 
 /**
- * Sync a playlist to match it's Spotify state.
- * Pass updateData to sync when updating playlist type.
+ * - Sync a playlist to match it's Spotify state.
+ * - Import tracks from 'untracked' playlist.
+ * - Pass updateData to sync when updating playlist type.
  * @param {UserObj} userObj
  * @param {string} id - playlistId
  * @param {object} [updateData] - Sync for playlist type update.
@@ -273,25 +268,41 @@ exports.syncTracks = async (userObj, id, updateData = undefined) => {
   const { type, label_id } =
     updateData || (await PlaylistModel.getOne(userObj.userId, id));
 
-  // Import tracks from untracked playlist (only add tracks)
-  // OR add new tracks when updates = TRUE
   const tracks = await TracksService.getPlaylistTracks(userObj, id);
   await TrackModel.addTracks(userObj.userId, tracks);
+  // If type is 'untracked' stop here, only import tracks
   if (['mix', 'label'].includes(type)) {
     // Add new playlist-track associations
     const playlistTracks = { playlist_id: id, tracks };
     await PlaylistModel.addPlaylists(userObj.userId, [playlistTracks], true);
+    // Sync 'label' playlists by matching tracks-playlists with tracks-labels
     if (type === 'label') {
-      // TODO? remove all labels before readding?
-      // if user removes track from spotifyPL, should we remove label from track?
-      // ??? maybe add syncing to addLabels
-      const trackIds = tracks.map(t => t.id);
-      await LabelModel.syncPlaylistLabels(id, label_id, trackIds);
+      // Remove labels if not update syncing
+      if (!updateData) {
+        const idsToRemove = await LabelModel.getTrackIdsNotInPlaylist(
+          label_id,
+          id
+        );
+        if (idsToRemove.length) {
+          const labelTracksToRemove = {
+            label_id,
+            track_ids: idsToRemove,
+          };
+          await LabelModel.removeLabels([labelTracksToRemove]);
+        }
+      }
+      // Upsert playlist's tracks to playlist's label
+      const labelTracks = {
+        label_id,
+        track_ids: tracks.map(t => t.id),
+      };
+      await LabelModel.addLabels([labelTracks]);
     }
   }
-  // Playlist synced, set updates to false
-  // TODO? dont update here if we have cachedData (it means we're not done)
-  await PlaylistModel.update(userObj.userId, id, { updates: false });
+  // If syncing on 'playlist type update' update playlist there instead
+  if (!updateData) {
+    await PlaylistModel.update(userObj.userId, id, { updates: false });
+  }
 };
 
 exports.syncTracks1 = async (userObj, id) => {

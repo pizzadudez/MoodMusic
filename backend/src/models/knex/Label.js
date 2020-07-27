@@ -120,28 +120,7 @@ exports.removeLabels = async list => {
     .flat();
   await db('tracks_labels').bulkDelete(data, Object.keys(data[0]));
 };
-/**
- * Sync 'label' playlists by matching tracks-playlists with tracks-labels.
- * @param {string} playlistId
- * @param {number} labelId
- * @param {string[]} trackIds
- */
-exports.syncPlaylistLabels = async (playlistId, labelId, trackIds) => {
-  // Get tracks_ids associated with label but not playlist.
-  const trackIdsToRemove = await db('tracks_labels as tl')
-    .leftJoin('tracks_playlists as tp', 'tp.track_id', 'tl.track_id')
-    .where('tl.label_id', labelId)
-    .whereRaw('tp.playlist_id IS DISTINCT FROM ?', [playlistId])
-    .pluck('tl.track_id');
-  // Remove extra tracks
-  if (trackIds.length) {
-    await exports.removeLabels([
-      { label_id: labelId, track_ids: trackIdsToRemove },
-    ]);
-  }
-  // Upsert all label playlist's tracks.
-  await exports.addLabels([{ label_id: labelId, track_ids: trackIds }]);
-};
+
 /**
  * Get all trackIds associated with a label.
  * @param {number} labelId
@@ -153,6 +132,19 @@ exports.getTrackIds = async labelId => {
     .where('label_id', labelId)
     .orderBy('added_at', 'desc');
   return rows;
+};
+/**
+ * Get tracks_ids associated with label but not playlist.
+ * @param {number} labelId
+ * @param {string} playlistId
+ * @returns {Promise<string[]>}
+ */
+exports.getTrackIdsNotInPlaylist = async (labelId, playlistId) => {
+  return db('tracks_labels as tl')
+    .leftJoin('tracks_playlists as tp', 'tp.track_id', 'tl.track_id')
+    .where('tl.label_id', labelId)
+    .whereRaw('tp.playlist_id IS DISTINCT FROM ?', [playlistId])
+    .pluck('tl.track_id');
 };
 
 // Helpers

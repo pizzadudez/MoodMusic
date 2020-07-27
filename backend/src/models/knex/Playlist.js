@@ -68,6 +68,14 @@ exports.create = async (userId, data) => {
  * @returns {Promise<object>} Updated playlist
  */
 exports.update = async (userId, id, data) => {
+  if (data.track_count_delta) {
+    data.track_count = db.raw(`?? + ?`, [
+      'track_count',
+      data.track_count_delta,
+    ]);
+    delete data.track_count_delta;
+  }
+
   await db('playlists').update(data).where({ id, user_id: userId });
   return exports.getOne(userId, id);
 };

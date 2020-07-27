@@ -57,9 +57,9 @@
 /**
  * @typedef {object} PlaylistChanges - Internal changes to playlists.
  * @property {string} id
- * @property {boolean=} updates
  * @property {string=} snapshot_id
  * @property {number=} track_count_delta
+ * @property {boolean=} updates
  */
 /**
  * @typedef {object} PlaylistUpdates - Updates made by user.
@@ -69,6 +69,7 @@
  * @property {number=} label_id
  * @property {string=} snapshot_id
  * @property {number=} track_count_delta
+ * @property {boolean=} updates
  */
 /**
  * @typedef {object} NewPlaylist
