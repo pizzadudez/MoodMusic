@@ -72,7 +72,8 @@ exports.restore = async (req, res, next) => {
 
 exports.syncTracks = async (req, res, next) => {
   try {
-    const playlist = await PlaylistsService.syncTracks(req.user, req.params.id);
+    await PlaylistsService.syncTracks(req.user, req.params.id);
+    const playlist = await PlaylistModel.getOne(req.user.userId, req.params.id);
     res.status(200).json(playlist);
   } catch (err) {
     console.log(err.stack);
@@ -81,10 +82,8 @@ exports.syncTracks = async (req, res, next) => {
 };
 exports.revertTracks = async (req, res, next) => {
   try {
-    const playlist = await PlaylistsService.revertTracks(
-      req.user,
-      req.params.id
-    );
+    await PlaylistsService.revertTracks(req.user, req.params.id);
+    const playlist = await PlaylistModel.getOne(req.user.userId, req.params.id);
     res.status(200).send(playlist);
   } catch (err) {
     console.log(err.stack);

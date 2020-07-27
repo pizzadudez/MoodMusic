@@ -51,17 +51,25 @@
 /**
  * @typedef {object} LabelTracks
  * @property {number} label_id
- * @property {string[]=} track_ids
+ * @property {string[]} track_ids
  */
 
 /**
- * @typedef {object} PlaylistUpdates
+ * @typedef {object} PlaylistChanges - Internal changes to playlists.
  * @property {string} id
  * @property {boolean=} updates
  * @property {string=} snapshot_id
  * @property {number=} track_count_delta
  */
-
+/**
+ * @typedef {object} PlaylistUpdates - Updates made by user.
+ * @property {string=} name
+ * @property {string=} description
+ * @property {string=} type - enum: ['untracked', 'label', 'mix', 'deleted']
+ * @property {number=} label_id
+ * @property {string=} snapshot_id
+ * @property {number=} track_count_delta
+ */
 /**
  * @typedef {object} NewPlaylist
  * @property {string} type - enum: ['label', 'mix']

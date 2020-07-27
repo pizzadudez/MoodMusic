@@ -97,10 +97,10 @@ exports.update = async (userId, trackId, data) => {
  * Insert new Tracks, Albums and Track-User associations
  * @param {string} userId
  * @param {ParsedTrack[]} trackList - List of parsed Spotify TrackObjects.
- * @param {boolean=} sync
  * @param {boolean=} liked - Set true if the list of tracks is from Liked Songs.
+ * @param {boolean=} sync - Set true to also sync liked tracks
  */
-exports.addTracks = async (userId, trackList, sync = false, liked = false) => {
+exports.addTracks = async (userId, trackList, liked = false, sync = false) => {
   // TODO: sync liked tracks
   if (trackList.length < 1) return;
   const albums = trackList.map(track => track.album);

@@ -44,7 +44,7 @@ exports.getAllById = async userId => {
  * Create new label.
  * @param {string} userId
  * @param {object} data
- * @returns {Promise<object>} Created labelObject
+ * @returns {Promise<object>} Created label
  */
 exports.create = async (userId, data) => {
   if (data.type === 'subgenre') {
@@ -63,10 +63,11 @@ exports.create = async (userId, data) => {
 /**
  * Update existing label.
  * @param {string} userId
- * @param {number} labelId
+ * @param {number} id - labelId
  * @param {object} data
+ * @returns {Promise<object>} Updated label
  */
-exports.update = async (userId, labelId, data) => {
+exports.update = async (userId, id, data) => {
   if (data.type === 'subgenre') {
     // Validate parent type
     const validParent = await labelIsType(data.parent_id, 'genre');
@@ -76,9 +77,9 @@ exports.update = async (userId, labelId, data) => {
   }
   await db('labels')
     .update({ ...data, updated_at: db.fn.now() })
-    .where({ id: labelId, user_id: userId });
+    .where({ id, user_id: userId });
 
-  return exports.get(userId, labelId);
+  return exports.get(userId, id);
 };
 /**
  * Delete label byId.
@@ -118,6 +119,28 @@ exports.removeLabels = async list => {
     )
     .flat();
   await db('tracks_labels').bulkDelete(data, Object.keys(data[0]));
+};
+/**
+ * Sync 'label' playlists by matching tracks-playlists with tracks-labels.
+ * @param {string} playlistId
+ * @param {number} labelId
+ * @param {string[]} trackIds
+ */
+exports.syncPlaylistLabels = async (playlistId, labelId, trackIds) => {
+  // Get tracks_ids associated with label but not playlist.
+  const trackIdsToRemove = await db('tracks_labels as tl')
+    .leftJoin('tracks_playlists as tp', 'tp.track_id', 'tl.track_id')
+    .where('tl.label_id', labelId)
+    .whereRaw('tp.playlist_id IS DISTINCT FROM ?', [playlistId])
+    .pluck('tl.track_id');
+  // Remove extra tracks
+  if (trackIds.length) {
+    await exports.removeLabels([
+      { label_id: labelId, track_ids: trackIdsToRemove },
+    ]);
+  }
+  // Upsert all label playlist's tracks.
+  await exports.addLabels([{ label_id: labelId, track_ids: trackIds }]);
 };
 /**
  * Get all trackIds associated with a label.

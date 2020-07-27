@@ -31,10 +31,11 @@ exports.getAllById = async userId => {
 };
 /**
  * Get playlist byId
+ * @param {string} userId
  * @param {string} id - playlistId
  * @returns {Promise<object>}
  */
-exports.getOne = async id => {
+exports.getOne = async (userId, id) => {
   const rows = await db('playlists')
     .select(
       'id',
@@ -46,7 +47,7 @@ exports.getOne = async id => {
       'type',
       'label_id'
     )
-    .where('id', id);
+    .where({ id, user_id: userId });
   return rows[0];
 };
 /**
@@ -57,19 +58,23 @@ exports.getOne = async id => {
  */
 exports.create = async (userId, data) => {
   await db('playlists').insert({ ...data, user_id: userId, updates: false });
-  return exports.getOne(data.id);
+  return exports.getOne(userId, data.id);
 };
 /**
  * Update existing playlist.
  * @param {string} userId
- * @param {string} playlistId
- * @param {*} data
+ * @param {string} id - playlistId
+ * @param {object} data
+ * @returns {Promise<object>} Updated playlist
  */
-exports.update = async (userId, playlistId, data) => {};
+exports.update = async (userId, id, data) => {
+  await db('playlists').update(data).where({ id, user_id: userId });
+  return exports.getOne(userId, id);
+};
 /**
  * Bulk update playlists. Can update track_count by passing
  * track_count_delta in the PlaylistUpdate object
- * @param {PlaylistUpdates[]} updateList - List of { id, ...changes }
+ * @param {PlaylistChanges[]} updateList - List of { id, ...changes }
  */
 exports.updateMany = async updateList => {
   if (updateList[0].track_count_delta) {

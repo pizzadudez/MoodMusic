@@ -13,7 +13,7 @@ const TrackModel = require('../models/knex/Track');
 exports.refreshTracks = async (userObj, sync = false) => {
   // Liked Tracks (last 50 / all)
   const likedTracks = await getLikedTracks(userObj, sync);
-  await TrackModel.addTracks(userObj.userId, likedTracks, sync, true);
+  await TrackModel.addTracks(userObj.userId, likedTracks, true, sync);
   // Playlist Tracks (refresh: mix, sync: mix + label)
   const playlists = await refreshPlaylists(userObj, sync);
   if (playlists.length) {
@@ -22,7 +22,7 @@ exports.refreshTracks = async (userObj, sync = false) => {
     );
     const trackLists = await Promise.all(trackRequests);
     // Add Tracks
-    await TrackModel.addTracks(userObj.userId, trackLists.flat(), sync);
+    await TrackModel.addTracks(userObj.userId, trackLists.flat());
     // Add Playlist-Track associations
     const playlistTracksList = playlists.map(({ id }, idx) => ({
       playlist_id: id,

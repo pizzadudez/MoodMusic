@@ -8,6 +8,7 @@ const TrackModel = require('../models/knex/Track');
 const PlaylistModel1 = require('../models/Playlist');
 const PlaylistModel = require('../models/knex/Playlist');
 const TracksService = require('../services/tracks');
+const PlaylistsService = require('../services/playlists');
 const UserModel = require('../models/knex/User');
 const db = require('../../db/knex');
 
@@ -25,7 +26,26 @@ router.get('/', async (req, res, next) => {
     //   "verbose" = "labels"."verbose" || "tmp"."verbose"`;
     // await db('labels').bulkUpdate(data, undefined, customUpdateSet);
 
-    response = await LabelModel.getTrackIds(20);
+    // await PlaylistsService.update(req.user.userId, '0UgkVNe1k74eWQwaudS8Ob', {
+    //   description: '123',
+    // });
+
+    // const qb = db.raw(`SELECT tl.track_id FROM tracks_labels tl
+    // LEFT JOIN tracks_playlists tp ON tl.track_id = tp.track_id
+    // WHERE tl.label_id = 1
+    // AND tp.playlist_id IS DISTINCT FROM '0UgkVNe1k74eWQwaudS8Ob'`);
+    // const { rows } = await qb;
+    // response = rows;
+
+    const qb = db('tracks_labels as tl')
+      .pluck('tl.track_id')
+      .leftJoin('tracks_playlists as tp', 'tp.track_id', 'tl.track_id')
+      .where('tl.label_id', 7)
+      .whereRaw('tp.playlist_id IS DISTINCT FROM ?', [
+        '3u3C3gwuWhxIUPEsYZ2MAV',
+      ]);
+    // console.log(qb.toString());
+    response = await qb;
 
     // ============================================================
     console.timeEnd('getTest');
