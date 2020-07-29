@@ -189,6 +189,13 @@ exports.removePlaylists = async list => {
     .flat();
   await db('tracks_playlists').bulkDelete(data, Object.keys(data[0]));
 };
+/**
+ * Remove all track-playlist associations from a playlist.
+ * @param {string} id - playlistId
+ */
+exports.removePlaylistTracks = async id => {
+  await db('tracks_playlists').where('playlist_id', id).del();
+};
 
 // Helpers
 /**

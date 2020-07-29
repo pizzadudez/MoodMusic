@@ -120,6 +120,13 @@ exports.removeLabels = async list => {
     .flat();
   await db('tracks_labels').bulkDelete(data, Object.keys(data[0]));
 };
+/**
+ * Remove all track-label associations from a label.
+ * @param {number} id - labelId
+ */
+exports.removeLabelTracks = async id => {
+  await db('tracks_labels').where('label_id', id).del();
+};
 
 /**
  * Get all trackIds associated with a label.
@@ -141,7 +148,13 @@ exports.getTrackIds = async labelId => {
  */
 exports.getTrackIdsNotInPlaylist = async (labelId, playlistId) => {
   return db('tracks_labels as tl')
-    .leftJoin('tracks_playlists as tp', 'tp.track_id', 'tl.track_id')
+    .leftJoin('tracks_playlists as tp', function () {
+      this.on('tl.track_id', '=', 'tp.track_id').andOn(
+        'tp.playlist_id',
+        '=',
+        db.raw('?', [playlistId])
+      );
+    })
     .where('tl.label_id', labelId)
     .whereRaw('tp.playlist_id IS DISTINCT FROM ?', [playlistId])
     .pluck('tl.track_id');

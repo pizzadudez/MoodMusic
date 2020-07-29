@@ -37,18 +37,24 @@ router.get('/', async (req, res, next) => {
     // const { rows } = await qb;
     // response = rows;
 
-    const qb = db('tracks_labels as tl')
-      .pluck('tl.track_id')
-      .leftJoin('tracks_playlists as tp', 'tp.track_id', 'tl.track_id')
-      .where('tl.label_id', 7)
-      .whereRaw('tp.playlist_id IS DISTINCT FROM ?', [
-        '3u3C3gwuWhxIUPEsYZ2MAV',
-      ]);
-    // console.log(qb.toString());
-    response = await qb;
+    // const qb = db('tracks_labels as tl')
+    //   .pluck('tl.track_id')
+    //   .leftJoin('tracks_playlists as tp', 'tp.track_id', 'tl.track_id')
+    //   .where('tl.label_id', 7)
+    //   .whereRaw('tp.playlist_id IS DISTINCT FROM ?', [
+    //     '3u3C3gwuWhxIUPEsYZ2MAV',
+    //   ]);
+    // // console.log(qb.toString());
+    // response = await qb;
+
+    response = await LabelModel.getTrackIdsNotInPlaylist(
+      1,
+      '7GcFeQfpn24KJd2AjYlaVv'
+    );
 
     // ============================================================
     console.timeEnd('getTest');
+    console.log(response);
     res.send(response || 'ok');
   } catch (err) {
     console.log(err.stack);

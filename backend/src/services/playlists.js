@@ -106,7 +106,7 @@ exports.update = async (userObj, id, data) => {
     if (type === 'label') {
       if (data.type === 'label' && data.label_id) {
         // Remove old label from playlist's tracks
-        //// await LabelModel.removeLabelTracks(label_id)
+        await LabelModel.removeLabelTracks(label_id);
       } else {
         // Remove playlist-label assoc; keep label-tracks assoc
         data.label_id = null;
@@ -115,10 +115,10 @@ exports.update = async (userObj, id, data) => {
 
     if (data.type === 'untracked') {
       // Remove playlist-tracks assoc; keep user-tracks
-      //// await PlaylistModel.removePlaylistTracks
+      await PlaylistModel.removePlaylistTracks(id);
     } else {
       // Unless setting playlist to 'untracked', syncTracks
-      exports.syncTracks(userObj, id, {
+      await exports.syncTracks(userObj, id, {
         type: data.type,
         label_id: data.label_id,
       });
@@ -158,7 +158,6 @@ exports.update = async (userObj, id, data) => {
     );
   }
 
-  // TODO? set updates=false if we synced
   return PlaylistModel.update(userObj.userId, id, data);
 };
 
