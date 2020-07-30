@@ -68,6 +68,7 @@ exports.create = async (userId, data) => {
  * @returns {Promise<object>} Updated playlist
  */
 exports.update = async (userId, id, data) => {
+  // Handle track_count_delta property
   if (data.track_count_delta) {
     data.track_count = db.raw(`?? + ?`, [
       'track_count',
@@ -195,6 +196,19 @@ exports.removePlaylists = async list => {
  */
 exports.removePlaylistTracks = async id => {
   await db('tracks_playlists').where('playlist_id', id).del();
+};
+
+/**
+ * Get all trackIds associated with a playlist.
+ * @param {string} playlistId
+ * @returns {Promise<string[]>}
+ */
+exports.getTrackIds = async playlistId => {
+  const rows = db('tracks_playlists')
+    .pluck('track_id')
+    .where('playlist_id', playlistId)
+    .orderBy('position', 'asc');
+  return rows;
 };
 
 // Helpers

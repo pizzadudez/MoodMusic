@@ -1,9 +1,16 @@
-const LabelModel = require('../models/Label');
-const PlaylistModel = require('../models/Playlist');
+const LabelModel = require('../models/knex/Label');
+const PlaylistModel = require('../models/knex/Playlist');
 const PlaylistsService = require('./playlists');
 
+exports.delete = async (userObj, id) => {
+  /**
+   * - delete label
+   * - ????
+   */
+};
+
 // TODO: hook new models and services
-exports.delete = async id => {
+exports.delete1 = async id => {
   await LabelModel.delete(id);
   const playlists = await PlaylistModel.getAll();
 
