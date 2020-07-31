@@ -5,9 +5,6 @@ const LabelModel = require('../models/knex/Label');
 const TracksService = require('./tracks');
 const { chunkArray } = require('../utils');
 
-const request = require('request-promise-native');
-const PlaylistModel1 = require('../models/Playlist');
-
 /**
  * - Add tracks to Spotify playlists
  * - Add Track-Playlist associations in our database
@@ -118,6 +115,7 @@ exports.update = async (userObj, id, data) => {
       await PlaylistModel.removePlaylistTracks(id);
     } else {
       // Unless setting playlist to 'untracked', syncTracks
+      /** @type PlaylistChanges */
       const changes = await exports.syncTracks(userObj, id, {
         type: data.type,
         label_id: data.label_id,
@@ -203,7 +201,7 @@ exports.restore = async (userObj, id) => {
  * @param {object} [updateData] - Sync for playlist type update.
  * @param {string} updateData.type
  * @param {number} updateData.label_id
- * @returns {Promise<PlaylistChanges>}
+ * @returns {Promise<object>} Synced playlist | type: PlaylistChanges
  */
 exports.syncTracks = async (userObj, id, updateData = undefined) => {
   const { type, label_id } =
@@ -249,61 +247,42 @@ exports.syncTracks = async (userObj, id, updateData = undefined) => {
   }
   // If syncing for 'playlist type update', update playlist there instead
   if (!updateData) {
-    await PlaylistModel.update(userObj.userId, id, playlistChanges);
+    return PlaylistModel.update(userObj.userId, id, playlistChanges);
   }
   return { id, ...playlistChanges };
 };
 /**
- * TODO WRITE DESCRIPTION
+ * Revert Spotify playlist to it's current MoodMusic track state.
  * @param {UserObj} userObj
  * @param {string} id - playlistId
+ * @returns {Promise<object>} Reverted playlist
  */
 exports.revertTracks = async (userObj, id) => {
-  /**
-   * - get all tracks for playlist and map to uris
-   * - chunkArray 100
-   * - for cunk in chunks post tracks in order
-   *  - 1st batch use 'put' instead of 'post' to replace whole playlist
-   * - return PM.update (updates: false, track_count: uris.length, snapshot_id)
-   */
-  /**
-   * Considerations:
-   * - should we replace everything?
-   */
-};
+  const url = `https://api.spotify.com/v1/playlists/${id}/tracks`;
+  const headers = { Authorization: 'Bearer ' + userObj.accessToken };
+  let snapshot_id;
+  // Get ordered trackIds from MoodMusic
+  const trackIds = await PlaylistModel.getTrackIds(id);
+  const trackUris = trackIds.map(id => `spotify:track:${id}`);
 
-exports.revertTracks1 = async (userObj, playlistId) => {
-  const trackIds = await PlaylistModel1.getTracks(playlistId);
-  let uris = trackIds.map(id => 'spotify:track:' + id);
-
-  let replace = true; // first 100 tracks use the replace endpoint
-  let snapshotId;
-  while (uris.length) {
-    const batch = uris.splice(0, 100);
-    const options = {
-      url: 'https://api.spotify.com/v1/playlists/' + playlistId + '/tracks',
-      headers: { Authorization: 'Bearer ' + userObj.accessToken },
-      body: { uris: batch },
-      json: true,
-    };
-    if (replace) {
-      const response = await request.put(options);
-      snapshotId = response.snapshot_id;
-      replace = false;
-    } else {
-      const response = await request.post(options);
-      snapshotId = response.snapshot_id;
-    }
+  let replace = true; // Flag for first request to use 'replace' endpoint.
+  const chunks = chunkArray(trackUris, 100);
+  for (const chunk of chunks) {
+    const { data } = await axios({
+      url,
+      method: replace ? 'put' : 'post',
+      data: { uris: chunk },
+      headers,
+    });
+    replace = false;
+    snapshot_id = data.snapshot_id;
   }
-  await PlaylistModel1.updateMany([
-    {
-      id: playlistId,
-      updates: 0,
-      track_count: trackIds.length,
-      snapshot_id: snapshotId,
-    },
-  ]);
-  return PlaylistModel1.getOne(playlistId);
+
+  return PlaylistModel.update(userObj.userId, id, {
+    updates: false,
+    snapshot_id,
+    track_count: trackIds.length,
+  });
 };
 
 // Helpers
