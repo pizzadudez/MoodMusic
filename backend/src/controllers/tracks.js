@@ -1,10 +1,9 @@
 const TrackModel = require('../models/Track');
-const TrackModel2 = require('../models/knex/Track');
 const TracksService = require('../services/tracks');
 
 exports.getAll = async (req, res, next) => {
   try {
-    const tracksById = await TrackModel2.getAllById(req.user.userId);
+    const tracksById = await TrackModel.getAllById(req.user.userId);
     res.status(200).json(tracksById);
   } catch (err) {
     console.log(err.stack);
@@ -14,7 +13,7 @@ exports.getAll = async (req, res, next) => {
 exports.refreshTracks = async (req, res, next) => {
   try {
     await TracksService.refreshTracks(req.user);
-    const tracks = await TrackModel2.getAllById(req.user.userId);
+    const tracks = await TrackModel.getAllById(req.user.userId);
     res.status(200).json({ message: 'refreshed', tracks });
   } catch (err) {
     console.log(err.stack);
@@ -24,7 +23,7 @@ exports.refreshTracks = async (req, res, next) => {
 exports.syncTracks = async (req, res, next) => {
   try {
     await TracksService.refreshTracks(req.user, true);
-    const tracks = await TrackModel2.getAllById(req.user.userId);
+    const tracks = await TrackModel.getAllById(req.user.userId);
     res.status(200).json({ message: 'synced', tracks });
   } catch (err) {
     console.log(err.stack);

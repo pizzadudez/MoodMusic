@@ -1,4 +1,4 @@
-const LabelModel = require('../models/knex/Label');
+const LabelModel = require('../models/Label');
 const LabelsService = require('../services/labels');
 
 exports.getAll = async (req, res, next) => {

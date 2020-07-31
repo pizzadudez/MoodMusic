@@ -1,7 +1,7 @@
 const { default: axios } = require('axios');
-const UserModel = require('../models/knex/User');
-const PlaylistModel = require('../models/knex/Playlist');
-const TrackModel = require('../models/knex/Track');
+const UserModel = require('../models/User');
+const PlaylistModel = require('../models/Playlist');
+const TrackModel = require('../models/Track');
 
 /**
  * Refresh or sync user's tracks:

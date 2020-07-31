@@ -1,87 +1,113 @@
-/* Old sqlite3 connection */
-
-const sqlite3 = require('sqlite3').verbose();
-
-const db = new sqlite3.Database('./db/db.sqlite3', err => {
-  err ? console.log(err) : {};
+// @ts-nocheck
+require('dotenv-safe').config({
+  allowEmptyValues: true,
 });
-// Import this into models
-exports.conn = () => {
-  db.get('PRAGMA foreign_keys = ON');
-  return db;
-};
-// Init database on server start
-exports.init = () => {
-  db.serialize(() => {
-    db.run('PRAGMA foreign_keys = ON');
+const Knex = require('knex');
+const environment = process.env.NODE_ENV || 'development';
+const config = require('../knexfile')[environment];
+const {
+  chunkArray,
+  generateValueBindings,
+  getPGDataTypes,
+} = require('../src/utils');
 
-    db.run(`CREATE TABLE IF NOT EXISTS users (
-      user_id TEXT UNIQUE,
-      access_token TEXT,
-      refresh_token TEXT,
-      refreshed_at TEXT,
-      synced_at TEXT
-    )`);
+// Extend Knex QueryBuilder with custom methods
+Knex.QueryBuilder.extend('bulkUpsert', async function (
+  data,
+  onConflict = 'ON CONFLICT DO NOTHING',
+  chunkSize = 1000
+) {
+  const isTransaction = this.client.transacting ? true : false;
+  const runInTransaction = callback => {
+    if (isTransaction) {
+      return callback(this);
+    }
+    return this.client.transaction(callback);
+  };
 
-    db.run(`CREATE TABLE IF NOT EXISTS tracks (
-      id TEXT NOT NULL PRIMARY KEY,
-      name TEXT,
-      artist TEXT,
-      album_id TEXT,
-      rating INTEGER DEFAULT 0,
-      liked INTEGER DEFAULT 0,
-      added_at TEXT,
-      FOREIGN KEY (album_id) REFERENCES albums (id)
-    )`);
-    db.run(`CREATE TABLE IF NOT EXISTS albums (
-      id TEXT NOT NULL PRIMARY KEY,
-      name TEXT,
-      small TEXT,
-      medium TEXT,
-      large TEXT
-    )`);
-
-    db.run(`CREATE TABLE IF NOT EXISTS playlists (
-      id TEXT NOT NULL PRIMARY KEY,
-      name TEXT,
-      description TEXT,
-      track_count INTEGER,
-      snapshot_id TEXT,
-      updates INTEGER DEFAULT 1,
-      added_at TEXT,
-      type TEXT NOT NULL DEFAULT 'untracked',
-      label_id INTEGER UNIQUE DEFAULT NULL, 
-      FOREIGN KEY (label_id) REFERENCES labels (id) ON DELETE SET NULL
-    )`);
-    db.run(`CREATE TABLE IF NOT EXISTS tracks_playlists (
-      track_id TEXT NOT NULL,
-      playlist_id TEXT NOT NULL,
-      position INTEGER DEFAULT NULL,
-      added_at TEXT,
-      PRIMARY KEY (track_id, playlist_id),
-      FOREIGN KEY (track_id) REFERENCES tracks (id) ON DELETE CASCADE,
-      FOREIGN KEY (playlist_id) REFERENCES playlists (id) ON DELETE CASCADE
-    )`);
-
-    db.run(`CREATE TABLE IF NOT EXISTS labels (
-      id INTEGER NOT NULL PRIMARY KEY,
-      type TEXT NOT NULL,
-      name TEXT NOT NULL UNIQUE,
-      color TEXT,
-      verbose TEXT DEFAULT NULL,
-      suffix TEXT DEFAULT NULL,
-      created_at TEXT,
-      updated_at TEXT,
-      parent_id INTEGER DEFAULT NULL,
-      FOREIGN KEY (parent_id) REFERENCES labels (id) ON DELETE CASCADE
-    )`);
-    db.run(`CREATE TABLE IF NOT EXISTS tracks_labels (
-      track_id TEXT NOT NULL,
-      label_id INTEGER NOT NULL,
-      added_at TEXT,
-      PRIMARY KEY (track_id, label_id),
-      FOREIGN KEY (track_id) REFERENCES tracks (id) ON DELETE CASCADE,
-      FOREIGN KEY (label_id) REFERENCES labels (id) ON DELETE CASCADE
-    )`);
+  return runInTransaction(async tr => {
+    /* Local transaction does not have the initial QueryBuilder's table,
+    we must add it manually. */
+    if (!isTransaction) {
+      tr = tr(this._single.table);
+    }
+    const chunks = chunkArray(data, chunkSize);
+    for (const chunk of chunks) {
+      await tr.client.raw('? ?', [tr.insert(chunk), tr.client.raw(onConflict)]);
+    }
   });
-};
+});
+Knex.QueryBuilder.extend('bulkDelete', async function (
+  data,
+  columns = ['id'],
+  chunkSize = 1000
+) {
+  const isTransaction = this.client.transacting ? true : false;
+  const runInTransaction = callback => {
+    if (isTransaction) {
+      return callback(this);
+    }
+    return this.client.transaction(callback);
+  };
+
+  return runInTransaction(async tr => {
+    const tableName = this._single.table;
+    const columnNames = columns.join(', ');
+    const columnDataTypes = getPGDataTypes(data[0]);
+    const whereCondition = columns
+      .map(c => `${tableName}.${c} = tmp.${c}::${columnDataTypes[c]}`)
+      .join(' AND ');
+
+    const chunks = chunkArray(data, chunkSize);
+    for (const chunk of chunks) {
+      const valueBindings = generateValueBindings(columns.length, chunk.length);
+      const values = chunk.map(el => columns.map(c => el[c])).flat();
+      const stmt = `DELETE FROM ${tableName} 
+        USING (VALUES ${valueBindings}) AS tmp(${columnNames})
+        WHERE ${whereCondition}`;
+      await tr.client.raw(stmt, values);
+    }
+  });
+});
+Knex.QueryBuilder.extend('bulkUpdate', async function (
+  data,
+  whereColumns = ['id'],
+  updateSetStatement = undefined,
+  chunkSize = 1000
+) {
+  const isTransaction = this.client.transacting ? true : false;
+  const runInTransaction = callback => {
+    if (isTransaction) {
+      return callback(this);
+    }
+    return this.client.transaction(callback);
+  };
+
+  return runInTransaction(async tr => {
+    const tableName = this._single.table;
+    const columns = Object.keys(data[0]);
+    const columnNames = columns.join(', ');
+    const columnDataTypes = getPGDataTypes(data[0]);
+    const whereCondition = whereColumns
+      .map(c => `${tableName}.${c} = tmp.${c}::${columnDataTypes[c]}`)
+      .join(' AND ');
+    if (!updateSetStatement) {
+      const setColumns = columns.filter(c => !whereColumns.includes(c));
+      updateSetStatement = setColumns
+        .map(c => `${c} = tmp.${c}::${columnDataTypes[c]}`)
+        .join(', ');
+    }
+
+    const chunks = chunkArray(data, chunkSize);
+    for (const chunk of chunks) {
+      const valueBindings = generateValueBindings(columns.length, chunk.length);
+      const values = chunk.map(el => columns.map(c => el[c])).flat();
+      const stmt = `UPDATE ${tableName} SET ${updateSetStatement}
+        FROM (VALUES ${valueBindings}) AS tmp(${columnNames}) 
+        WHERE ${whereCondition}`;
+      await tr.client.raw(stmt, values);
+    }
+  });
+});
+
+module.exports = Knex(config);

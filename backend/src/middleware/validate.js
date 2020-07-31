@@ -1,5 +1,5 @@
 const Joi = require('@hapi/joi');
-const UserModel = require('../models/knex/User');
+const UserModel = require('../models/User');
 
 const FORBIDDEN = `Forbidden: Request contains resource identifiers\
  that do not belong to the user.`;

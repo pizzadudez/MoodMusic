@@ -1,7 +1,7 @@
 const { default: axios } = require('axios');
 const qs = require('querystring');
 const jwt = require('jsonwebtoken');
-const UserModel = require('../models/knex/User');
+const UserModel = require('../models/User');
 const {
   CLIENT_ID,
   CLIENT_SECRET,

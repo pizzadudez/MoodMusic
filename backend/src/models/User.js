@@ -1,49 +1,70 @@
-const db = require('../../db').conn();
+const db = require('../../db');
 
-exports.createUser = (userId, accessToken, refreshToken) => {
-  return new Promise((resolve, reject) => {
-    const sql = `INSERT INTO users 
-                 (user_id, access_token, refresh_token)
-                 VALUES(?, ?, ?)`;
-    const values = [userId, accessToken, refreshToken];
-    db.serialize(() => {
-      db.run('DELETE FROM users');
-      db.run(sql, values, err =>
-        err ? reject(new Error(err.message)) : resolve('User Registered!')
-      );
-    });
-  });
+/**
+ * Create new user or update refresh_token for existing entry.
+ * @param {string} id - userId
+ * @param {string} refresh_token - Refresh token provided by Spotify
+ */
+exports.register = async (id, refresh_token) => {
+  await db.raw(
+    `? ON CONFLICT (id) DO UPDATE SET
+      refresh_token = EXCLUDED.refresh_token,
+      updated_at = NOW()`,
+    [db('users').insert({ id, refresh_token })]
+  );
 };
-exports.data = () => {
-  return new Promise((resolve, reject) => {
-    db.get('SELECT * from users', (err, row) => {
-      if (err) {
-        reject(new Error(err.message));
-      } else if (row) {
-        resolve(row);
-      } else {
-        reject(new Error('Could not retrieve userData. Authenticate first!'));
-      }
-    });
-  });
+/**
+ * Update user record.
+ * @param {string} id - userId
+ * @param {object} data
+ * @param {string=} data.refresh_token
+ * @param {boolean=} data.refreshed_at
+ * @param {boolean=} data.synced_at
+ */
+exports.update = async (id, data) => {
+  const { refreshed_at, synced_at, refresh_token } = data;
+  await db('users')
+    .update({
+      refresh_token,
+      ...(refreshed_at && { refreshed_at: db.fn.now() }),
+      ...(synced_at && { synced_at: db.fn.now() }),
+      updated_at: db.fn.now(),
+    })
+    .where({ id });
 };
-exports.updateToken = accessToken => {
-  return new Promise((resolve, reject) => {
-    db.run('UPDATE users SET access_token=?', [accessToken], err => {
-      err ? reject(new Error(err.message)) : resolve();
-    });
-  });
+/**
+ * Retrieve UserData
+ * @param {string} id - userId
+ * @returns {Promise<UserData>}
+ */
+exports.data = async id => {
+  const rows = await db('users')
+    .select('refresh_token', 'refreshed_at', 'synced_at')
+    .where({ id });
+  return rows[0];
 };
-exports.updateUser = (fieldName, value = undefined) => {
-  const fields = { refresh: 'refreshed_at', sync: 'synced_at' };
-  if (!fields[fieldName]) {
-    return Promise.reject(new Error('Invalid fieldName'));
-  }
-  value = value || new Date().toISOString();
 
-  return new Promise((resolve, reject) => {
-    db.run(`UPDATE users set ${fields[fieldName]}=?`, [value], err => {
-      err ? reject(new Error(err.message)) : resolve();
-    });
-  });
+/**
+ * Check if all labelIds belong to the user.
+ * @param {string} userId
+ * @param {number[]} labelIds
+ * @returns {Promise<boolean>}
+ */
+exports.checkLabels = async (userId, labelIds) => {
+  const ids = await db('labels').pluck('id').where('user_id', userId);
+  const userLabels = Object.fromEntries(ids.map(id => [id, true]));
+
+  return labelIds.every(id => userLabels[id]);
+};
+/**
+ * Check if all playlistIds belong to the user.
+ * @param {string} userId
+ * @param {string[]} playlistIds
+ * @returns {Promise<boolean>}
+ */
+exports.checkPlaylists = async (userId, playlistIds) => {
+  const ids = await db('playlists').pluck('id').where('user_id', userId);
+  const userPlaylists = Object.fromEntries(ids.map(id => [id, true]));
+
+  return playlistIds.every(id => userPlaylists[id]);
 };

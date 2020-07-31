@@ -1,4 +1,4 @@
-const LabelModel = require('../models/knex/Label');
+const LabelModel = require('../models/Label');
 const PlaylistsService = require('./playlists');
 
 /**

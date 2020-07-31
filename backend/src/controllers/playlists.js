@@ -1,4 +1,4 @@
-const PlaylistModel = require('../models/knex/Playlist');
+const PlaylistModel = require('../models/Playlist');
 const PlaylistsService = require('../services/playlists');
 
 exports.getAll = async (req, res, next) => {

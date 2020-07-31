@@ -1,7 +1,7 @@
 const { default: axios } = require('axios');
-const PlaylistModel = require('../models/knex/Playlist');
-const TrackModel = require('../models/knex/Track');
-const LabelModel = require('../models/knex/Label');
+const PlaylistModel = require('../models/Playlist');
+const TrackModel = require('../models/Track');
+const LabelModel = require('../models/Label');
 const TracksService = require('./tracks');
 const { chunkArray } = require('../utils');
 

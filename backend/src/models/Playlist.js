@@ -1,298 +1,241 @@
-const db = require('../../db').conn();
+const db = require('../../db');
 
-exports.getAll = (byId = false) => {
-  return new Promise((resolve, reject) => {
-    const sql = `SELECT id, name, description, 
-      track_count, updates, added_at, type, label_id
-      FROM playlists ORDER BY added_at DESC`;
-    db.all(sql, (err, rows) => {
-      if (err) {
-        reject(new Error(err.message));
+/**
+ * Get user's playlists as an array.
+ * @param {string} userId
+ * @returns {Promise<object[]>}
+ */
+exports.getAll = userId => {
+  return db('playlists')
+    .select(
+      'id',
+      'name',
+      'description',
+      'track_count',
+      'updates',
+      'added_at',
+      'type',
+      'label_id'
+    )
+    .orderBy('added_at', 'desc')
+    .where('user_id', userId);
+};
+/**
+ * Get user's playlists as a byId object.
+ * @param {string} userId
+ * @returns {Promise<Object<string,object>>}
+ */
+exports.getAllById = async userId => {
+  const playlists = await exports.getAll(userId);
+  return Object.fromEntries(playlists.map(el => [el.id, el]));
+};
+/**
+ * Get playlist byId
+ * @param {string} userId
+ * @param {string} id - playlistId
+ * @returns {Promise<object>}
+ */
+exports.getOne = async (userId, id) => {
+  const rows = await db('playlists')
+    .select(
+      'id',
+      'name',
+      'description',
+      'track_count',
+      'updates',
+      'added_at',
+      'type',
+      'label_id'
+    )
+    .where({ id, user_id: userId });
+  return rows[0];
+};
+/**
+ * Create new playlist.
+ * @param {string} userId
+ * @param {NewPlaylist} data
+ * @returns {Promise<object>} Created playlist
+ */
+exports.create = async (userId, data) => {
+  await db('playlists').insert({ ...data, user_id: userId, updates: false });
+  return exports.getOne(userId, data.id);
+};
+/**
+ * Update existing playlist.
+ * @param {string} userId
+ * @param {string} id - playlistId
+ * @param {object} data
+ * @returns {Promise<object>} Updated playlist
+ */
+exports.update = async (userId, id, data) => {
+  // Handle track_count_delta property
+  if (data.track_count_delta) {
+    data.track_count = db.raw(`?? + ?`, [
+      'track_count',
+      data.track_count_delta,
+    ]);
+    delete data.track_count_delta;
+  }
+
+  await db('playlists').update(data).where({ id, user_id: userId });
+  return exports.getOne(userId, id);
+};
+/**
+ * Bulk update playlists. Can update track_count by passing
+ * track_count_delta in the PlaylistUpdate object
+ * @param {PlaylistChanges[]} updateList - List of { id, ...changes }
+ */
+exports.updateMany = async updateList => {
+  if (updateList[0].track_count_delta) {
+    // Custom update, we have to change track_count based on it current value.
+    const updateSetStatement = `"snapshot_id" = "tmp"."snapshot_id",
+      "track_count" = "track_count" + "tmp"."track_count_delta"::integer`;
+    await db('playlists').bulkUpdate(updateList, undefined, updateSetStatement);
+  } else {
+    await db('playlists').bulkUpdate(updateList);
+  }
+};
+
+/**
+ * - Upsert user's playlists
+ * - Return list of playlists to be refreshed/synced.
+ * @param {string} userId
+ * @param {ParsedPlaylist[]} playlistList
+ * @param {boolean=} sync - Return all playlist ids (except untracked/deleted)
+ * @returns {Promise<{id: string, track_count: number}[]>}
+ */
+exports.refresh = async (userId, playlistList, sync = false) => {
+  if (playlistList.length < 1) return [];
+  const onConflict = `ON CONFLICT (id) DO UPDATE SET
+    snapshot_id = EXCLUDED.snapshot_id,
+    track_count = EXCLUDED.track_count,
+    updates = true
+    WHERE playlists.snapshot_id != EXCLUDED.snapshot_id`;
+  await db('playlists').bulkUpsert(playlistList, onConflict);
+  // Select playlitIds with changes
+  const condition = sync
+    ? "type IN ('mix', 'label')"
+    : "type IN ('mix') AND updates = TRUE";
+  const playlistIds = await db('playlists')
+    .select(['id', 'track_count'])
+    .whereRaw(condition)
+    .andWhere('user_id', userId);
+
+  return playlistIds;
+};
+/**
+ * Handle adding Playlist-Track associations.
+ * @param {string} userId
+ * @param {PlaylistTracks[]} list - Accepts both tracks and track_ids
+ * @param {boolean=} sync
+ */
+exports.addPlaylists = async (userId, list, sync = false) => {
+  const lastPositions = await getLastPositions(userId);
+  const data = list
+    .map(({ playlist_id, tracks, track_ids }) => {
+      if (tracks) {
+        // tracks from playlist refresh/sync
+        const trackMap = tracks.reduce((obj, track, idx) => {
+          obj[track.id] = obj[track.id] || {
+            playlist_id,
+            track_id: track.id,
+            added_at: track.added_at,
+            position: sync ? idx : idx + 1 + (lastPositions[playlist_id] || -1),
+          };
+          return obj;
+        }, {});
+        return Object.values(trackMap);
       } else {
-        resolve(
-          byId ? Object.fromEntries(rows.map(row => [row.id, row])) : rows
-        );
+        // track_ids from user request
+        return track_ids.map((id, idx) => ({
+          playlist_id,
+          track_id: id,
+          position: idx + 1 + (lastPositions[playlist_id] || -1),
+        }));
       }
-    });
+    })
+    .flat();
+  // Batch insert associations
+  await db.transaction(async tr => {
+    const onConflict = `ON CONFLICT (track_id, playlist_id) DO UPDATE SET 
+        position = EXCLUDED.position, 
+        updated_at = NOW()`;
+    // Insert (or Upsert if sync) New Associations
+    await tr('tracks_playlists').bulkUpsert(
+      data,
+      sync ? onConflict : undefined
+    );
+    // Remove associations that have not been upserted
+    if (sync) {
+      const playlists = list.map(playlistTracks => playlistTracks.playlist_id);
+      await tr('tracks_playlists')
+        .whereIn('playlist_id', playlists)
+        .andWhere('updated_at', '<', tr.fn.now())
+        .del();
+    }
   });
 };
-exports.getAllById = () => {
-  return exports.getAll(true);
+/**
+ * Handle removing Playlist-Track associations.
+ * @param {PlaylistTracks[]} list
+ */
+exports.removePlaylists = async list => {
+  const data = list
+    .map(({ playlist_id, track_ids }) =>
+      track_ids.map(track_id => ({
+        playlist_id,
+        track_id,
+      }))
+    )
+    .flat();
+  await db('tracks_playlists').bulkDelete(data, Object.keys(data[0]));
 };
-exports.getOne = id => {
-  return new Promise((resolve, reject) => {
-    const sql = `SELECT id, name, description, 
-      track_count, updates, added_at, type, label_id
-      FROM playlists WHERE id=?`;
-    db.get(sql, [id], (err, row) => {
-      if (err) {
-        reject(new Error(err.message));
-      } else {
-        resolve(row);
-      }
-    });
-  });
-};
-exports.getTracks = (id, hashMap = false) => {
-  return new Promise((resolve, reject) => {
-    const sql = `SELECT track_id FROM tracks_playlists
-      WHERE playlist_id=? ORDER BY position ASC`;
-    db.all(sql, [id], (err, rows) => {
-      if (err) {
-        reject(new Error(err.message));
-      } else {
-        hashMap
-          ? resolve(Object.fromEntries(rows.map(row => [row.track_id, true])))
-          : resolve(rows.map(row => row.track_id));
-      }
-    });
-  });
-};
-
-exports.addPlaylists = async (playlists, sync = false) => {
-  const sql = `INSERT OR ${sync ? 'REPLACE' : 'IGNORE'} INTO tracks_playlists
-    (track_id, playlist_id, added_at, position)
-    VALUES(?, ?, ?, ?)`;
-  const deleteSql = `DELETE FROM tracks_playlists WHERE playlist_id=?`;
-  const added_at = new Date().toISOString();
-  const lastPositions = await getLastPositions();
-
-  return new Promise((resolve, reject) => {
-    db.serialize(() => {
-      db.run('BEGIN TRANSACTION');
-      playlists.forEach(({ playlist_id, track_ids, tracks }) => {
-        if (sync) {
-          db.run(deleteSql, [playlist_id], err => {
-            if (err) reject(new Error(err.message));
-          });
-        }
-        // track_ids are from manual Add; tracks from refresh/sync
-        if (tracks) {
-          tracks.forEach((track, idx) => {
-            const values = [
-              track.id,
-              playlist_id,
-              track.added_at,
-              sync ? idx : idx + lastPositions[playlist_id] + 1,
-            ];
-            db.run(sql, values, err => {
-              if (err) reject(new Error(err.message));
-            });
-          });
-        } else {
-          track_ids.forEach((id, idx) => {
-            const values = [
-              id,
-              playlist_id,
-              added_at,
-              idx + lastPositions[playlist_id] + 1,
-            ];
-            db.run(sql, values, err => {
-              if (err) reject(new Error(err.message));
-            });
-          });
-        }
-      });
-      db.run('COMMIT TRANSACTION', err => {
-        if (err) {
-          reject(new Error(err.message));
-        } else {
-          resolve();
-        }
-      });
-    });
-  });
-};
-exports.removePlaylists = playlists => {
-  const sql = `DELETE FROM tracks_playlists WHERE
-  track_id=? AND playlist_id=?`;
-
-  return new Promise((resolve, reject) => {
-    db.serialize(() => {
-      db.run('BEGIN TRANSACTION');
-      playlists.forEach(({ playlist_id, track_ids }) => {
-        track_ids.forEach(id => {
-          db.run(sql, [id, playlist_id], err => {
-            if (err) reject(new Error(err.message));
-          });
-        });
-      });
-      db.run('COMMIT TRANSACTION', err => {
-        if (err) {
-          reject(new Error(err.message));
-        } else {
-          resolve();
-        }
-      });
-    });
-  });
-};
-// Removes all tracks_playlists associations for a playlist (set untracked)
-exports.removePlaylistTracks = id => {
-  return new Promise((resolve, reject) => {
-    const sql = 'DELETE FROM tracks_playlists WHERE playlist_id=?';
-    db.run(sql, [id], err => {
-      if (err) {
-        reject(new Error(err.message));
-      } else {
-        resolve();
-      }
-    });
-  });
+/**
+ * Remove all track-playlist associations from a playlist.
+ * @param {string} id - playlistId
+ */
+exports.removePlaylistTracks = async id => {
+  await db('tracks_playlists').where('playlist_id', id).del();
 };
 
-exports.create = data => {
-  const sql = `INSERT INTO playlists 
-    (id, name, description, track_count, snapshot_id,
-    added_at, type, label_id, updates)
-    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`;
-  const values = [...Object.values(data), ...(data.label_id ? [] : [null]), 0];
-
-  return new Promise((resolve, reject) => {
-    db.run(sql, values, err => {
-      if (err) {
-        reject(new Error(err.message));
-      } else {
-        resolve(exports.getOne(data.id));
-      }
-    });
-  });
-};
-exports.update = (id, data) => {
-  const sanitizedData = {
-    ...(data.name && { name: data.name }),
-    ...(data.description && { description: data.description }),
-    ...(data.type && { type: data.type }),
-    ...(data.type && data.label_id && { label_id: data.label_id }),
-    ...(data.type && data.type !== 'label' && { label_id: null }),
-    ...(data.type && { updates: 0 }), // type changed => already synced
-    ...(data.snapshot_id && { snapshot_id: data.snapshot_id }),
-    ...(data.track_count && { track_count: data.track_count }),
-  };
-  const fields = Object.keys(sanitizedData)
-    .map(key => key + '=?')
-    .join(', ');
-  const values = Object.values(sanitizedData);
-
-  return new Promise((resolve, reject) => {
-    const sql = 'UPDATE playlists SET ' + fields + ' WHERE id=?';
-    db.run(sql, [...values, id], function (err) {
-      if (err) {
-        reject(new Error(err.message));
-      } else {
-        resolve(exports.getOne(id));
-      }
-    });
-  });
-};
-// Update multiple playlists with changed fields [{id, ...changes}]
-exports.updateMany = list => {
-  return new Promise((resolve, reject) => {
-    db.serialize(() => {
-      db.run('BEGIN TRANSACTION');
-      list.forEach(({ id, ...changes }) => {
-        const fields = Object.keys(changes)
-          .filter(key => key !== undefined)
-          .map(key => key + '=?')
-          .join(', ');
-        const values = Object.values(changes).filter(val => val !== undefined);
-        const sql = 'UPDATE playlists SET ' + fields + ' WHERE id=?';
-        db.run(sql, [...values, id], err => {
-          if (err) reject(new Error(err.message));
-        });
-      });
-      db.run('COMMIT TRANSACTION', err => {
-        if (err) {
-          reject(new Error(err.message));
-        } else {
-          resolve();
-        }
-      });
-    });
-  });
-};
-
-// Upsert playlits and return which playlists to refresh/sync tracks from
-exports.refresh = (data, sync = false) => {
-  const insertSql = `INSERT INTO playlists
-    (id, name, description, track_count,
-    snapshot_id, added_at)
-    VALUES (?, ?, ?, ?, ?, ?)`;
-  const updateSql = `UPDATE playlists
-    SET snapshot_id=?, updates=1, track_count=?
-    WHERE id=? AND snapshot_id!=?`;
-  const added_at = new Date().toISOString();
-
-  return new Promise((resolve, reject) => {
-    db.serialize(() => {
-      db.run('BEGIN TRANSACTION');
-      data.forEach(pl => {
-        const values = [
-          pl.id,
-          pl.name,
-          pl.description,
-          pl.track_count,
-          pl.snapshot_id,
-          added_at,
-        ];
-        // INSERT
-        db.run(insertSql, values, err => {
-          if (err && err['code'] !== 'SQLITE_CONSTRAINT') {
-            reject(new Error(err.message));
-          } else if (err) {
-            const values = [
-              pl.snapshot_id,
-              pl.track_count,
-              pl.id,
-              pl.snapshot_id,
-            ];
-            // id conflict => UPDATE
-            db.run(updateSql, values, err => {
-              if (err) reject(new Error(err.message));
-            });
-          }
-        });
-      });
-      db.run('COMMIT TRANSACTION', err => {
-        if (err) {
-          reject(new Error(err.message));
-        } else {
-          // Return playlists that match the criteria to be refreshed/synced
-          const sql =
-            'SELECT id, track_count FROM playlists WHERE ' +
-            (sync
-              ? `type IN ('mix', 'label')`
-              : `type IN ('mix') AND updates=1`);
-          db.all(sql, (err, rows) => {
-            if (err) {
-              reject(new Error(err.message));
-            } else {
-              resolve(rows);
-            }
-          });
-        }
-      });
-    });
-  });
+/**
+ * Get all trackIds associated with a playlist.
+ * @param {string} playlistId
+ * @returns {Promise<string[]>}
+ */
+exports.getTrackIds = async playlistId => {
+  const rows = db('tracks_playlists')
+    .pluck('track_id')
+    .where('playlist_id', playlistId)
+    .orderBy('position', 'asc');
+  return rows;
 };
 
 // Helpers
-const getLastPositions = () => {
-  return new Promise((resolve, reject) => {
-    const sql = `SELECT playlist_id, 
-      max(position) AS last_position
-      FROM tracks_playlists
-      GROUP BY playlist_id`;
-    db.all(sql, (err, rows) => {
-      if (err) {
-        reject(new Error(err.message));
-      } else {
-        resolve(
-          Object.fromEntries(
-            rows.map(row => [row.playlist_id, row.last_position || -1])
-          )
-        );
-      }
-    });
-  });
+/**
+ * Create hashMap of user's playlist's last track positions,
+ * these can be different from playlist total track count.
+ * @param {string} userId
+ * @returns {Promise<Object<string, number>>}
+ */
+const getLastPositions = async userId => {
+  // TODO: refactor to get playlist_ids instead of userId
+  const rows = await db('tracks_playlists')
+    .select('playlist_id as id')
+    .max('position as last_pos')
+    .whereIn(
+      'playlist_id',
+      db('playlists').select('id').where('user_id', userId)
+    )
+    .groupBy('playlist_id');
+
+  /** Join vs WhereIn Select, join seems slower the more data we have */
+  // const rows = await db('tracks_playlists')
+  //   .leftJoin('playlists', 'playlists.id', 'tracks_playlists.playlist_id')
+  //   .select('playlist_id as id')
+  //   .max('position as last_pos')
+  //   .where('user_id', userId)
+  //   .groupBy('playlist_id');
+
+  return Object.fromEntries(rows.map(({ id, last_pos }) => [id, last_pos]));
 };
