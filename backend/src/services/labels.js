@@ -1,22 +1,12 @@
 const LabelModel = require('../models/knex/Label');
-const PlaylistModel = require('../models/knex/Playlist');
 const PlaylistsService = require('./playlists');
 
+/**
+ * Handle deleting label and associated playlist.
+ * @param {UserObj} userObj
+ * @param {number} id - labelId
+ */
 exports.delete = async (userObj, id) => {
-  /**
-   * - delete label
-   * - ????
-   */
-};
-
-// TODO: hook new models and services
-exports.delete1 = async id => {
-  await LabelModel.delete(id);
-  const playlists = await PlaylistModel.getAll();
-
-  const requests = playlists
-    .filter(p => p.type === 'label' && !p.label_id)
-    .map(p => PlaylistsService.delete(p.id));
-
-  await Promise.all(requests);
+  const playlistId = await LabelModel.delete(userObj.userId, id);
+  if (playlistId) await PlaylistsService.delete(userObj, playlistId);
 };

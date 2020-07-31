@@ -82,12 +82,15 @@ exports.update = async (userId, id, data) => {
   return exports.get(userId, id);
 };
 /**
- * Delete label byId.
+ * Delete label byId. Return associated playlistId.
  * @param {string} userId
- * @param {number} labelId
+ * @param {number} id - labelId
+ * @returns {Promise<string | undefined>} playlistId associated with label
  */
-exports.delete = async (userId, labelId) => {
-  await db('labels').where({ id: labelId, user_id: userId }).del();
+exports.delete = async (userId, id) => {
+  const ids = await db('playlists').pluck('id').where('label_id', id);
+  await db('labels').where({ id: id, user_id: userId }).del();
+  return ids[0];
 };
 
 /**

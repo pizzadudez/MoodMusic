@@ -18,14 +18,18 @@ exports.up = function (knex) {
         })
         .notNullable();
       table.string('name').notNullable();
-      table.string('color');
-      table.string('verbose');
-      table.string('suffix');
+      table.string('color').notNullable();
+      table.string('verbose').defaultTo(null);
+      table.string('suffix').defaultTo(null);
       table.timestamp('created_at').notNullable().defaultTo(knex.fn.now());
       table.timestamp('updated_at').notNullable().defaultTo(knex.fn.now());
 
       table.integer('parent_id').references('labels.id').defaultTo(null);
-      table.string('user_id').references('users.id').notNullable();
+      table
+        .string('user_id')
+        .references('users.id')
+        .onDelete('CASCADE')
+        .notNullable();
     })
     .createTable('playlists', table => {
       table.string('id').primary().unique().notNullable();
@@ -43,8 +47,16 @@ exports.up = function (knex) {
       table.boolean('updates').notNullable().defaultTo(true);
       table.timestamp('added_at').notNullable().defaultTo(knex.fn.now());
 
-      table.integer('label_id').references('labels.id').defaultTo(null);
-      table.string('user_id').references('users.id').notNullable();
+      table
+        .integer('label_id')
+        .references('labels.id')
+        .onDelete('SET NULL')
+        .defaultTo(null);
+      table
+        .string('user_id')
+        .references('users.id')
+        .onDelete('CASCADE')
+        .notNullable();
     })
     .createTable('albums', table => {
       table.string('id').primary().unique().notNullable();
@@ -61,17 +73,33 @@ exports.up = function (knex) {
       table.string('album_id').references('albums.id').notNullable();
     })
     .createTable('tracks_users', table => {
-      table.string('track_id').references('tracks.id').notNullable();
-      table.string('user_id').references('users.id').notNullable();
-      table.boolean('liked').defaultTo(false);
-      table.integer('rating').defaultTo(0);
+      table
+        .string('track_id')
+        .references('tracks.id')
+        .onDelete('CASCADE')
+        .notNullable();
+      table
+        .string('user_id')
+        .references('users.id')
+        .onDelete('CASCADE')
+        .notNullable();
+      table.boolean('liked').notNullable().defaultTo(false);
+      table.integer('rating').notNullable().defaultTo(0);
       table.timestamp('added_at').notNullable().defaultTo(knex.fn.now());
 
       table.primary(['track_id', 'user_id']);
     })
     .createTable('tracks_playlists', table => {
-      table.string('track_id').references('tracks.id').notNullable();
-      table.string('playlist_id').references('playlists.id').notNullable();
+      table
+        .string('track_id')
+        .references('tracks.id')
+        .onDelete('CASCADE')
+        .notNullable();
+      table
+        .string('playlist_id')
+        .references('playlists.id')
+        .onDelete('CASCADE')
+        .notNullable();
       table.integer('position').defaultTo(null);
       table.timestamp('added_at').notNullable().defaultTo(knex.fn.now());
       table.timestamp('updated_at').notNullable().defaultTo(knex.fn.now());
@@ -79,8 +107,16 @@ exports.up = function (knex) {
       table.primary(['track_id', 'playlist_id']);
     })
     .createTable('tracks_labels', table => {
-      table.string('track_id').references('tracks.id').notNullable();
-      table.integer('label_id').references('labels.id').notNullable();
+      table
+        .string('track_id')
+        .references('tracks.id')
+        .onDelete('CASCADE')
+        .notNullable();
+      table
+        .integer('label_id')
+        .references('labels.id')
+        .onDelete('CASCADE')
+        .notNullable();
       table.timestamp('added_at').notNullable().defaultTo(knex.fn.now());
 
       table.primary(['track_id', 'label_id']);
