@@ -47,17 +47,60 @@ router.get('/', async (req, res, next) => {
     // // console.log(qb.toString());
     // response = await qb;
 
-    response = await LabelModel.getTrackIdsNotInPlaylist(
-      1,
-      '7GcFeQfpn24KJd2AjYlaVv'
+    // await PlaylistsService.addTracks(req.user, [
+    //   {
+    //     playlist_id: '56aUoIhjOHD3Fy0kv7I3Qt',
+    //     track_ids: ['005JfkAhvs05PiQLUb2Iuf', '0nkDm27DGppCSk8dnGtvPa'],
+    //   },
+    // ]);
+
+    // await PlaylistsService.removeSpecificSpotifyTracks(req.user, {
+    //   playlist_id: '56aUoIhjOHD3Fy0kv7I3Qt',
+    //   tracks: [{ id: '005JfkAhvs05PiQLUb2Iuf', position: 2 }],
+    // });
+
+    // const v = {
+    //   a: () => {
+    //     const trackMap = {};
+    //     const duplicates = [];
+    //     tracks.forEach((track, idx) => {
+    //       if (trackMap[track.id]) {
+    //         duplicates.push({ id: track.id, position: idx });
+    //       }
+    //       trackMap[track.id] = true;
+    //     });
+    //     return duplicates;
+    //   },
+    //   b: () => {
+    //     const duplicates = [];
+    //     tracks.reduce((acc, track, idx) => {
+    //       if (acc[track.id]) {
+    //         duplicates.push({ id: track.id, position: idx });
+    //       }
+    //       acc[track.id] = true;
+    //       return acc;
+    //     }, {});
+    //     return duplicates;
+    //   },
+    // };
+
+    response = await PlaylistsService.removePlaylistDuplicates(
+      req.user,
+      '7pS43sG0C61pt7U9LcqozG'
     );
+    // await PlaylistsService.addTracks(req.user, [
+    //   {
+    //     playlist_id: '3fq2l4tR29CfUXxgriZJ0i',
+    //     track_ids: response.map(t => t.id),
+    //   },
+    // ]);
 
     // ============================================================
     console.timeEnd('getTest');
     console.log(response);
     res.send(response || 'ok');
   } catch (err) {
-    console.log(err.stack);
+    console.log(err);
     res.sendStatus(500);
   }
 });

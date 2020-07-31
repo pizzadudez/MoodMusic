@@ -118,11 +118,14 @@ exports.update = async (userObj, id, data) => {
       await PlaylistModel.removePlaylistTracks(id);
     } else {
       // Unless setting playlist to 'untracked', syncTracks
-      await exports.syncTracks(userObj, id, {
+      const changes = await exports.syncTracks(userObj, id, {
         type: data.type,
         label_id: data.label_id,
       });
       data.updates = false;
+      data.snapshot_id = changes.snapshot_id;
+      data.track_count_delta = changes.track_count_delta;
+
       if (data.type === 'label') {
         // Playlist inherit label's tracks
         const trackIds = await LabelModel.getTrackIdsNotInPlaylist(
@@ -134,12 +137,13 @@ exports.update = async (userObj, id, data) => {
             playlist_id: id,
             track_ids: trackIds,
           };
-          const playlistChanges = await updateSpotifyPlaylistTracks(
+          const changes = await updateSpotifyPlaylistTracks(
             userObj,
             playlistTrackIds
           );
-          data.snapshot_id = playlistChanges.snapshot_id;
-          data.track_count_delta = playlistChanges.track_count_delta;
+          data.snapshot_id = changes.snapshot_id;
+          data.track_count_delta =
+            (data.track_count_delta || 0) + changes.track_count_delta;
           await PlaylistModel.addPlaylists(userObj.userId, [playlistTrackIds]);
         }
       }
@@ -201,6 +205,7 @@ exports.restore = async (userObj, id) => {
  * @param {object} [updateData] - Sync for playlist type update.
  * @param {string} updateData.type
  * @param {number} updateData.label_id
+ * @returns {Promise<PlaylistChanges>}
  */
 exports.syncTracks = async (userObj, id, updateData = undefined) => {
   const { type, label_id } =
@@ -209,13 +214,20 @@ exports.syncTracks = async (userObj, id, updateData = undefined) => {
   const tracks = await TracksService.getPlaylistTracks(userObj, id);
   await TrackModel.addTracks(userObj.userId, tracks);
   // If type is 'untracked' stop here, only import tracks
+
+  const playlistChanges = { updates: false };
   if (['mix', 'label'].includes(type)) {
+    // Remove Spotify playlist duplicates
+    const changes = await exports.removePlaylistDuplicates(userObj, id, tracks);
+    playlistChanges.snapshot_id = changes.snapshot_id;
+    playlistChanges.track_count_delta = changes.removed;
+
     // Add new playlist-track associations
     const playlistTracks = { playlist_id: id, tracks };
     await PlaylistModel.addPlaylists(userObj.userId, [playlistTracks], true);
     // Sync 'label' playlists by matching tracks-playlists with tracks-labels
     if (type === 'label') {
-      // Remove labels if not update syncing
+      // If not update syncing, remove labels from tracks no longer in playlist
       if (!updateData) {
         const idsToRemove = await LabelModel.getTrackIdsNotInPlaylist(
           label_id,
@@ -237,10 +249,11 @@ exports.syncTracks = async (userObj, id, updateData = undefined) => {
       await LabelModel.addLabels([labelTracks]);
     }
   }
-  // If syncing on 'playlist type update' update playlist there instead
+  // If syncing for 'playlist type update', update playlist there instead
   if (!updateData) {
-    await PlaylistModel.update(userObj.userId, id, { updates: false });
+    await PlaylistModel.update(userObj.userId, id, playlistChanges);
   }
+  return { id, ...playlistChanges };
 };
 /**
  * TODO WRITE DESCRIPTION
@@ -254,6 +267,10 @@ exports.revertTracks = async (userObj, id) => {
    * - for cunk in chunks post tracks in order
    *  - 1st batch use 'put' instead of 'post' to replace whole playlist
    * - return PM.update (updates: false, track_count: uris.length, snapshot_id)
+   */
+  /**
+   * Considerations:
+   * - should we replace everything?
    */
 };
 
@@ -304,12 +321,11 @@ const updateSpotifyPlaylistTracks = async (
   { playlist_id, track_ids },
   remove = false
 ) => {
-  const trackUris = track_ids.map(id => `spotify:track:${id}`);
   const url = `https://api.spotify.com/v1/playlists/${playlist_id}/tracks`;
-  const headers = {
-    Authorization: 'Bearer ' + userObj.accessToken,
-  };
+  const headers = { Authorization: 'Bearer ' + userObj.accessToken };
   let snapshot_id;
+
+  const trackUris = track_ids.map(id => `spotify:track:${id}`);
   const chunks = chunkArray(trackUris, 100);
   for (const chunk of chunks) {
     const { data } = await axios({
@@ -331,12 +347,53 @@ const updateSpotifyPlaylistTracks = async (
  * Remove duplicate tracks from Spotify playlist.
  * @param {UserObj} userObj
  * @param {string} id - playlistId
- * @param {string[]=} trackIds - Optional, for avoiding more Spotify requests.
+ * @param {{id: string}[]} tracks - Optional, avoid unnecessary Spotify requests
+ * @returns {Promise<{snapshot_id?: string, removed?: number}>}
  */
-const removePlaylistDuplicates = async (userObj, id, trackIds) => {
-  // TODO!, use this when updating playlist to tracked or when syncing
-  // a single playlist
-  /**
-   * - get dupe track_ids from array and then remove from playlist, and add again
-   */
+exports.removePlaylistDuplicates = async (userObj, id, tracks = undefined) => {
+  // TODO: use for PS.syncTracks (implicitly update to 'tracked' aswell)
+  // TODO! consider using in TS.refresh(sync)
+  const url = `https://api.spotify.com/v1/playlists/${id}/tracks`;
+  const headers = { Authorization: 'Bearer ' + userObj.accessToken };
+  tracks = tracks || (await TracksService.getPlaylistTracks(userObj, id));
+
+  // Find duplicate tracks and generate request bodyData
+  const trackMap = {};
+  let duplicatesCount = 0;
+  const duplicatesMap = tracks.reduce((acc, track, idx) => {
+    if (trackMap[track.id]) {
+      acc[track.id] = acc[track.id] || {
+        uri: `spotify:track:${track.id}`,
+        positions: [],
+      };
+      acc[track.id].positions.push(idx);
+      duplicatesCount += 1;
+    }
+    trackMap[track.id] = track;
+    return acc;
+  }, {});
+  // No duplicates, return early
+  if (!duplicatesCount) return {};
+
+  const duplicates = Object.values(duplicatesMap);
+  // We only need snapshot_id for more than 100 unique duplicate tracks (rare)
+  let { snapshot_id = undefined } =
+    duplicates.length > 100
+      ? await PlaylistModel.getOne(userObj.userId, id)
+      : {};
+  const chunks = chunkArray(duplicates, 100);
+  for (const chunk of chunks) {
+    const { data } = await axios({
+      url,
+      method: 'delete',
+      data: { tracks: chunk, ...(snapshot_id && { snapshot_id }) },
+      headers,
+    });
+    snapshot_id = data.snapshot_id;
+  }
+
+  return {
+    snapshot_id,
+    removed: -duplicatesCount,
+  };
 };
