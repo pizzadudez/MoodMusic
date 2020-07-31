@@ -46,22 +46,18 @@ exports.refreshTracks = async (userObj, sync = false) => {
  */
 exports.getPlaylistTracks = async (userObj, id, trackCount = undefined) => {
   const baseUrl = `https://api.spotify.com/v1/playlists/${id}/tracks?offset=`;
-  const config = {
-    headers: {
-      Authorization: 'Bearer ' + userObj.accessToken,
-    },
-  };
+  const headers = { Authorization: 'Bearer ' + userObj.accessToken };
   // Get last 100 tracks only if trackCount is provided
   const firstOffset = trackCount > 100 ? trackCount - 100 : 0;
   const {
     data: { items: tracks, total: resTrackCount },
-  } = await axios.get(baseUrl + firstOffset, config);
+  } = await axios.get(baseUrl + firstOffset, { headers });
   // Concurrently request rest of tracks
   let otherTracks = [];
   if (!trackCount) {
     const requests = [];
     for (let offset = 1; offset <= resTrackCount / 100; offset++) {
-      requests.push(axios.get(baseUrl + offset * 100, config));
+      requests.push(axios.get(baseUrl + offset * 100, { headers }));
     }
     const responses = await Promise.all(requests);
     otherTracks = responses.map(res => res.data.items).flat();
@@ -80,9 +76,7 @@ exports.toggleLike = async (userObj, id, toggle = true) => {
     url: 'https://api.spotify.com/v1/me/tracks',
     method: toggle ? 'put' : 'delete',
     data: { ids: [id] },
-    headers: {
-      Authorization: 'Bearer ' + userObj.accessToken,
-    },
+    headers: { Authorization: 'Bearer ' + userObj.accessToken },
   });
   await TrackModel.update(userObj.userId, id, { liked: toggle });
 };
@@ -95,21 +89,17 @@ exports.toggleLike = async (userObj, id, toggle = true) => {
  */
 const getLikedTracks = async (userObj, sync = false) => {
   const baseUrl = 'https://api.spotify.com/v1/me/tracks?limit=50';
-  const config = {
-    headers: {
-      Authorization: 'Bearer ' + userObj.accessToken,
-    },
-  };
+  const headers = { Authorization: 'Bearer ' + userObj.accessToken };
   // Get latest 50 liked tracks and total count
   const {
     data: { items: latestTracks, total: trackCount },
-  } = await axios.get(baseUrl, config);
+  } = await axios.get(baseUrl, { headers });
   // Concurrently request rest of tracks
   let otherTracks = [];
   if (sync) {
     const requests = [];
     for (let offset = 1; offset <= trackCount / 50; offset++) {
-      requests.push(axios.get(baseUrl + `&offset=${offset * 50}`, config));
+      requests.push(axios.get(baseUrl + `&offset=${offset * 50}`, { headers }));
     }
     const responses = await Promise.all(requests);
     otherTracks = responses.map(res => res.data.items).flat();
@@ -126,21 +116,17 @@ const getLikedTracks = async (userObj, sync = false) => {
  */
 const refreshPlaylists = async (userObj, sync = false) => {
   const baseUrl = 'https://api.spotify.com/v1/me/playlists?limit=50';
-  const config = {
-    headers: {
-      Authorization: 'Bearer ' + userObj.accessToken,
-    },
-  };
+  const headers = { Authorization: 'Bearer ' + userObj.accessToken };
   // Get first batch of playlists and total count
   const {
     data: { items: playlists, total: playlistCount },
-  } = await axios.get(baseUrl, config);
+  } = await axios.get(baseUrl, { headers });
   // Concurrently request rest of playlists
   let otherPlaylists = [];
   if (playlistCount > 50) {
     const requests = [];
     for (let offset = 1; offset <= playlistCount / 50; offset++) {
-      requests.push(axios.get(baseUrl + `&offset=${offset * 50}`, config));
+      requests.push(axios.get(baseUrl + `&offset=${offset * 50}`, { headers }));
     }
     const responses = await Promise.all(requests);
     otherPlaylists = responses.map(res => res.data.items).flat();

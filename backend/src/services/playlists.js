@@ -189,9 +189,7 @@ exports.restore = async (userObj, id) => {
   await axios.put(
     `https://api.spotify.com/v1/playlists/${id}/followers`,
     {},
-    {
-      headers: { Authorization: `Bearer ${userObj.accessToken}` },
-    }
+    { headers: { Authorization: `Bearer ${userObj.accessToken}` } }
   );
   return PlaylistModel.update(userObj.userId, id, { type: 'untracked' });
 };

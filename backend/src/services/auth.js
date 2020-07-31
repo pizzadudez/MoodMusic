@@ -52,15 +52,12 @@ exports.requestTokens = async (
     code: code,
     redirect_uri: REDIRECT_URI,
   });
-  const config = {
-    headers: {
-      'Content-Type': 'application/x-www-form-urlencoded',
-      Authorization:
-        'Basic ' +
-        Buffer.from(`${clientId}:${clientSecret}`).toString('base64'),
-    },
+  const headers = {
+    'Content-Type': 'application/x-www-form-urlencoded',
+    Authorization:
+      'Basic ' + Buffer.from(`${clientId}:${clientSecret}`).toString('base64'),
   };
-  const response = await axios.post(url, data, config);
+  const response = await axios.post(url, data, { headers });
   const { access_token, refresh_token, expires_in } = response.data;
 
   return {
@@ -74,10 +71,8 @@ exports.requestTokens = async (
 // Registers user and returns the userObject for jwt signing
 exports.registerUser = async (access_token, refresh_token, iat) => {
   const url = 'https://api.spotify.com/v1/me';
-  const config = {
-    headers: { Authorization: 'Bearer ' + access_token },
-  };
-  const { data } = await axios.get(url, config);
+  const headers = { Authorization: 'Bearer ' + access_token };
+  const { data } = await axios.get(url, { headers });
   const { id, email, display_name, images, premium } = data;
   // register user to db
   await UserModel.register(id, refresh_token);
@@ -100,15 +95,12 @@ exports.refreshToken = async userId => {
     grant_type: 'refresh_token',
     refresh_token,
   });
-  const config = {
-    headers: {
-      'Content-Type': 'application/x-www-form-urlencoded',
-      Authorization:
-        'Basic ' +
-        Buffer.from(`${clientId}:${clientSecret}`).toString('base64'),
-    },
+  const headers = {
+    'Content-Type': 'application/x-www-form-urlencoded',
+    Authorization:
+      'Basic ' + Buffer.from(`${clientId}:${clientSecret}`).toString('base64'),
   };
-  const response = await axios.post(url, data, config);
+  const response = await axios.post(url, data, { headers });
   const { access_token, expires_in } = response.data;
 
   return {
