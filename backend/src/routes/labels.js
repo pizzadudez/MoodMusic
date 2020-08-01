@@ -1,16 +1,31 @@
 const router = require('express').Router();
 const controller = require('../controllers/labels');
 const validate = require('../middleware/validate');
+const authorize = require('../middleware/authorize');
 
+/* Label CRUD */
 router.get('/labels', controller.getAll);
-router.post('/labels', validate('createLabel'), controller.create);
-router.patch('/label/:id', validate('updateLabel'), controller.update);
-// Not working currently, Label service for deletion deprecated
-router.delete('/label/:id', controller.delete);
+router.post('/labels', validate('newLabel'), controller.create);
+router.patch(
+  '/label/:id',
+  validate('updatedLabel'),
+  authorize('label'),
+  controller.update
+);
+router.delete('/label/:id', authorize('label'), controller.delete);
 
-// User resources validation
-router.post('/labels/add', validate('addLabels'), controller.addLabels);
-// User resources validation
-router.post('/labels/remove', validate('addLabels'), controller.removeLabels);
+/* Label-Track associations */
+router.post(
+  '/labels/add',
+  validate('labelTracks'),
+  authorize('labelTracks'),
+  controller.addLabels
+);
+router.post(
+  '/labels/remove',
+  validate('labelTracks'),
+  authorize('labelTracks'),
+  controller.removeLabels
+);
 
 module.exports = router;

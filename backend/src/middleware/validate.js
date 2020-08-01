@@ -1,10 +1,7 @@
 const Joi = require('@hapi/joi');
-const UserModel = require('../models/User');
 
-const FORBIDDEN = `Forbidden: Request contains resource identifiers\
- that do not belong to the user.`;
-const validationSchema = {
-  addLabels: Joi.array().items(
+const schema = {
+  labelTracks: Joi.array().items(
     Joi.object()
       .keys({
         label_id: Joi.number().required(),
@@ -12,7 +9,7 @@ const validationSchema = {
       })
       .required()
   ),
-  addPlaylists: Joi.array().items(
+  playlistTracks: Joi.array().items(
     Joi.object()
       .keys({
         playlist_id: Joi.string().required(),
@@ -20,7 +17,7 @@ const validationSchema = {
       })
       .required()
   ),
-  createLabel: Joi.object().keys({
+  newLabel: Joi.object().keys({
     type: Joi.string().valid('genre', 'subgenre', 'mood').required(),
     name: Joi.string().min(2).required(),
     color: Joi.string()
@@ -38,7 +35,7 @@ const validationSchema = {
       otherwise: Joi.forbidden(),
     }),
   }),
-  updateLabel: Joi.object().keys({
+  updatedLabel: Joi.object().keys({
     type: Joi.string().valid('genre', 'subgenre', 'mood'),
     name: Joi.string().min(2),
     color: Joi.string().regex(/^#[A-Fa-f0-9]{6}/),
@@ -54,7 +51,7 @@ const validationSchema = {
       otherwise: Joi.forbidden(),
     }),
   }),
-  createPlaylist: Joi.object().keys({
+  newPlaylist: Joi.object().keys({
     name: Joi.when('type', {
       is: 'label',
       then: Joi.string().min(2),
@@ -68,7 +65,7 @@ const validationSchema = {
       otherwise: Joi.forbidden(),
     }),
   }),
-  updatePlaylist: Joi.object().keys({
+  updatedPlaylist: Joi.object().keys({
     name: Joi.string().min(2),
     description: Joi.string(),
     type: Joi.string().valid('label', 'mix', 'untracked'),
@@ -78,45 +75,25 @@ const validationSchema = {
       otherwise: Joi.forbidden(),
     }),
   }),
-  toggleLike: Joi.object().keys({
+  // TODO: remove this eventually after changing track route for like/rate
+  toggleBool: Joi.object().keys({
     toggle: Joi.boolean().required(),
   }),
 };
 
-const authorizeResource = type => async (req, res, next) => {
-  const { userId } = req.user;
-  let authorized = true;
+/**
+ * Validate request body using Joi.
+ * @param {string} name - Joi validation object identifier
+ */
+const validate = name => (req, res, next) => {
+  const { error } = schema[name].validate(req.body, { abortEarly: false });
 
-  switch (type) {
-    case 'addLabels': {
-      const labelIds = req.body.map(({ label_id }) => label_id);
-      authorized = await UserModel.checkLabels(userId, labelIds);
-      break;
-    }
-    case 'addPlaylists': {
-      const playlistIds = req.body.map(({ playlist_id }) => playlist_id);
-      authorized = await UserModel.checkPlaylists(userId, playlistIds);
-      break;
-    }
-  }
-
-  if (authorized) next();
-  else res.status(403).json({ message: FORBIDDEN });
-};
-
-const validate = type => async (req, res, next) => {
-  // TODO! sometimes we'll validate req.params, we wont need Joi validation
-  const { error } = validationSchema[type].validate(req.body, {
-    abortEarly: false,
-  });
   if (error) {
-    console.log(error);
-    const { details } = error;
-    const message = details.map(e => e.message).join(',\n');
-    console.log('Validation error: ', message);
-    res.status(422).send(message);
+    const details = error.details.map(d => d.message);
+    console.log('Validation error: ', details.join('\n'));
+    res.status(422).json({ message: 'Validation Failed', errors: details });
   } else {
-    return authorizeResource(type)(req, res, next);
+    next();
   }
 };
 

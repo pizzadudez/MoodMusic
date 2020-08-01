@@ -7,7 +7,7 @@ const TestRouter = require('./test');
 
 router.use(
   '/',
-  // Auth middleware
+  // Authentication middleware
   authenticateJwt,
   refreshJwt,
   // Resource specific routers

@@ -1,35 +1,46 @@
 const router = require('express').Router();
 const controller = require('../controllers/playlists');
 const validate = require('../middleware/validate');
+const authorize = require('../middleware/authorize');
 
+/* Playlist CRUD */
 router.get('/playlists', controller.getAll);
-// User resources validation
+router.post('/playlists', validate('newPlaylist'), controller.create);
+router.patch(
+  '/playlist/:id',
+  validate('updatedPlaylist'),
+  authorize('playlist'),
+  controller.update
+);
+router.delete('/playlist/:id', authorize('playlist'), controller.delete);
+router.get('/playlist/:id/restore', authorize('playlist'), controller.restore);
+
+/* Playlist Operations */
+router.get('/playlist/:id/sync', authorize('playlist'), controller.syncTracks);
+router.get(
+  '/playlist/:id/revert',
+  authorize('playlist'),
+  controller.revertTracks
+);
+// TODO: NYI
+router.post(
+  '/playlist/:id/reorder',
+  authorize('playlist'),
+  controller.reorderTracks
+);
+
+/* Playlist-Track associations */
 router.post(
   '/playlists/add',
-  validate('addPlaylists'),
+  validate('playlistTracks'),
+  authorize('playlistTracks'),
   controller.addPlaylists
 );
-// User resources validation
 router.post(
   '/playlists/remove',
-  validate('addPlaylists'),
+  validate('playlistTracks'),
+  authorize('playlistTracks'),
   controller.removePlaylists
 );
-
-router.post('/playlists', validate('createPlaylist'), controller.create);
-// Not yet updated, check again
-router.patch('/playlist/:id', validate('updatePlaylist'), controller.update);
-// Not yet updated, check again
-router.delete('/playlist/:id', controller.delete);
-// Not yet updated, check again
-router.get('/playlist/:id/restore', controller.restore);
-
-// Not yet updated, check again
-router.get('/playlist/:id/sync', controller.syncTracks);
-// Not yet updated, check again
-router.get('/playlist/:id/revert', controller.revertTracks);
-
-// NOT YET IMPLEMENTED
-router.post('/playlist/:id/reorder', controller.reorderTracks);
 
 module.exports = router;
