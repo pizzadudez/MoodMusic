@@ -21,7 +21,8 @@
   "devDependencies": {},
   "scripts": {
     "test": "set REACT_ENV=production && nodemon",
-    "start": "nodemon"
+    "dev": "nodemon",
+    "start": "set REACT_ENV=production && node src/app.js"
   },
   "author": "Vlad Albert",
   "license": "ISC"
