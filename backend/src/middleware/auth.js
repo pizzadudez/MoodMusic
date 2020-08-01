@@ -6,7 +6,7 @@ exports.authenticateJwt = (req, res, next) => {
   const authHeader = req.headers['authorization'];
   const token = authHeader && authHeader.split(' ')[1];
 
-  // TODO change where to redirect ??
+  // TODO! change where to redirect ??
   if (!token) return res.redirect(FRONTEND_URI);
   jwt.verify(token, JWT_SECRET, (err, payload) => {
     if (err) return res.sendStatus(403);

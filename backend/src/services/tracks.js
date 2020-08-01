@@ -4,16 +4,13 @@ const PlaylistModel = require('../models/Playlist');
 const TrackModel = require('../models/Track');
 
 /**
- * Refresh or sync user's tracks:
- * - liked tracks (refresh: latest 50 only)
- * - tracks from playlists (mix/label)
+ * Refresh or sync user's playlist's tracks:
+ * - Refresh: 'mix' playlists with updates (only 100 latest tracks)
+ * - Sync: 'mix' and 'label' playlists, regardless of updates status
  * @param {UserObj} userObj
- * @param {boolean=} sync - Do a hard sync instead of refresh
+ * @param {boolean=} sync - Sync playlists
  */
-exports.refreshTracks = async (userObj, sync = false) => {
-  // Liked Tracks (last 50 / all)
-  const likedTracks = await getLikedTracks(userObj, sync);
-  await TrackModel.addTracks(userObj.userId, likedTracks, true, sync);
+exports.refreshPlaylistTracks = async (userObj, sync = false) => {
   // Playlist Tracks (refresh: mix, sync: mix + label)
   const playlists = await refreshPlaylists(userObj, sync);
   if (playlists.length) {
@@ -28,7 +25,7 @@ exports.refreshTracks = async (userObj, sync = false) => {
       playlist_id: id,
       tracks: trackLists[idx],
     }));
-    await PlaylistModel.addPlaylists(userObj.userId, playlistTracksList, sync);
+    await PlaylistModel.addPlaylists(playlistTracksList, sync);
     // Playlists have been refreshed/synced, set updates to false
     const playlistUpdates = playlists.map(({ id }) => ({ id, updates: false }));
     await PlaylistModel.updateMany(playlistUpdates);
@@ -38,6 +35,33 @@ exports.refreshTracks = async (userObj, sync = false) => {
     [sync ? 'synced_at' : 'refreshed_at']: true,
   });
 };
+/**
+ * Refresh or Sync user's liked tracks. Refreshing will only get the 50
+ * most recently liked tracks and will not change old liked tracks' liked status
+ * @param {UserObj} userObj
+ * @param {boolean=} sync - When true, will sync user's liked tracks
+ */
+exports.refreshLikedTracks = async (userObj, sync = false) => {
+  const tracks = await getLikedTracks(userObj, sync);
+  await TrackModel.addTracks(userObj.userId, tracks, true, sync);
+};
+/**
+ * Change user's track "liked song" state.
+ * @param {UserObj} userObj
+ * @param {string} id - trackId
+ * @param {boolean=} toggle - Like/Unlike
+ */
+exports.toggleLike = async (userObj, id, toggle = true) => {
+  await axios({
+    url: 'https://api.spotify.com/v1/me/tracks',
+    method: toggle ? 'put' : 'delete',
+    data: { ids: [id] },
+    headers: { Authorization: 'Bearer ' + userObj.accessToken },
+  });
+  await TrackModel.update(userObj.userId, id, { liked: toggle });
+};
+
+// Helpers
 /**
  * Get playlist tracks from Spotify
  * @param {UserObj} userObj
@@ -65,23 +89,6 @@ exports.getPlaylistTracks = async (userObj, id, trackCount = undefined) => {
 
   return parseTracks([...tracks, ...otherTracks]);
 };
-/**
- * Change user's track "liked song" state.
- * @param {UserObj} userObj
- * @param {string} id - trackId
- * @param {boolean=} toggle - Like/Unlike
- */
-exports.toggleLike = async (userObj, id, toggle = true) => {
-  await axios({
-    url: 'https://api.spotify.com/v1/me/tracks',
-    method: toggle ? 'put' : 'delete',
-    data: { ids: [id] },
-    headers: { Authorization: 'Bearer ' + userObj.accessToken },
-  });
-  await TrackModel.update(userObj.userId, id, { liked: toggle });
-};
-
-// Helpers
 /**
  * Get liked tracks from Spotify
  * @param {UserObj} userObj

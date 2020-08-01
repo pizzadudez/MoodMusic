@@ -125,12 +125,11 @@ exports.refresh = async (userId, playlistList, sync = false) => {
 };
 /**
  * Handle adding Playlist-Track associations.
- * @param {string} userId
  * @param {PlaylistTracks[]} list - Accepts both tracks and track_ids
  * @param {boolean=} sync
  */
-exports.addPlaylists = async (userId, list, sync = false) => {
-  const lastPositions = await getLastPositions(userId);
+exports.addPlaylists = async (list, sync = false) => {
+  const lastPositions = await getLastPositions(list);
   const data = list
     .map(({ playlist_id, tracks, track_ids }) => {
       if (tracks) {
@@ -155,6 +154,7 @@ exports.addPlaylists = async (userId, list, sync = false) => {
       }
     })
     .flat();
+
   // Batch insert associations
   await db.transaction(async tr => {
     const onConflict = `ON CONFLICT (track_id, playlist_id) DO UPDATE SET 
@@ -213,29 +213,17 @@ exports.getTrackIds = async playlistId => {
 
 // Helpers
 /**
- * Create hashMap of user's playlist's last track positions,
- * these can be different from playlist total track count.
- * @param {string} userId
- * @returns {Promise<Object<string, number>>}
+ * Create a dictionary of playlist ids and max(position) from tracks-playlists.
+ * @param {PlaylistTracks[]} playlistTracksList
+ * @returns {Promise<object>} { [playlistId]: lastPosition }
  */
-const getLastPositions = async userId => {
-  // TODO: refactor to get playlist_ids instead of userId
+const getLastPositions = async playlistTracksList => {
+  const playlistIds = playlistTracksList.map(obj => obj.playlist_id);
   const rows = await db('tracks_playlists')
     .select('playlist_id as id')
     .max('position as last_pos')
-    .whereIn(
-      'playlist_id',
-      db('playlists').select('id').where('user_id', userId)
-    )
+    .whereIn('playlist_id', playlistIds)
     .groupBy('playlist_id');
-
-  /** Join vs WhereIn Select, join seems slower the more data we have */
-  // const rows = await db('tracks_playlists')
-  //   .leftJoin('playlists', 'playlists.id', 'tracks_playlists.playlist_id')
-  //   .select('playlist_id as id')
-  //   .max('position as last_pos')
-  //   .where('user_id', userId)
-  //   .groupBy('playlist_id');
 
   return Object.fromEntries(rows.map(({ id, last_pos }) => [id, last_pos]));
 };

@@ -1,7 +1,7 @@
 const TrackModel = require('../models/Track');
 const TracksService = require('../services/tracks');
 
-exports.getAll = async (req, res, next) => {
+exports.getAll = async (req, res) => {
   try {
     const tracksById = await TrackModel.getAllById(req.user.userId);
     res.status(200).json(tracksById);
@@ -10,9 +10,12 @@ exports.getAll = async (req, res, next) => {
     res.status(500).send('Internal server error.');
   }
 };
-exports.refreshTracks = async (req, res, next) => {
+exports.refreshTracks = async (req, res) => {
   try {
-    await TracksService.refreshTracks(req.user);
+    await Promise.all([
+      TracksService.refreshLikedTracks(req.user),
+      TracksService.refreshPlaylistTracks(req.user),
+    ]);
     const tracks = await TrackModel.getAllById(req.user.userId);
     res.status(200).json({ message: 'refreshed', tracks });
   } catch (err) {
@@ -20,9 +23,12 @@ exports.refreshTracks = async (req, res, next) => {
     res.sendStatus(500);
   }
 };
-exports.syncTracks = async (req, res, next) => {
+exports.syncTracks = async (req, res) => {
   try {
-    await TracksService.refreshTracks(req.user, true);
+    await Promise.all([
+      TracksService.refreshLikedTracks(req.user, true),
+      TracksService.refreshPlaylistTracks(req.user, true),
+    ]);
     const tracks = await TrackModel.getAllById(req.user.userId);
     res.status(200).json({ message: 'synced', tracks });
   } catch (err) {
@@ -31,7 +37,7 @@ exports.syncTracks = async (req, res, next) => {
   }
 };
 
-exports.toggleLike = async (req, res, next) => {
+exports.toggleLike = async (req, res) => {
   try {
     await TracksService.toggleLike(req.user, req.params.id, req.body.toggle);
     res.sendStatus(200);
@@ -40,5 +46,5 @@ exports.toggleLike = async (req, res, next) => {
     res.sendStatus(500);
   }
 };
-exports.rate = async (req, res, next) => {};
-exports.delete = async (req, res, next) => {};
+exports.rate = async (req, res) => {};
+exports.delete = async (req, res) => {};

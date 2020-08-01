@@ -96,13 +96,12 @@ exports.update = async (userId, trackId, data) => {
 /**
  * Insert new Tracks, Albums and Track-User associations
  * @param {string} userId
- * @param {ParsedTrack[]} trackList - List of parsed Spotify TrackObjects.
- * @param {boolean=} liked - Set true if the list of tracks is from Liked Songs.
- * @param {boolean=} sync - Set true to also sync liked tracks
+ * @param {ParsedTrack[]} trackList - List of parsed Spotify TrackObjects
+ * @param {boolean=} liked - Set true for 'Liked Songs'
+ * @param {boolean=} sync - Sync 'Liked Songs'
  */
 exports.addTracks = async (userId, trackList, liked = false, sync = false) => {
-  // TODO: sync liked tracks
-  if (trackList.length < 1) return;
+  if (!trackList.length) return;
   const albums = trackList.map(track => track.album);
   const tracks = trackList.map(track => ({
     id: track.id,
@@ -118,8 +117,23 @@ exports.addTracks = async (userId, trackList, liked = false, sync = false) => {
   }));
 
   await db.transaction(async tr => {
+    // Insert new albums and tracks (not user dependent)
     await tr('albums').bulkUpsert(albums);
     await tr('tracks').bulkUpsert(tracks);
-    await tr('tracks_users').bulkUpsert(userTracks);
+    // Insert user-tracks (Upsert on 'liked' tracks sync)
+    const onConflict = `ON CONFLICT (track_id, user_id) DO UPDATE SET
+      liked = EXCLUDED.liked,
+      updated_at = NOW()`;
+    await tr('tracks_users').bulkUpsert(
+      userTracks,
+      liked && sync ? onConflict : undefined
+    );
+    // Unlike tracks not in trackList if syncing
+    if (liked && sync) {
+      await tr('tracks_users')
+        .where('user_id', userId)
+        .andWhere('updated_at', '<', tr.fn.now())
+        .update({ liked: false });
+    }
   });
 };

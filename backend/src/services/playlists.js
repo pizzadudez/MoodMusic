@@ -20,7 +20,7 @@ exports.addTracks = async (userObj, data) => {
   // Get back new snapshot_ids and track_count_delta
   const playlistUpdates = await Promise.all(spotifyRequests);
   // Add associations to our database
-  await PlaylistModel.addPlaylists(userObj.userId, data);
+  await PlaylistModel.addPlaylists(data);
   // Update playlists with new info
   await PlaylistModel.updateMany(playlistUpdates);
 };
@@ -79,7 +79,7 @@ exports.create = async (userObj, data) => {
       data.track_count = track_count_delta;
     }
     const playlist = await PlaylistModel.create(userObj.userId, data);
-    await PlaylistModel.addPlaylists(userObj.userId, [playlistTrackIds]);
+    await PlaylistModel.addPlaylists([playlistTrackIds]);
     return playlist;
   }
 
@@ -94,7 +94,6 @@ exports.create = async (userObj, data) => {
  * @returns {Promise<object>} Updated playlist
  */
 exports.update = async (userObj, id, data) => {
-  // TODO?? remove playlist duplicates here??
   const { type, label_id } = await PlaylistModel.getOne(userObj.userId, id);
 
   // Changing playlist type comes with multiple side-effects
@@ -142,7 +141,7 @@ exports.update = async (userObj, id, data) => {
           data.snapshot_id = changes.snapshot_id;
           data.track_count_delta =
             (data.track_count_delta || 0) + changes.track_count_delta;
-          await PlaylistModel.addPlaylists(userObj.userId, [playlistTrackIds]);
+          await PlaylistModel.addPlaylists([playlistTrackIds]);
         }
       }
     }
@@ -220,7 +219,7 @@ exports.syncTracks = async (userObj, id, updateData = undefined) => {
 
     // Add new playlist-track associations
     const playlistTracks = { playlist_id: id, tracks };
-    await PlaylistModel.addPlaylists(userObj.userId, [playlistTracks], true);
+    await PlaylistModel.addPlaylists([playlistTracks], true);
     // Sync 'label' playlists by matching tracks-playlists with tracks-labels
     if (type === 'label') {
       // If not update syncing, remove labels from tracks no longer in playlist
@@ -313,7 +312,7 @@ const updateSpotifyPlaylistTracks = async (
     });
     snapshot_id = data.snapshot_id;
   }
-  // TODO! snapshot_id might be undefined (v2 had a check for this)
+  // TODO? snapshot_id might be undefined (v2 had a check for this)
   return {
     id: playlist_id,
     snapshot_id,
@@ -328,8 +327,7 @@ const updateSpotifyPlaylistTracks = async (
  * @returns {Promise<{snapshot_id?: string, removed?: number}>}
  */
 exports.removePlaylistDuplicates = async (userObj, id, tracks = undefined) => {
-  // TODO: use for PS.syncTracks (implicitly update to 'tracked' aswell)
-  // TODO! consider using in TS.refresh(sync)
+  // TODO? consider using in TS.refresh(sync)
   const url = `https://api.spotify.com/v1/playlists/${id}/tracks`;
   const headers = { Authorization: 'Bearer ' + userObj.accessToken };
   tracks = tracks || (await TracksService.getPlaylistTracks(userObj, id));

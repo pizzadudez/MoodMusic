@@ -91,48 +91,48 @@ exports.revertTracks = async (req, res, next) => {
     res.sendStatus(500);
   }
 };
-exports.reorderTracks = async (req, res, next) => {};
-
-// TODO: adapt reorderTracks from this (old services)
-
-// exports.updatePositions = async (id, tracks) => {
-//   try {
-//     const token = (await UserModel.data()).access_token;
-//     const currTrackList = await getPlaylistTracks(id, token, true);
-//     if (currTrackList.tracks.length != tracks.length) {
-//       throw new Error('Malformed tracklist. Unequal lengths');
-//     }
-//     const hashMap = currTrackList.tracks.reduce((map, trackObj) => {
-//       map[trackObj.id] = true;
-//       return map;
-//     }, {});
-//     tracks.forEach(track => {
-//       if (!hashMap[track]) throw new Error('Malformed tracklist. Id mismatch');
-//     });
-
-//     // Validation done, request complete replacement of tracks
-//     await new Promise(async (resolve, reject) => {
-//       let uris = tracks.map(track => 'spotify:track:' + track);
-//       // 100 tracks limit per request
-//       while (uris.length) {
-//         const uriSegment = uris.splice(0, 100);
-//         const options = {
-//           url: 'https://api.spotify.com/v1/playlists/' + id + '/tracks',
-//           headers: { Authorization: 'Bearer ' + token },
-//           body: { uris: uriSegment },
-//           json: true,
-//         };
-//         await new Promise((resolve, reject) => {
-//           request.put(options, (err, res, body) => {
-//             const error = err || res.statusCode >= 400 ? body : null;
-//             error ? reject(error) : resolve();
-//           });
-//         }).catch(err => reject(err));
-//       }
-//       resolve();
-//     });
-//   } catch (err) {
-//     console.log(err);
-//     return Promise.reject(err);
-//   }
-// };
+// TODO: adapt from this old service (v1)
+exports.reorderTracks = async (req, res, next) => {
+  /*
+  exports.updatePositions = async (id, tracks) => {
+    try {
+      const token = (await UserModel.data()).access_token;
+      const currTrackList = await getPlaylistTracks(id, token, true);
+      if (currTrackList.tracks.length != tracks.length) {
+        throw new Error('Malformed tracklist. Unequal lengths');
+      }
+      const hashMap = currTrackList.tracks.reduce((map, trackObj) => {
+        map[trackObj.id] = true;
+        return map;
+      }, {});
+      tracks.forEach(track => {
+        if (!hashMap[track]) throw new Error('Malformed tracklist. Id mismatch');
+      });
+      // Validation done, request complete replacement of tracks
+      await new Promise(async (resolve, reject) => {
+        let uris = tracks.map(track => 'spotify:track:' + track);
+        // 100 tracks limit per request
+        while (uris.length) {
+          const uriSegment = uris.splice(0, 100);
+          const options = {
+            url: 'https://api.spotify.com/v1/playlists/' + id + '/tracks',
+            headers: { Authorization: 'Bearer ' + token },
+            body: { uris: uriSegment },
+            json: true,
+          };
+          await new Promise((resolve, reject) => {
+            request.put(options, (err, res, body) => {
+              const error = err || res.statusCode >= 400 ? body : null;
+              error ? reject(error) : resolve();
+            });
+          }).catch(err => reject(err));
+        }
+        resolve();
+      });
+    } catch (err) {
+      console.log(err);
+      return Promise.reject(err);
+    }
+  };
+  */
+};

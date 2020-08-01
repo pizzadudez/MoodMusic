@@ -5,7 +5,7 @@ require('dotenv-safe').config({
 const REACT_ENV = process.env.REACT_ENV || 'development';
 
 module.exports = {
-  PORT: process.env.PORT || 1000,
+  PORT: process.env.PORT || 8888,
   CLIENT_ID: process.env.CLIENT_ID,
   CLIENT_SECRET: process.env.CLIENT_SECRET,
   REDIRECT_URI: process.env.REDIRECT_URI,

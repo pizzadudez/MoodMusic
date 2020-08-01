@@ -51,7 +51,7 @@ exports.update = async (req, res, next) => {
     res.status(500).send('Internal server error.');
   }
 };
-// TODO! return deleted playlist id maybe?, FE has errors currently
+// TODO? return deleted playlist id maybe?, FE has errors currently
 exports.delete = async (req, res, next) => {
   try {
     await LabelsService.delete(req.user, req.params.id);

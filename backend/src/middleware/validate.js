@@ -105,7 +105,7 @@ const authorizeResource = type => async (req, res, next) => {
 };
 
 const validate = type => async (req, res, next) => {
-  // TODO: sometimes we'll validate req.params, we wont need Joi validation
+  // TODO! sometimes we'll validate req.params, we wont need Joi validation
   const { error } = validationSchema[type].validate(req.body, {
     abortEarly: false,
   });

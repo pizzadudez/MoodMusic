@@ -86,6 +86,7 @@ exports.up = function (knex) {
       table.boolean('liked').notNullable().defaultTo(false);
       table.integer('rating').notNullable().defaultTo(0);
       table.timestamp('added_at').notNullable().defaultTo(knex.fn.now());
+      table.timestamp('updated_at').notNullable().defaultTo(knex.fn.now());
 
       table.primary(['track_id', 'user_id']);
     })
