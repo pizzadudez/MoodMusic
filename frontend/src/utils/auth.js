@@ -1,5 +1,9 @@
 import axios from 'axios';
 
+// TODO! do this another way, with env variables?
+if (process.env.NODE_ENV === 'production')
+  axios.defaults.baseURL = 'https://mood-music-spotify.herokuapp.com';
+
 // Intercept refreshed jwt in response
 axios.interceptors.response.use(res => {
   const { jwt } = res.data;

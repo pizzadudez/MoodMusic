@@ -19,8 +19,10 @@ app.set('json spaces', 2);
 app.use('/authorize', AuthRouter);
 app.use('/api', ApiRouter);
 app.use('/docs', DocsRouter);
-// Let React Router handle all remaining routes
-app.use('*', express.static(path.join(__dirname, '../../frontend/build')));
+// Dev only: let React Router handle all remaining routes
+if (process.env.NODE_ENV !== 'production') {
+  app.use('*', express.static(path.join(__dirname, '../../frontend/build')));
+}
 
 app.listen(PORT, () => {
   console.log(`MoodMusic server running on port: ${PORT}`);
