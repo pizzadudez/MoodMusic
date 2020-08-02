@@ -8,8 +8,8 @@ const db = require('../../db');
  */
 exports.get = async (userId, labelId) => {
   const { rows } = await db.raw(
-    `SELECT l.id, l.type, l.name, l.color, l.verbose, 
-    l.suffix, l.parent_id, l.created_at, l.updated_at, (
+    `SELECT l.id, l.type, l.name, l.color, l.verbose, l.suffix,
+    l.parent_id, l.created_at, l.updated_at, p.id AS playlist_id, (
       SELECT ARRAY_AGG(id) FROM labels WHERE parent_id = l.id
     ) AS subgenre_ids, (
       SELECT COUNT(label_id) FROM tracks_labels tl
@@ -25,7 +25,7 @@ exports.get = async (userId, labelId) => {
       ...rest,
       track_count: Number(track_count),
       ...(parent_id && { genre_id: parent_id }),
-      ...(rest.type === 'genre' && { subgenre_ids }),
+      ...(rest.type === 'genre' && { subgenre_ids: subgenre_ids || [] }),
     })
   );
 
