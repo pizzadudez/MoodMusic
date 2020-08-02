@@ -1,7 +1,4 @@
 // @ts-nocheck
-require('dotenv-safe').config({
-  allowEmptyValues: true,
-});
 const Knex = require('knex');
 const environment = process.env.NODE_ENV || 'development';
 const config = require('../knexfile')[environment];

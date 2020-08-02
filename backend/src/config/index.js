@@ -1,6 +1,5 @@
-require('dotenv-safe').config({
-  allowEmptyValues: true,
-});
+if (process.env.NODE_ENV !== 'production')
+  require('dotenv-safe').config({ allowEmptyValues: true });
 
 const REACT_ENV = process.env.REACT_ENV || 'development';
 
