@@ -1,7 +1,7 @@
 const LabelModel = require('../models/Label');
 const LabelsService = require('../services/labels');
 
-exports.getAll = async (req, res, next) => {
+exports.getAll = async (req, res) => {
   try {
     const labelsById = await LabelModel.getAllById(req.user.userId);
     res.status(200).json(labelsById);
@@ -10,7 +10,7 @@ exports.getAll = async (req, res, next) => {
     res.status(500).send('Internal server error.');
   }
 };
-exports.addLabels = async (req, res, next) => {
+exports.addLabels = async (req, res) => {
   try {
     await LabelModel.addLabels(req.body);
     res.status(200).send('Labels added to Tracks.');
@@ -19,7 +19,7 @@ exports.addLabels = async (req, res, next) => {
     res.status(500).send('Internal server error.');
   }
 };
-exports.removeLabels = async (req, res, next) => {
+exports.removeLabels = async (req, res) => {
   try {
     await LabelModel.removeLabels(req.body);
     res.status(200).send('Labels removed from Tracks.');
@@ -29,7 +29,7 @@ exports.removeLabels = async (req, res, next) => {
   }
 };
 
-exports.create = async (req, res, next) => {
+exports.create = async (req, res) => {
   try {
     const label = await LabelModel.create(req.user.userId, req.body);
     res.status(200).json(label);
@@ -38,7 +38,7 @@ exports.create = async (req, res, next) => {
     res.status(500).send('Internal server error.');
   }
 };
-exports.update = async (req, res, next) => {
+exports.update = async (req, res) => {
   try {
     const label = await LabelModel.update(
       req.user.userId,
@@ -52,7 +52,7 @@ exports.update = async (req, res, next) => {
   }
 };
 // TODO? return deleted playlist id maybe?, FE has errors currently
-exports.delete = async (req, res, next) => {
+exports.delete = async (req, res) => {
   try {
     await LabelsService.delete(req.user, req.params.id);
     res.status(200).send('Successfully deleted.');

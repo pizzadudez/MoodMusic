@@ -1,7 +1,7 @@
 const PlaylistModel = require('../models/Playlist');
 const PlaylistsService = require('../services/playlists');
 
-exports.getAll = async (req, res, next) => {
+exports.getAll = async (req, res) => {
   try {
     const playlistsById = await PlaylistModel.getAllById(req.user.userId);
     res.status(200).json(playlistsById);
@@ -10,7 +10,7 @@ exports.getAll = async (req, res, next) => {
     res.status(500).send('Internal server error.');
   }
 };
-exports.addPlaylists = async (req, res, next) => {
+exports.addPlaylists = async (req, res) => {
   try {
     await PlaylistsService.addTracks(req.user, req.body);
     res.status(201).send('Tracks added to playlists.');
@@ -19,7 +19,7 @@ exports.addPlaylists = async (req, res, next) => {
     res.status(500).send('Internal server error.');
   }
 };
-exports.removePlaylists = async (req, res, next) => {
+exports.removePlaylists = async (req, res) => {
   try {
     await PlaylistsService.removeTracks(req.user, req.body);
     res.status(201).send('Tracks removed from playlists.');
@@ -29,7 +29,7 @@ exports.removePlaylists = async (req, res, next) => {
   }
 };
 
-exports.create = async (req, res, next) => {
+exports.create = async (req, res) => {
   try {
     const playlist = await PlaylistsService.create(req.user, req.body);
     res.status(200).json(playlist);
@@ -38,7 +38,7 @@ exports.create = async (req, res, next) => {
     res.sendStatus(500);
   }
 };
-exports.update = async (req, res, next) => {
+exports.update = async (req, res) => {
   try {
     const playlist = await PlaylistsService.update(
       req.user,
@@ -51,7 +51,7 @@ exports.update = async (req, res, next) => {
     res.sendStatus(500);
   }
 };
-exports.delete = async (req, res, next) => {
+exports.delete = async (req, res) => {
   try {
     const playlist = await PlaylistsService.delete(req.user, req.params.id);
     res.status(200).json(playlist);
@@ -60,7 +60,7 @@ exports.delete = async (req, res, next) => {
     res.sendStatus(500);
   }
 };
-exports.restore = async (req, res, next) => {
+exports.restore = async (req, res) => {
   try {
     const playlist = await PlaylistsService.restore(req.user, req.params.id);
     res.status(200).json(playlist);
@@ -70,7 +70,7 @@ exports.restore = async (req, res, next) => {
   }
 };
 
-exports.syncTracks = async (req, res, next) => {
+exports.syncTracks = async (req, res) => {
   try {
     const playlist = await PlaylistsService.syncTracks(req.user, req.params.id);
     res.status(200).json(playlist);
@@ -79,7 +79,7 @@ exports.syncTracks = async (req, res, next) => {
     res.sendStatus(500);
   }
 };
-exports.revertTracks = async (req, res, next) => {
+exports.revertTracks = async (req, res) => {
   try {
     const playlist = await PlaylistsService.revertTracks(
       req.user,
@@ -92,7 +92,7 @@ exports.revertTracks = async (req, res, next) => {
   }
 };
 // TODO: adapt from this old service (v1)
-exports.reorderTracks = async (req, res, next) => {
+exports.reorderTracks = async (req, res) => {
   /*
   exports.updatePositions = async (id, tracks) => {
     try {

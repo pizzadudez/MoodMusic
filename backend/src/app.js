@@ -1,5 +1,7 @@
 const express = require('express');
 const path = require('path');
+const cors = require('cors');
+
 const { PORT } = require('./config');
 const handleJson = require('./middleware/handleJson');
 const AuthRouter = require('./auth');
@@ -9,6 +11,7 @@ const DocsRouter = require('./docs');
 const app = express();
 app.use(express.static(path.join(__dirname, '../../frontend/build')));
 // Middleware
+app.use(cors());
 app.use(express.urlencoded({ extended: true, limit: '50mb' }));
 app.use(handleJson);
 app.set('json spaces', 2);
